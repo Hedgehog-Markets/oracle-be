@@ -27,3 +27,17 @@ pub struct Currency {
 impl Account for Currency {
     const TYPE: AccountType = AccountType::Currency;
 }
+
+impl From<InitCurrency> for (Currency, usize) {
+    fn from(params: InitCurrency) -> (Currency, usize) {
+        let InitCurrency { mint, reward_range, bond_range } = params;
+
+        (Currency { account_type: Currency::TYPE, mint, reward_range, bond_range }, Currency::SIZE)
+    }
+}
+
+pub(crate) struct InitCurrency {
+    pub mint: Pubkey,
+    pub reward_range: Range<u64>,
+    pub bond_range: Range<u64>,
+}

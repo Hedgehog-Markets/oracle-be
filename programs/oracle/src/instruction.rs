@@ -1,3 +1,5 @@
+use std::ops::Range;
+
 use borsh::{BorshDeserialize, BorshSerialize};
 use common::{BuildInstruction, VariantName};
 use shank::{ShankContext, ShankInstruction};
@@ -102,6 +104,18 @@ pub enum OracleInstruction {
     #[account(1, writable, name = "request", desc = "Request")]
     #[account(2, writable, name = "voting", desc = "Voting")]
     FinalizeVoting(FinalizeVotingArgs),
+
+    /// Creates a [`Currency`].
+    ///
+    /// [`Currency`]: crate::state::Currency
+    #[account(0, name = "oracle", desc = "Oracle account")]
+    #[account(1, writable, name = "currency", desc = "Currency")]
+    #[account(2, name = "mint", desc = "Mint")]
+    #[account(3, name = "authority", desc = "Oracle authority")]
+    #[account(4, name = "payer", desc = "Payer")]
+    #[account(5, name = "token_program", desc = "SPL token program")]
+    #[account(6, name = "system_program", desc = "System program")]
+    CreateCurrency(CreateCurrencyArgs),
 }
 
 #[derive(Clone, Debug, BorshDeserialize, BorshSerialize)]
@@ -160,4 +174,18 @@ pub enum SubmitVoteArgs {
 #[derive(Clone, Debug, BorshDeserialize, BorshSerialize)]
 pub enum FinalizeVotingArgs {
     V1 {},
+}
+
+#[derive(Clone, Debug, BorshDeserialize, BorshSerialize)]
+pub enum CreateCurrencyArgs {
+    V1 {
+        /// The valid reward range when creating a [`Request`].
+        ///
+        /// [`Request`]: crate::state::Request
+        reward_range: Range<u64>,
+        /// The valid bond range when creating an [`Assertion`].
+        ///
+        /// [`Assertion`]: crate::state::Assertion
+        bond_range: Range<u64>,
+    },
 }

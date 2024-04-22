@@ -80,6 +80,10 @@ pub enum OracleError {
     /// 18 - Bond out of bounds.
     #[error("Bond must be within valid bounds")]
     BondBounds,
+
+    /// 18 - Oracle authority mismatch.
+    #[error("Oracle authority address does not match")]
+    OracleAuthorityMismatch,
 }
 
 impl PrintProgramError for OracleError {
