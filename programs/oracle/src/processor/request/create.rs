@@ -4,9 +4,12 @@ use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
 
 use crate::cpi::spl::{CreateTokenAccount, TransferChecked};
+use crate::error::OracleError;
 use crate::instruction::accounts::{Context, CreateRequestAccounts};
 use crate::instruction::CreateRequestArgs;
-use crate::state::{AccountSized, InitAccount, InitContext, InitRequest, Oracle, Request};
+use crate::state::{
+    Account, AccountSized, Currency, InitAccount, InitContext, InitRequest, Oracle, Request,
+};
 use crate::{cpi, pda, utils};
 
 pub fn create<'a>(
@@ -31,10 +34,11 @@ fn create_v1(
     let CreateRequestAccounts {
         oracle,
         request,
+        reward_currency: reward_currency_info,
+        bond_currency: bond_currency_info,
         reward_mint,
         reward_source,
         reward_escrow,
-        bond_mint,
         creator,
         payer,
         token_program,
@@ -50,7 +54,24 @@ fn create_v1(
 
     pda::oracle::assert_pda(oracle.key)?;
 
-    // TODO: Use marker accounts to check valid bond mints.
+    let reward_currency = Currency::from_account_info(reward_currency_info)?;
+    let bond_currency = Currency::from_account_info(bond_currency_info)?;
+
+    pda::currency::assert_pda(reward_currency_info.key, oracle.key, &reward_currency.mint)?;
+    pda::currency::assert_pda(bond_currency_info.key, oracle.key, &bond_currency.mint)?;
+
+    // Check the reward mint matches the reward currency.
+    if !common::cmp_pubkeys(&reward_currency.mint, reward_mint.key) {
+        return Err(OracleError::RewardMintMismatch.into());
+    }
+
+    // Check the reward and bond bounds.
+    if !reward_currency.reward_range.contains(&reward) {
+        return Err(OracleError::RewardBounds.into());
+    }
+    if !bond_currency.bond_range.contains(&bond) {
+        return Err(OracleError::BondBounds.into());
+    }
 
     let request_index: u64;
 
@@ -75,7 +96,7 @@ fn create_v1(
             reward,
             reward_mint: *reward_mint.key,
             bond,
-            bond_mint: *bond_mint.key,
+            bond_mint: bond_currency.mint,
             timestamp,
             data,
         })?
@@ -125,7 +146,7 @@ fn create_v1(
         )?;
     }
 
-    // TODO: Emit an event for the request?
+    // TODO: Emit an event?
 
     Ok(())
 }

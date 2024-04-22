@@ -84,7 +84,7 @@ impl Request {
 
     pub fn validate_bond_mint(&self, mint: &Pubkey) -> Result<(), OracleError> {
         if !common::cmp_pubkeys(&self.bond_mint, mint) {
-            return Err(OracleError::BondMismatch);
+            return Err(OracleError::BondMintMismatch);
         }
         Ok(())
     }

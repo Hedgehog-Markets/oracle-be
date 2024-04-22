@@ -59,7 +59,7 @@ pub enum OracleError {
 
     /// 13 - Bond mint mismatch.
     #[error("Bond mint address does not match")]
-    BondMismatch,
+    BondMintMismatch,
 
     /// 14 - Voting window has not expired.
     #[error("Voting window has not expired")]
@@ -68,6 +68,18 @@ pub enum OracleError {
     /// 15 - Voting window has expired.
     #[error("Voting window has expired")]
     VotingWindowExpired,
+
+    /// 16 - Reward mint mismatch.
+    #[error("Reward mint address does not match")]
+    RewardMintMismatch,
+
+    /// 17 - Reward out of bounds.
+    #[error("Reward must be within valid bounds")]
+    RewardBounds,
+
+    /// 18 - Bond out of bounds.
+    #[error("Bond must be within valid bounds")]
+    BondBounds,
 }
 
 impl PrintProgramError for OracleError {

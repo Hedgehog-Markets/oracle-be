@@ -26,6 +26,7 @@ mod vote;
 mod voting;
 
 pub use self::assertion::*;
+pub use self::currency::*;
 pub use self::oracle::*;
 pub use self::request::*;
 pub use self::stake::*;

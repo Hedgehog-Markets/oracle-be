@@ -29,14 +29,15 @@ pub enum OracleInstruction {
     /// [`Request`]: crate::state::Request
     #[account(0, writable, name = "oracle", desc = "Oracle account")]
     #[account(1, writable, name = "request", desc = "Request")]
-    #[account(2, name = "reward_mint", desc = "Reward mint")]
-    #[account(3, writable, name = "reward_source", desc = "Reward source token account")]
-    #[account(4, writable, name = "reward_escrow", desc = "Reward escrow token account")]
-    #[account(5, name = "bond_mint", desc = "Bond mint")]
-    #[account(6, signer, name = "creator", desc = "Creator")]
-    #[account(7, signer, writable, name = "payer", desc = "Payer")]
-    #[account(8, name = "token_program", desc = "SPL token program")]
-    #[account(9, name = "system_program", desc = "System program")]
+    #[account(2, name = "reward_currency", desc = "Reward currency")]
+    #[account(3, name = "bond_currency", desc = "Bond currency")]
+    #[account(4, name = "reward_mint", desc = "Reward mint")]
+    #[account(5, writable, name = "reward_source", desc = "Reward source token account")]
+    #[account(6, writable, name = "reward_escrow", desc = "Reward escrow token account")]
+    #[account(7, signer, name = "creator", desc = "Creator")]
+    #[account(8, signer, writable, name = "payer", desc = "Payer")]
+    #[account(9, name = "token_program", desc = "SPL token program")]
+    #[account(10, name = "system_program", desc = "System program")]
     CreateRequest(CreateRequestArgs),
 
     /// Creates an [`Assertion`] for a [`Request`].
