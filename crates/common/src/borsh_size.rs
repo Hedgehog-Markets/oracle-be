@@ -2,6 +2,7 @@ use std::num::{
     NonZeroI128, NonZeroI16, NonZeroI32, NonZeroI64, NonZeroI8, NonZeroU128, NonZeroU16,
     NonZeroU32, NonZeroU64, NonZeroU8,
 };
+use std::ops::{Range, RangeFrom};
 
 use solana_program::pubkey::{Pubkey, PUBKEY_BYTES};
 
@@ -30,6 +31,13 @@ impl_sized!(i8, i16, i32, i64, i128);
 impl_sized!(NonZeroU8, NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU128);
 impl_sized!(NonZeroI8, NonZeroI16, NonZeroI32, NonZeroI64, NonZeroI128);
 
+impl<T, const N: usize> BorshSize for [T; N]
+where
+    T: BorshSize,
+{
+    const SIZE: usize = N * T::SIZE;
+}
+
 impl BorshSize for Pubkey {
     const SIZE: usize = PUBKEY_BYTES;
 }
@@ -39,4 +47,30 @@ where
     T: BorshSize,
 {
     const SIZE: usize = 1 + T::SIZE;
+}
+
+impl<T, E> BorshSize for Result<T, E>
+where
+    T: BorshSize,
+    E: BorshSize,
+{
+    const SIZE: usize = 1 + max(T::SIZE, E::SIZE);
+}
+
+impl<T> BorshSize for Range<T>
+where
+    T: BorshSize,
+{
+    const SIZE: usize = 2 * T::SIZE;
+}
+
+impl<T> BorshSize for RangeFrom<T>
+where
+    T: BorshSize,
+{
+    const SIZE: usize = 2 * T::SIZE;
+}
+
+const fn max(x: usize, y: usize) -> usize {
+    if x >= y { x } else { y }
 }
