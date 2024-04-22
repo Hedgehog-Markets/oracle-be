@@ -8,7 +8,7 @@ use crate::error::OracleError;
 use crate::instruction::accounts::{Context, FinalizeVotingAccounts};
 use crate::instruction::FinalizeVotingArgs;
 use crate::pda;
-use crate::state::{AccountSized, Request, RequestState, Voting};
+use crate::state::{Account, AccountSized, Oracle, Request, RequestState, Voting};
 
 pub fn finalize<'a>(
     program_id: &'a Pubkey,
@@ -29,16 +29,26 @@ fn finalize_v1(
 ) -> ProgramResult {
     let FinalizeVotingArgs::V1 {} = args;
 
-    let FinalizeVotingAccounts { request, voting } = ctx.accounts;
+    let FinalizeVotingAccounts { oracle, request, voting } = ctx.accounts;
+
+    let voting_window: i64;
+
+    // Get oracle voting window.
+    {
+        let oracle = Oracle::from_account_info(oracle)?;
+
+        voting_window = oracle.config.voting_window;
+    }
 
     let request_address = request.key;
 
     let mut request = Request::from_account_info_mut(request)?;
 
-    // Step 1: Check request.
+    // Check request.
     {
-        request.assert_pda(request_address)?;
+        pda::request::assert_pda(request_address, oracle.key, &request.index)?;
 
+        // Check request is not disputed.
         if request.state != RequestState::Disputed {
             return Err(OracleError::NotDisputed.into());
         }
@@ -50,7 +60,7 @@ fn finalize_v1(
 
     let mut voting = Voting::from_account_info_mut(voting)?;
 
-    // Step 2: Check the voting window has expired.
+    // Check the voting window has expired.
     if now.unix_timestamp < voting.end_timestamp {
         return Err(OracleError::VotingWindowNotExpired.into());
     }
@@ -60,7 +70,7 @@ fn finalize_v1(
         log!("No votes cast - starting new vote window");
 
         voting.start_timestamp = now.unix_timestamp;
-        voting.end_timestamp = increment!(now.unix_timestamp, crate::VOTING_WINDOW)?;
+        voting.end_timestamp = increment!(now.unix_timestamp, voting_window)?;
 
         voting.save()?;
 
@@ -72,10 +82,12 @@ fn finalize_v1(
     // Voting account is not mutated when resolving.
     let voting = voting.into_inner();
 
-    // Step 3: Update request with resolved value.
+    // Update request with resolved value.
     request.resolve_timestamp = now.unix_timestamp;
     request.state = RequestState::Resolved;
     request.value = voting.mode_value;
+
+    request.save()?;
 
     // TODO: Emit an event?
 

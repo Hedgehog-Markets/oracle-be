@@ -25,7 +25,7 @@ fn create_v1(
     ctx: Context<CreateOracleAccounts>,
     args: CreateOracleArgs,
 ) -> ProgramResult {
-    let CreateOracleArgs::V1 { authority } = args;
+    let CreateOracleArgs::V1 { authority, config } = args;
 
     let CreateOracleAccounts { oracle, payer, system_program } = ctx.accounts;
 
@@ -39,7 +39,7 @@ fn create_v1(
     let signer_seeds = pda::oracle::seeds_with_bump(&oracle_bump);
 
     // Step 1: Initialize `oracle` account.
-    Oracle::init(InitOracle { authority }).save(InitContext {
+    Oracle::init(InitOracle { authority, config }).save(InitContext {
         account: oracle,
         payer,
         system_program,

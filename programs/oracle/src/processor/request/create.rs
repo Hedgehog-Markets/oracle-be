@@ -66,8 +66,8 @@ fn create_v1(
 
     // Step 2: Initialize `request` account.
     {
-        let request_bump = pda::request::assert_pda(request.key, &request_index)?;
-        let signer_seeds = pda::request::seeds_with_bump(&request_index, &request_bump);
+        let request_bump = pda::request::assert_pda(request.key, oracle.key, &request_index)?;
+        let signer_seeds = pda::request::seeds_with_bump(oracle.key, &request_index, &request_bump);
 
         Request::try_init(InitRequest {
             index: request_index,

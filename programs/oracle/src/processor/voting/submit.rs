@@ -11,7 +11,8 @@ use crate::error::OracleError;
 use crate::instruction::accounts::{Context, SubmitVoteAccounts};
 use crate::instruction::SubmitVoteArgs;
 use crate::state::{
-    Account, AccountSized, InitAccount, InitContext, InitVote, Request, RequestState, Vote, Voting,
+    Account, AccountSized, InitAccount, InitContext, InitVote, Oracle, Request, RequestState, Vote,
+    Voting,
 };
 use crate::{pda, utils};
 
@@ -34,7 +35,7 @@ fn submit_v1(
 ) -> ProgramResult {
     let SubmitVoteArgs::V1 { value } = args;
 
-    let SubmitVoteAccounts { request, voting, vote, stake, voter, payer, system_program } =
+    let SubmitVoteAccounts { oracle, request, voting, vote, stake, voter, payer, system_program } =
         ctx.accounts;
 
     if !voter.is_signer || !payer.is_signer {
@@ -43,13 +44,22 @@ fn submit_v1(
 
     utils::assert_system_program(system_program.key)?;
 
-    // Step 1: Check request.
+    let voting_window: i64;
+
+    // Get oracle voting window.
+    {
+        let oracle = Oracle::from_account_info(oracle)?;
+
+        voting_window = oracle.config.voting_window;
+    }
+
+    // Check request.
     {
         let request_address = request.key;
 
         let request = Request::from_account_info(request)?;
 
-        request.assert_pda(request_address)?;
+        pda::request::assert_pda(request_address, oracle.key, &request.index)?;
 
         if request.state != RequestState::Disputed {
             return Err(OracleError::NotDisputed.into());
@@ -64,7 +74,7 @@ fn submit_v1(
 
     let mut voting = Voting::from_account_info_mut(voting)?;
 
-    // Step 2: Check the voting window hasn't expired.
+    // Step 1: Check the voting window hasn't expired.
     if voting.end_timestamp <= now.unix_timestamp {
         if voting.vote_count != 0 {
             return Err(OracleError::VotingWindowExpired.into());
@@ -74,13 +84,13 @@ fn submit_v1(
         log!("No votes cast - starting new vote window");
 
         voting.start_timestamp = now.unix_timestamp;
-        voting.end_timestamp = increment!(now.unix_timestamp, crate::VOTING_WINDOW)?;
+        voting.end_timestamp = increment!(now.unix_timestamp, voting_window)?;
     }
 
     // TODO: Implement staking for votes.
     let votes = 1;
 
-    // Step 3: Initialize `vote` account.
+    // Step 2: Initialize `vote` account.
     {
         let vote_bump = pda::vote::assert_pda(vote.key, voting_address, stake.key)?;
         let signer_seeds = pda::vote::seeds_with_bump(voting_address, stake.key, &vote_bump);

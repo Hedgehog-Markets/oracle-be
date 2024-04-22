@@ -60,11 +60,10 @@ impl TryFrom<InitVoting> for (Voting, usize) {
     type Error = OracleError;
 
     fn try_from(params: InitVoting) -> Result<(Voting, usize), Self::Error> {
-        let InitVoting { request, start_timestamp } = params;
+        let InitVoting { request, start_timestamp, voting_window } = params;
 
-        let end_timestamp = start_timestamp
-            .checked_add(crate::VOTING_WINDOW)
-            .ok_or(OracleError::ArithmeticOverflow)?;
+        let end_timestamp =
+            start_timestamp.checked_add(voting_window).ok_or(OracleError::ArithmeticOverflow)?;
 
         Ok((
             Voting {
@@ -84,4 +83,6 @@ impl TryFrom<InitVoting> for (Voting, usize) {
 pub(crate) struct InitVoting {
     pub request: Pubkey,
     pub start_timestamp: i64,
+
+    pub voting_window: i64,
 }

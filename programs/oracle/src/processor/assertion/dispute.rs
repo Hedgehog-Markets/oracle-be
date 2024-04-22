@@ -10,7 +10,8 @@ use crate::error::OracleError;
 use crate::instruction::accounts::{Context, DisputeAssertionAccounts};
 use crate::instruction::DisputeAssertionArgs;
 use crate::state::{
-    AccountSized, Assertion, InitAccount, InitContext, InitVoting, Request, RequestState, Voting,
+    Account, AccountSized, Assertion, InitAccount, InitContext, InitVoting, Oracle, Request,
+    RequestState, Voting,
 };
 use crate::{cpi, pda, utils};
 
@@ -34,6 +35,7 @@ fn dispute_v1(
     let DisputeAssertionArgs::V1 { value } = args;
 
     let DisputeAssertionAccounts {
+        oracle,
         request,
         assertion,
         voting,
@@ -54,6 +56,14 @@ fn dispute_v1(
     utils::assert_system_program(system_program.key)?;
 
     let bond: u64;
+    let voting_window: i64;
+
+    // Get oracle voting window.
+    {
+        let oracle = Oracle::from_account_info(oracle)?;
+
+        voting_window = oracle.config.voting_window;
+    }
 
     let now = Clock::get()?;
 
@@ -65,7 +75,7 @@ fn dispute_v1(
 
         // Check request state.
         {
-            request.assert_pda(request_address)?;
+            pda::request::assert_pda(request_address, oracle.key, &request.index)?;
 
             match request.state {
                 RequestState::Asserted => {}
@@ -158,6 +168,7 @@ fn dispute_v1(
         Voting::try_init(InitVoting {
             request: *request.key,
             start_timestamp: now.unix_timestamp,
+            voting_window,
         })?
         .save(InitContext {
             account: voting,

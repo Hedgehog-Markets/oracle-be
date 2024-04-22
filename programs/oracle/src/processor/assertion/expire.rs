@@ -29,13 +29,15 @@ fn expire_v1(
 ) -> ProgramResult {
     let ExpireAssertionArgs::V1 {} = args;
 
-    let ExpireAssertionAccounts { request: request_info, assertion } = ctx.accounts;
+    let ExpireAssertionAccounts { oracle, request, assertion } = ctx.accounts;
 
-    let mut request = Request::from_account_info_mut(request_info)?;
+    let request_address = request.key;
 
-    // Step 1: Check request state.
+    let mut request = Request::from_account_info_mut(request)?;
+
+    // Check request state.
     {
-        request.assert_pda(request_info.key)?;
+        pda::request::assert_pda(request_address, oracle.key, &request.index)?;
 
         match request.state {
             RequestState::Asserted => {}
@@ -45,23 +47,21 @@ fn expire_v1(
         }
     }
 
-    // Step 2: Check assertion address.
-    pda::assertion::assert_pda(assertion.key, request_info.key)?;
+    // Check assertion address.
+    pda::assertion::assert_pda(assertion.key, request_address)?;
 
     let assertion = Assertion::from_account_info(assertion)?;
     let now = Clock::get()?;
 
-    // Step 3: Check expiration timestamp.
+    // Check expiration timestamp.
     assertion.validate_expiration_timestamp(now.unix_timestamp)?;
 
-    // Step 4: Update request.
-    {
-        request.value = assertion.asserted_value;
-        request.resolve_timestamp = now.unix_timestamp;
-        request.state = RequestState::Resolved;
+    // Update request with resolved value.
+    request.value = assertion.asserted_value;
+    request.resolve_timestamp = now.unix_timestamp;
+    request.state = RequestState::Resolved;
 
-        request.save()?;
-    }
+    request.save()?;
 
     // TODO: Emit an event?
 

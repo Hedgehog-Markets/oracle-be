@@ -14,6 +14,19 @@ pub struct Oracle {
 
     /// Authority address.
     pub authority: Pubkey,
+
+    /// Oracle config.
+    pub config: Config,
+}
+
+#[derive(Clone, Debug, BorshDeserialize, BorshSerialize, BorshSize)]
+pub struct Config {
+    /// The duration of the dispute window in seconds.
+    pub dispute_window: i64,
+    /// The duration of the voting window in seconds.
+    pub voting_window: i64,
+    /// The fee taken, in basis points, from the bond of the incorrect party in a dispute.
+    pub bond_fee_bps: u16,
 }
 
 impl Account for Oracle {
@@ -22,12 +35,13 @@ impl Account for Oracle {
 
 impl From<InitOracle> for (Oracle, usize) {
     fn from(params: InitOracle) -> (Oracle, usize) {
-        let InitOracle { authority } = params;
+        let InitOracle { authority, config } = params;
 
-        (Oracle { account_type: Oracle::TYPE, next_index: 0, authority }, Oracle::SIZE)
+        (Oracle { account_type: Oracle::TYPE, next_index: 0, authority, config }, Oracle::SIZE)
     }
 }
 
 pub(crate) struct InitOracle {
     pub authority: Pubkey,
+    pub config: Config,
 }

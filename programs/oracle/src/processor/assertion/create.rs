@@ -10,7 +10,8 @@ use crate::error::OracleError;
 use crate::instruction::accounts::{Context, CreateAssertionAccounts};
 use crate::instruction::CreateAssertionArgs;
 use crate::state::{
-    AccountSized, Assertion, InitAccount, InitAssertion, InitContext, Request, RequestState,
+    Account, AccountSized, Assertion, InitAccount, InitAssertion, InitContext, Oracle, Request,
+    RequestState,
 };
 use crate::{cpi, pda, utils};
 
@@ -34,6 +35,7 @@ fn create_v1(
     let CreateAssertionArgs::V1 { value } = args;
 
     let CreateAssertionAccounts {
+        oracle,
         request,
         assertion,
         bond_mint,
@@ -53,6 +55,14 @@ fn create_v1(
     utils::assert_system_program(system_program.key)?;
 
     let bond: u64;
+    let dispute_window: i64;
+
+    // Get oracle dispute window.
+    {
+        let oracle = Oracle::from_account_info(oracle)?;
+
+        dispute_window = oracle.config.dispute_window;
+    }
 
     let now = Clock::get()?;
 
@@ -62,7 +72,7 @@ fn create_v1(
 
         let mut request = Request::from_account_info_mut(request)?;
 
-        request.assert_pda(request_address)?;
+        pda::request::assert_pda(request_address, oracle.key, &request.index)?;
 
         if request.state != RequestState::Requested {
             return Err(OracleError::AlreadyAsserted.into());
@@ -89,6 +99,7 @@ fn create_v1(
             assertion_timestamp: now.unix_timestamp,
             asserter: *asserter.key,
             asserted_value: value,
+            dispute_window,
         })?
         .save(InitContext {
             account: assertion,

@@ -66,10 +66,16 @@ impl TryFrom<InitAssertion> for (Assertion, usize) {
     type Error = OracleError;
 
     fn try_from(params: InitAssertion) -> Result<(Assertion, usize), Self::Error> {
-        let InitAssertion { request, assertion_timestamp, asserter, asserted_value } = params;
+        let InitAssertion {
+            request,
+            assertion_timestamp,
+            asserter,
+            asserted_value,
+            dispute_window,
+        } = params;
 
         let expiration_timestamp = assertion_timestamp
-            .checked_add(crate::DISPUTE_WINDOW)
+            .checked_add(dispute_window)
             .ok_or(OracleError::ArithmeticOverflow)?;
 
         Ok((
@@ -94,4 +100,6 @@ pub(crate) struct InitAssertion {
     pub assertion_timestamp: i64,
     pub asserter: Pubkey,
     pub asserted_value: u64,
+
+    pub dispute_window: i64,
 }

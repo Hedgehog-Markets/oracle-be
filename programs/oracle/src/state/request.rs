@@ -1,11 +1,9 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 use common::BorshSize;
 use shank::ShankAccount;
-use solana_program::entrypoint::ProgramResult;
 use solana_program::pubkey::Pubkey;
 
 use crate::error::OracleError;
-use crate::pda;
 
 use super::{Account, AccountSized, AccountType};
 
@@ -83,11 +81,6 @@ impl Request {
         + RequestState::SIZE    // state
         + u64::SIZE             // value
         ;
-
-    pub fn assert_pda(&self, address: &Pubkey) -> ProgramResult {
-        pda::request::assert_pda(address, &self.index)?;
-        Ok(())
-    }
 
     pub fn validate_bond_mint(&self, mint: &Pubkey) -> Result<(), OracleError> {
         if !common::cmp_pubkeys(&self.bond_mint, mint) {
