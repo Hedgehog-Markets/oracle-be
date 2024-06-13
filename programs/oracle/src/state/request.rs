@@ -78,8 +78,8 @@ impl Request {
         + Pubkey::SIZE          // bond_mint
         + u64::SIZE             // reward
         + Pubkey::SIZE          // reward_mint
-        + i64::SIZE             // assertion_timestamp
-        + i64::SIZE             // resolve_timestamp
+        + UnixTimestamp::SIZE   // assertion_timestamp
+        + UnixTimestamp::SIZE   // resolve_timestamp
         + RequestState::SIZE    // state
         + u64::SIZE             // value
         ;
