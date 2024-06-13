@@ -29,6 +29,7 @@ import {
   publicKey as publicKeySerializer,
   string,
   struct,
+  tuple,
   u64,
 } from "@metaplex-foundation/umi/serializers";
 
@@ -39,12 +40,14 @@ export type Currency = Account<CurrencyAccountData>;
 export type CurrencyAccountData = {
   accountType: AccountType;
   mint: PublicKey;
-  minimumBond: bigint;
+  rewardRange: [bigint, bigint];
+  bondRange: [bigint, bigint];
 };
 
 export type CurrencyAccountDataArgs = {
   mint: PublicKey;
-  minimumBond: number | bigint;
+  rewardRange: [number | bigint, number | bigint];
+  bondRange: [number | bigint, number | bigint];
 };
 
 export function getCurrencyAccountDataSerializer(): Serializer<
@@ -56,7 +59,8 @@ export function getCurrencyAccountDataSerializer(): Serializer<
       [
         ["accountType", getAccountTypeSerializer()],
         ["mint", publicKeySerializer()],
-        ["minimumBond", u64()],
+        ["rewardRange", tuple([u64(), u64()])],
+        ["bondRange", tuple([u64(), u64()])],
       ],
       { description: "CurrencyAccountData" },
     ),
@@ -125,18 +129,20 @@ export function getCurrencyGpaBuilder(context: Pick<Context, "rpc" | "programs">
     .registerFields<{
       accountType: AccountTypeArgs;
       mint: PublicKey;
-      minimumBond: number | bigint;
+      rewardRange: [number | bigint, number | bigint];
+      bondRange: [number | bigint, number | bigint];
     }>({
       accountType: [0, getAccountTypeSerializer()],
       mint: [1, publicKeySerializer()],
-      minimumBond: [33, u64()],
+      rewardRange: [33, tuple([u64(), u64()])],
+      bondRange: [49, tuple([u64(), u64()])],
     })
     .deserializeUsing<Currency>((account) => deserializeCurrency(account))
     .whereField("accountType", AccountType.Currency);
 }
 
 export function getCurrencySize(): number {
-  return 41;
+  return 65;
 }
 
 export function findCurrencyPda(

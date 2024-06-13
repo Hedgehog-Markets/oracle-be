@@ -7,6 +7,7 @@
  */
 
 export * from "./createAssertion";
+export * from "./createCurrency";
 export * from "./createOracle";
 export * from "./createRequest";
 export * from "./disputeAssertion";

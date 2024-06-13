@@ -6,7 +6,9 @@
 //!
 
 pub(crate) mod r#account_type;
+pub(crate) mod r#config;
 pub(crate) mod r#create_assertion_args;
+pub(crate) mod r#create_currency_args;
 pub(crate) mod r#create_oracle_args;
 pub(crate) mod r#create_request_args;
 pub(crate) mod r#dispute_assertion_args;
@@ -17,7 +19,9 @@ pub(crate) mod r#request_state;
 pub(crate) mod r#submit_vote_args;
 
 pub use self::r#account_type::*;
+pub use self::r#config::*;
 pub use self::r#create_assertion_args::*;
+pub use self::r#create_currency_args::*;
 pub use self::r#create_oracle_args::*;
 pub use self::r#create_request_args::*;
 pub use self::r#dispute_assertion_args::*;

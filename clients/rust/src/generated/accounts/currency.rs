@@ -15,11 +15,12 @@ pub struct Currency {
     pub account_type: AccountType,
     #[cfg_attr(feature = "serde", serde(with = "serde_with::As::<serde_with::DisplayFromStr>"))]
     pub mint: Pubkey,
-    pub minimum_bond: u64,
+    pub reward_range: (u64, u64),
+    pub bond_range: (u64, u64),
 }
 
 impl Currency {
-    pub const LEN: usize = 41;
+    pub const LEN: usize = 65;
 
     /// Prefix values used to generate a PDA for this account.
     ///

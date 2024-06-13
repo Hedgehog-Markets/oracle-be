@@ -6,12 +6,11 @@
 //!
 
 use borsh::{BorshDeserialize, BorshSerialize};
-use num_derive::FromPrimitive;
 
-#[derive(
-    BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq, PartialOrd, Hash, FromPrimitive,
-)]
+#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum FinalizeVotingArgs {
-    V1,
+pub struct Config {
+    pub dispute_window: u32,
+    pub voting_window: u32,
+    pub bond_fee_bps: u16,
 }

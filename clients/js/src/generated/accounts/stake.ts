@@ -10,6 +10,8 @@ import type { AccountTypeArgs } from "../types";
 import type {
   Account,
   Context,
+  DateTime,
+  DateTimeInput,
   Pda,
   PublicKey,
   RpcAccount,
@@ -22,9 +24,11 @@ import {
   assertAccountExists,
   deserializeAccount,
   gpaBuilder,
+  mapDateTimeSerializer,
   publicKey as toPublicKey,
 } from "@metaplex-foundation/umi";
 import {
+  i64,
   mapSerializer,
   publicKey as publicKeySerializer,
   string,
@@ -41,12 +45,14 @@ export type StakeAccountData = {
   owner: PublicKey;
   delegate: PublicKey;
   amount: bigint;
+  lockTimestamp: DateTime;
 };
 
 export type StakeAccountDataArgs = {
   owner: PublicKey;
   delegate: PublicKey;
   amount: number | bigint;
+  lockTimestamp: DateTimeInput;
 };
 
 export function getStakeAccountDataSerializer(): Serializer<
@@ -60,6 +66,7 @@ export function getStakeAccountDataSerializer(): Serializer<
         ["owner", publicKeySerializer()],
         ["delegate", publicKeySerializer()],
         ["amount", u64()],
+        ["lockTimestamp", mapDateTimeSerializer(i64())],
       ],
       { description: "StakeAccountData" },
     ),
@@ -130,18 +137,16 @@ export function getStakeGpaBuilder(context: Pick<Context, "rpc" | "programs">) {
       owner: PublicKey;
       delegate: PublicKey;
       amount: number | bigint;
+      lockTimestamp: DateTimeInput;
     }>({
       accountType: [0, getAccountTypeSerializer()],
       owner: [1, publicKeySerializer()],
       delegate: [33, publicKeySerializer()],
       amount: [65, u64()],
+      lockTimestamp: [73, mapDateTimeSerializer(i64())],
     })
     .deserializeUsing<Stake>((account) => deserializeStake(account))
     .whereField("accountType", AccountType.Stake);
-}
-
-export function getStakeSize(): number {
-  return 73;
 }
 
 export function findStakePda(

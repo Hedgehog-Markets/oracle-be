@@ -5,7 +5,7 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-use crate::generated::types::AccountType;
+use crate::generated::types::{AccountType, Config};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::pubkey::Pubkey;
 
@@ -16,10 +16,11 @@ pub struct Oracle {
     pub next_index: u64,
     #[cfg_attr(feature = "serde", serde(with = "serde_with::As::<serde_with::DisplayFromStr>"))]
     pub authority: Pubkey,
+    pub config: Config,
 }
 
 impl Oracle {
-    pub const LEN: usize = 41;
+    pub const LEN: usize = 51;
 
     /// Prefix values used to generate a PDA for this account.
     ///

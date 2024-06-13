@@ -10,6 +10,8 @@ import type { AccountTypeArgs } from "../types";
 import type {
   Account,
   Context,
+  DateTime,
+  DateTimeInput,
   Pda,
   PublicKey,
   RpcAccount,
@@ -22,6 +24,7 @@ import {
   assertAccountExists,
   deserializeAccount,
   gpaBuilder,
+  mapDateTimeSerializer,
   publicKey as toPublicKey,
 } from "@metaplex-foundation/umi";
 import {
@@ -41,8 +44,8 @@ export type Voting = Account<VotingAccountData>;
 export type VotingAccountData = {
   accountType: AccountType;
   request: PublicKey;
-  startTimestamp: bigint;
-  endTimestamp: bigint;
+  startTimestamp: DateTime;
+  endTimestamp: DateTime;
   voteCount: bigint;
   modeValue: bigint;
   votes: Map<bigint, bigint>;
@@ -50,8 +53,8 @@ export type VotingAccountData = {
 
 export type VotingAccountDataArgs = {
   request: PublicKey;
-  startTimestamp: number | bigint;
-  endTimestamp: number | bigint;
+  startTimestamp: DateTimeInput;
+  endTimestamp: DateTimeInput;
   voteCount: number | bigint;
   modeValue: number | bigint;
   votes: Map<number | bigint, number | bigint>;
@@ -66,8 +69,8 @@ export function getVotingAccountDataSerializer(): Serializer<
       [
         ["accountType", getAccountTypeSerializer()],
         ["request", publicKeySerializer()],
-        ["startTimestamp", i64()],
-        ["endTimestamp", i64()],
+        ["startTimestamp", mapDateTimeSerializer(i64())],
+        ["endTimestamp", mapDateTimeSerializer(i64())],
         ["voteCount", u64()],
         ["modeValue", u64()],
         ["votes", map(u64(), u64())],
@@ -139,16 +142,16 @@ export function getVotingGpaBuilder(context: Pick<Context, "rpc" | "programs">) 
     .registerFields<{
       accountType: AccountTypeArgs;
       request: PublicKey;
-      startTimestamp: number | bigint;
-      endTimestamp: number | bigint;
+      startTimestamp: DateTimeInput;
+      endTimestamp: DateTimeInput;
       voteCount: number | bigint;
       modeValue: number | bigint;
       votes: Map<number | bigint, number | bigint>;
     }>({
       accountType: [0, getAccountTypeSerializer()],
       request: [1, publicKeySerializer()],
-      startTimestamp: [33, i64()],
-      endTimestamp: [41, i64()],
+      startTimestamp: [33, mapDateTimeSerializer(i64())],
+      endTimestamp: [41, mapDateTimeSerializer(i64())],
       voteCount: [49, u64()],
       modeValue: [57, u64()],
       votes: [65, map(u64(), u64())],

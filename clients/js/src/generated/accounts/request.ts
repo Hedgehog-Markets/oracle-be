@@ -16,6 +16,8 @@ import type {
 import type {
   Account,
   Context,
+  DateTime,
+  DateTimeInput,
   Pda,
   PublicKey,
   RpcAccount,
@@ -28,6 +30,7 @@ import {
   assertAccountExists,
   deserializeAccount,
   gpaBuilder,
+  mapDateTimeSerializer,
   publicKey as toPublicKey,
 } from "@metaplex-foundation/umi";
 import {
@@ -56,8 +59,8 @@ export type RequestAccountData = {
   rewardMint: PublicKey;
   bond: bigint;
   bondMint: PublicKey;
-  assertionTimestamp: bigint;
-  resolveTimestamp: bigint;
+  assertionTimestamp: DateTime;
+  resolveTimestamp: DateTime;
   state: RequestState;
   value: bigint;
   data: RequestData;
@@ -70,8 +73,8 @@ export type RequestAccountDataArgs = {
   rewardMint: PublicKey;
   bond: number | bigint;
   bondMint: PublicKey;
-  assertionTimestamp: number | bigint;
-  resolveTimestamp: number | bigint;
+  assertionTimestamp: DateTimeInput;
+  resolveTimestamp: DateTimeInput;
   state: RequestStateArgs;
   value: number | bigint;
   data: RequestDataArgs;
@@ -91,8 +94,8 @@ export function getRequestAccountDataSerializer(): Serializer<
         ["rewardMint", publicKeySerializer()],
         ["bond", u64()],
         ["bondMint", publicKeySerializer()],
-        ["assertionTimestamp", i64()],
-        ["resolveTimestamp", i64()],
+        ["assertionTimestamp", mapDateTimeSerializer(i64())],
+        ["resolveTimestamp", mapDateTimeSerializer(i64())],
         ["state", getRequestStateSerializer()],
         ["value", u64()],
         ["data", getRequestDataSerializer()],
@@ -169,8 +172,8 @@ export function getRequestGpaBuilder(context: Pick<Context, "rpc" | "programs">)
       rewardMint: PublicKey;
       bond: number | bigint;
       bondMint: PublicKey;
-      assertionTimestamp: number | bigint;
-      resolveTimestamp: number | bigint;
+      assertionTimestamp: DateTimeInput;
+      resolveTimestamp: DateTimeInput;
       state: RequestStateArgs;
       value: number | bigint;
       data: RequestDataArgs;
@@ -182,8 +185,8 @@ export function getRequestGpaBuilder(context: Pick<Context, "rpc" | "programs">)
       rewardMint: [49, publicKeySerializer()],
       bond: [81, u64()],
       bondMint: [89, publicKeySerializer()],
-      assertionTimestamp: [121, i64()],
-      resolveTimestamp: [129, i64()],
+      assertionTimestamp: [121, mapDateTimeSerializer(i64())],
+      resolveTimestamp: [129, mapDateTimeSerializer(i64())],
       state: [137, getRequestStateSerializer()],
       value: [138, u64()],
       data: [146, getRequestDataSerializer()],

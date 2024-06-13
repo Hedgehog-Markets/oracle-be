@@ -10,7 +10,7 @@
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "Program oracle account"
+            "Oracle account"
           ]
         },
         {
@@ -51,7 +51,7 @@
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "Program oracle account"
+            "Oracle account"
           ]
         },
         {
@@ -60,6 +60,22 @@
           "isSigner": false,
           "docs": [
             "Request"
+          ]
+        },
+        {
+          "name": "rewardCurrency",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Reward currency"
+          ]
+        },
+        {
+          "name": "bondCurrency",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Bond currency"
           ]
         },
         {
@@ -84,14 +100,6 @@
           "isSigner": false,
           "docs": [
             "Reward escrow token account"
-          ]
-        },
-        {
-          "name": "bondMint",
-          "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "Bond mint"
           ]
         },
         {
@@ -143,6 +151,14 @@
     {
       "name": "CreateAssertion",
       "accounts": [
+        {
+          "name": "oracle",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Oracle account"
+          ]
+        },
         {
           "name": "request",
           "isMut": true,
@@ -233,6 +249,14 @@
       "name": "ExpireAssertion",
       "accounts": [
         {
+          "name": "oracle",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Oracle account"
+          ]
+        },
+        {
           "name": "request",
           "isMut": true,
           "isSigner": false,
@@ -265,6 +289,14 @@
     {
       "name": "DisputeAssertion",
       "accounts": [
+        {
+          "name": "oracle",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Oracle account"
+          ]
+        },
         {
           "name": "request",
           "isMut": true,
@@ -363,6 +395,14 @@
       "name": "SubmitVote",
       "accounts": [
         {
+          "name": "oracle",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Oracle account"
+          ]
+        },
+        {
           "name": "request",
           "isMut": false,
           "isSigner": false,
@@ -436,6 +476,14 @@
       "name": "FinalizeVoting",
       "accounts": [
         {
+          "name": "oracle",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Oracle account"
+          ]
+        },
+        {
           "name": "request",
           "isMut": true,
           "isSigner": false,
@@ -464,6 +512,79 @@
         "type": "u8",
         "value": 6
       }
+    },
+    {
+      "name": "CreateCurrency",
+      "accounts": [
+        {
+          "name": "oracle",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Oracle account"
+          ]
+        },
+        {
+          "name": "currency",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Currency"
+          ]
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Mint"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Oracle authority"
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Payer"
+          ]
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "SPL token program"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "System program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "createCurrencyArgs",
+          "type": {
+            "defined": "CreateCurrencyArgs"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 7
+      }
     }
   ],
   "accounts": [
@@ -484,11 +605,15 @@
           },
           {
             "name": "assertionTimestamp",
-            "type": "i64"
+            "type": {
+              "defined": "UnixTimestamp"
+            }
           },
           {
             "name": "expirationTimestamp",
-            "type": "i64"
+            "type": {
+              "defined": "UnixTimestamp"
+            }
           },
           {
             "name": "asserter",
@@ -525,8 +650,22 @@
             "type": "publicKey"
           },
           {
-            "name": "minimumBond",
-            "type": "u64"
+            "name": "rewardRange",
+            "type": {
+              "tuple": [
+                "u64",
+                "u64"
+              ]
+            }
+          },
+          {
+            "name": "bondRange",
+            "type": {
+              "tuple": [
+                "u64",
+                "u64"
+              ]
+            }
           }
         ]
       }
@@ -549,6 +688,12 @@
           {
             "name": "authority",
             "type": "publicKey"
+          },
+          {
+            "name": "config",
+            "type": {
+              "defined": "Config"
+            }
           }
         ]
       }
@@ -590,11 +735,15 @@
           },
           {
             "name": "assertionTimestamp",
-            "type": "i64"
+            "type": {
+              "defined": "UnixTimestamp"
+            }
           },
           {
             "name": "resolveTimestamp",
-            "type": "i64"
+            "type": {
+              "defined": "UnixTimestamp"
+            }
           },
           {
             "name": "state",
@@ -637,6 +786,12 @@
           {
             "name": "amount",
             "type": "u64"
+          },
+          {
+            "name": "lockTimestamp",
+            "type": {
+              "defined": "UnixTimestamp"
+            }
           }
         ]
       }
@@ -684,11 +839,15 @@
           },
           {
             "name": "startTimestamp",
-            "type": "i64"
+            "type": {
+              "defined": "UnixTimestamp"
+            }
           },
           {
             "name": "endTimestamp",
-            "type": "i64"
+            "type": {
+              "defined": "UnixTimestamp"
+            }
           },
           {
             "name": "voteCount",
@@ -713,6 +872,26 @@
   ],
   "types": [
     {
+      "name": "Config",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "disputeWindow",
+            "type": "u32"
+          },
+          {
+            "name": "votingWindow",
+            "type": "u32"
+          },
+          {
+            "name": "bondFeeBps",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
       "name": "CreateOracleArgs",
       "type": {
         "kind": "enum",
@@ -723,6 +902,12 @@
               {
                 "name": "authority",
                 "type": "publicKey"
+              },
+              {
+                "name": "config",
+                "type": {
+                  "defined": "Config"
+                }
               }
             ]
           }
@@ -834,6 +1019,37 @@
       }
     },
     {
+      "name": "CreateCurrencyArgs",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "V1",
+            "fields": [
+              {
+                "name": "reward_range",
+                "type": {
+                  "tuple": [
+                    "u64",
+                    "u64"
+                  ]
+                }
+              },
+              {
+                "name": "bond_range",
+                "type": {
+                  "tuple": [
+                    "u64",
+                    "u64"
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
       "name": "AccountType",
       "type": {
         "kind": "enum",
@@ -906,83 +1122,98 @@
   "errors": [
     {
       "code": 0,
-      "name": "ArithmeticOverflow",
-      "msg": "Program arithmetic overflowed"
-    },
-    {
-      "code": 1,
       "name": "InsufficientBond",
       "msg": "Insufficient bond"
     },
     {
-      "code": 2,
+      "code": 1,
       "name": "NotAsserted",
       "msg": "Request does not have an assertion"
     },
     {
-      "code": 3,
+      "code": 2,
       "name": "NotDisputed",
       "msg": "Request is not disputed"
     },
     {
-      "code": 4,
+      "code": 3,
       "name": "AlreadyAsserted",
       "msg": "Request already has an assertion"
     },
     {
-      "code": 5,
+      "code": 4,
       "name": "AlreadyDisputed",
       "msg": "Assertion has already been disputed"
     },
     {
-      "code": 6,
+      "code": 5,
       "name": "AlreadyResolved",
       "msg": "Request has already been resolved"
     },
     {
-      "code": 7,
+      "code": 6,
       "name": "AssertionTooEarly",
       "msg": "Request is not accepting assertion yet"
     },
     {
-      "code": 8,
+      "code": 7,
       "name": "DisputeWindowNotExpired",
       "msg": "Dispute window has not expired"
     },
     {
-      "code": 9,
+      "code": 8,
       "name": "DisputeWindowExpired",
       "msg": "Dispute window has expired"
     },
     {
-      "code": 10,
+      "code": 9,
       "name": "InvalidValue",
       "msg": "Value is not valid for the request"
     },
     {
-      "code": 11,
+      "code": 10,
       "name": "InvalidDispute",
       "msg": "Disputed value falls within range of acceptable deviation for asserted value"
     },
     {
-      "code": 12,
+      "code": 11,
       "name": "DisputerIsAsserter",
       "msg": "Disputer cannot be the same as the asserter"
     },
     {
-      "code": 13,
-      "name": "BondMismatch",
+      "code": 12,
+      "name": "BondMintMismatch",
       "msg": "Bond mint address does not match"
     },
     {
-      "code": 14,
+      "code": 13,
       "name": "VotingWindowNotExpired",
       "msg": "Voting window has not expired"
     },
     {
-      "code": 15,
+      "code": 14,
       "name": "VotingWindowExpired",
       "msg": "Voting window has expired"
+    },
+    {
+      "code": 15,
+      "name": "RewardMintMismatch",
+      "msg": "Reward mint address does not match"
+    },
+    {
+      "code": 16,
+      "name": "RewardBounds",
+      "msg": "Reward must be within valid bounds"
+    },
+    {
+      "code": 17,
+      "name": "BondBounds",
+      "msg": "Bond must be within valid bounds"
+    },
+    {
+      "code": 18,
+      "name": "OracleAuthorityMismatch",
+      "msg": "Oracle authority address does not match"
     }
   ],
   "metadata": {

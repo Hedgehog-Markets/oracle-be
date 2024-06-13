@@ -1,5 +1,3 @@
-use std::ops::Range;
-
 use borsh::{BorshDeserialize, BorshSerialize};
 use common::BorshSize;
 use shank::ShankAccount;
@@ -17,11 +15,11 @@ pub struct Currency {
     /// The valid reward range when creating a [`Request`].
     ///
     /// [`Request`]: crate::state::Request
-    pub reward_range: Range<u64>,
+    pub reward_range: (u64, u64),
     /// The valid bond range when creating an [`Assertion`].
     ///
     /// [`Assertion`]: crate::state::Assertion
-    pub bond_range: Range<u64>,
+    pub bond_range: (u64, u64),
 }
 
 impl Account for Currency {
@@ -38,6 +36,6 @@ impl From<InitCurrency> for (Currency, usize) {
 
 pub(crate) struct InitCurrency {
     pub mint: Pubkey,
-    pub reward_range: Range<u64>,
-    pub bond_range: Range<u64>,
+    pub reward_range: (u64, u64),
+    pub bond_range: (u64, u64),
 }

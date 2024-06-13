@@ -20,7 +20,7 @@ import { getCreateOracleArgsSerializer } from "../types";
 
 // Accounts.
 export type CreateOracleInstructionAccounts = {
-  /** Program oracle account */
+  /** Oracle account */
   oracle?: PublicKey | Pda;
   /** Payer */
   payer?: Signer;

@@ -10,6 +10,8 @@ use borsh::{BorshDeserialize, BorshSerialize};
 
 /// Accounts.
 pub struct ExpireAssertion {
+    /// Oracle account
+    pub oracle: solana_program::pubkey::Pubkey,
     /// Request
     pub request: solana_program::pubkey::Pubkey,
     /// Assertion
@@ -29,7 +31,8 @@ impl ExpireAssertion {
         args: ExpireAssertionInstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
-        let mut accounts = Vec::with_capacity(2 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(3 + remaining_accounts.len());
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(self.oracle, false));
         accounts.push(solana_program::instruction::AccountMeta::new(self.request, false));
         accounts
             .push(solana_program::instruction::AccountMeta::new_readonly(self.assertion, false));
@@ -47,12 +50,12 @@ impl ExpireAssertion {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct ExpireAssertionInstructionData {
+pub struct ExpireAssertionInstructionData {
     discriminator: u8,
 }
 
 impl ExpireAssertionInstructionData {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self { discriminator: 3 }
     }
 }
@@ -67,10 +70,12 @@ pub struct ExpireAssertionInstructionArgs {
 ///
 /// ### Accounts:
 ///
-///   0. `[writable]` request
-///   1. `[]` assertion
-#[derive(Default)]
+///   0. `[]` oracle
+///   1. `[writable]` request
+///   2. `[]` assertion
+#[derive(Clone, Debug, Default)]
 pub struct ExpireAssertionBuilder {
+    oracle: Option<solana_program::pubkey::Pubkey>,
     request: Option<solana_program::pubkey::Pubkey>,
     assertion: Option<solana_program::pubkey::Pubkey>,
     expire_assertion_args: Option<ExpireAssertionArgs>,
@@ -80,6 +85,12 @@ pub struct ExpireAssertionBuilder {
 impl ExpireAssertionBuilder {
     pub fn new() -> Self {
         Self::default()
+    }
+    /// Oracle account
+    #[inline(always)]
+    pub fn oracle(&mut self, oracle: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.oracle = Some(oracle);
+        self
     }
     /// Request
     #[inline(always)]
@@ -122,6 +133,7 @@ impl ExpireAssertionBuilder {
     #[allow(clippy::clone_on_copy)]
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
         let accounts = ExpireAssertion {
+            oracle: self.oracle.expect("oracle is not set"),
             request: self.request.expect("request is not set"),
             assertion: self.assertion.expect("assertion is not set"),
         };
@@ -138,6 +150,8 @@ impl ExpireAssertionBuilder {
 
 /// `expire_assertion` CPI accounts.
 pub struct ExpireAssertionCpiAccounts<'a, 'b> {
+    /// Oracle account
+    pub oracle: &'b solana_program::account_info::AccountInfo<'a>,
     /// Request
     pub request: &'b solana_program::account_info::AccountInfo<'a>,
     /// Assertion
@@ -148,6 +162,8 @@ pub struct ExpireAssertionCpiAccounts<'a, 'b> {
 pub struct ExpireAssertionCpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Oracle account
+    pub oracle: &'b solana_program::account_info::AccountInfo<'a>,
     /// Request
     pub request: &'b solana_program::account_info::AccountInfo<'a>,
     /// Assertion
@@ -164,6 +180,7 @@ impl<'a, 'b> ExpireAssertionCpi<'a, 'b> {
     ) -> Self {
         Self {
             __program: program,
+            oracle: accounts.oracle,
             request: accounts.request,
             assertion: accounts.assertion,
             __args: args,
@@ -194,7 +211,9 @@ impl<'a, 'b> ExpireAssertionCpi<'a, 'b> {
         signers_seeds: &[&[&[u8]]],
         remaining_accounts: &[(&'b solana_program::account_info::AccountInfo<'a>, bool, bool)],
     ) -> solana_program::entrypoint::ProgramResult {
-        let mut accounts = Vec::with_capacity(2 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(3 + remaining_accounts.len());
+        accounts
+            .push(solana_program::instruction::AccountMeta::new_readonly(*self.oracle.key, false));
         accounts.push(solana_program::instruction::AccountMeta::new(*self.request.key, false));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             *self.assertion.key,
@@ -216,8 +235,9 @@ impl<'a, 'b> ExpireAssertionCpi<'a, 'b> {
             accounts,
             data,
         };
-        let mut account_infos = Vec::with_capacity(2 + 1 + remaining_accounts.len());
+        let mut account_infos = Vec::with_capacity(3 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
+        account_infos.push(self.oracle.clone());
         account_infos.push(self.request.clone());
         account_infos.push(self.assertion.clone());
         remaining_accounts
@@ -236,8 +256,10 @@ impl<'a, 'b> ExpireAssertionCpi<'a, 'b> {
 ///
 /// ### Accounts:
 ///
-///   0. `[writable]` request
-///   1. `[]` assertion
+///   0. `[]` oracle
+///   1. `[writable]` request
+///   2. `[]` assertion
+#[derive(Clone, Debug)]
 pub struct ExpireAssertionCpiBuilder<'a, 'b> {
     instruction: Box<ExpireAssertionCpiBuilderInstruction<'a, 'b>>,
 }
@@ -246,12 +268,22 @@ impl<'a, 'b> ExpireAssertionCpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
         let instruction = Box::new(ExpireAssertionCpiBuilderInstruction {
             __program: program,
+            oracle: None,
             request: None,
             assertion: None,
             expire_assertion_args: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
+    }
+    /// Oracle account
+    #[inline(always)]
+    pub fn oracle(
+        &mut self,
+        oracle: &'b solana_program::account_info::AccountInfo<'a>,
+    ) -> &mut Self {
+        self.instruction.oracle = Some(oracle);
+        self
     }
     /// Request
     #[inline(always)]
@@ -322,6 +354,8 @@ impl<'a, 'b> ExpireAssertionCpiBuilder<'a, 'b> {
         let instruction = ExpireAssertionCpi {
             __program: self.instruction.__program,
 
+            oracle: self.instruction.oracle.expect("oracle is not set"),
+
             request: self.instruction.request.expect("request is not set"),
 
             assertion: self.instruction.assertion.expect("assertion is not set"),
@@ -334,8 +368,10 @@ impl<'a, 'b> ExpireAssertionCpiBuilder<'a, 'b> {
     }
 }
 
+#[derive(Clone, Debug)]
 struct ExpireAssertionCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
+    oracle: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     request: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     assertion: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     expire_assertion_args: Option<ExpireAssertionArgs>,

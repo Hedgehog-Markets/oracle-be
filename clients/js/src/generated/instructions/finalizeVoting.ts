@@ -14,12 +14,14 @@ import type { Serializer } from "@metaplex-foundation/umi/serializers";
 import { transactionBuilder } from "@metaplex-foundation/umi";
 import { mapSerializer, struct, u8 } from "@metaplex-foundation/umi/serializers";
 
-import { findVotingPda } from "../accounts";
+import { findOraclePda, findVotingPda } from "../accounts";
 import { expectPublicKey, getAccountMetasAndSigners } from "../shared";
 import { getFinalizeVotingArgsSerializer } from "../types";
 
 // Accounts.
 export type FinalizeVotingInstructionAccounts = {
+  /** Oracle account */
+  oracle?: PublicKey | Pda;
   /** Request */
   request: PublicKey | Pda;
   /** Voting */
@@ -68,13 +70,18 @@ export function finalizeVoting(
 
   // Accounts.
   const resolvedAccounts = {
-    request: {
+    oracle: {
       index: 0,
+      isWritable: false as boolean,
+      value: input.oracle ?? null,
+    },
+    request: {
+      index: 1,
       isWritable: true as boolean,
       value: input.request ?? null,
     },
     voting: {
-      index: 1,
+      index: 2,
       isWritable: true as boolean,
       value: input.voting ?? null,
     },
@@ -84,6 +91,9 @@ export function finalizeVoting(
   const resolvedArgs: FinalizeVotingInstructionArgs = { ...input };
 
   // Default values.
+  if (!resolvedAccounts.oracle.value) {
+    resolvedAccounts.oracle.value = findOraclePda(context);
+  }
   if (!resolvedAccounts.voting.value) {
     resolvedAccounts.voting.value = findVotingPda(context, {
       request: expectPublicKey(resolvedAccounts.request.value),

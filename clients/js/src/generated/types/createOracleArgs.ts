@@ -6,6 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import type { Config, ConfigArgs } from ".";
 import type { PublicKey } from "@metaplex-foundation/umi";
 import type {
   GetDataEnumKind,
@@ -19,9 +20,19 @@ import {
   struct,
 } from "@metaplex-foundation/umi/serializers";
 
-export type CreateOracleArgs = { __kind: "V1"; authority: PublicKey };
+import { getConfigSerializer } from ".";
 
-export type CreateOracleArgsArgs = CreateOracleArgs;
+export type CreateOracleArgs = {
+  __kind: "V1";
+  authority: PublicKey;
+  config: Config;
+};
+
+export type CreateOracleArgsArgs = {
+  __kind: "V1";
+  authority: PublicKey;
+  config: ConfigArgs;
+};
 
 export function getCreateOracleArgsSerializer(): Serializer<
   CreateOracleArgsArgs,
@@ -33,11 +44,12 @@ export function getCreateOracleArgsSerializer(): Serializer<
         "V1",
         struct<GetDataEnumKindContent<CreateOracleArgs, "V1">>([
           ["authority", publicKeySerializer()],
+          ["config", getConfigSerializer()],
         ]),
       ],
     ],
     { description: "CreateOracleArgs" },
-  );
+  ) as Serializer<CreateOracleArgsArgs, CreateOracleArgs>;
 }
 
 // Data Enum Helpers.

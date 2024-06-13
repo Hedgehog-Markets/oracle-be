@@ -1,5 +1,3 @@
-use std::ops::Range;
-
 use borsh::{BorshDeserialize, BorshSerialize};
 use common::{BuildInstruction, VariantName};
 use shank::{ShankContext, ShankInstruction};
@@ -182,10 +180,10 @@ pub enum CreateCurrencyArgs {
         /// The valid reward range when creating a [`Request`].
         ///
         /// [`Request`]: crate::state::Request
-        reward_range: Range<u64>,
+        reward_range: (u64, u64),
         /// The valid bond range when creating an [`Assertion`].
         ///
         /// [`Assertion`]: crate::state::Assertion
-        bond_range: Range<u64>,
+        bond_range: (u64, u64),
     },
 }

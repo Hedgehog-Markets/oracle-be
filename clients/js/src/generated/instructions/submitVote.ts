@@ -14,12 +14,14 @@ import type { Serializer } from "@metaplex-foundation/umi/serializers";
 import { transactionBuilder } from "@metaplex-foundation/umi";
 import { mapSerializer, struct, u8 } from "@metaplex-foundation/umi/serializers";
 
-import { findStakePda, findVotePda, findVotingPda } from "../accounts";
+import { findOraclePda, findStakePda, findVotePda, findVotingPda } from "../accounts";
 import { expectPublicKey, getAccountMetasAndSigners } from "../shared";
 import { getSubmitVoteArgsSerializer } from "../types";
 
 // Accounts.
 export type SubmitVoteInstructionAccounts = {
+  /** Oracle account */
+  oracle?: PublicKey | Pda;
   /** Request */
   request: PublicKey | Pda;
   /** Voting */
@@ -78,34 +80,39 @@ export function submitVote(
 
   // Accounts.
   const resolvedAccounts = {
-    request: {
+    oracle: {
       index: 0,
+      isWritable: false as boolean,
+      value: input.oracle ?? null,
+    },
+    request: {
+      index: 1,
       isWritable: false as boolean,
       value: input.request ?? null,
     },
     voting: {
-      index: 1,
+      index: 2,
       isWritable: true as boolean,
       value: input.voting ?? null,
     },
-    vote: { index: 2, isWritable: true as boolean, value: input.vote ?? null },
+    vote: { index: 3, isWritable: true as boolean, value: input.vote ?? null },
     stake: {
-      index: 3,
+      index: 4,
       isWritable: false as boolean,
       value: input.stake ?? null,
     },
     voter: {
-      index: 4,
+      index: 5,
       isWritable: false as boolean,
       value: input.voter ?? null,
     },
     payer: {
-      index: 5,
+      index: 6,
       isWritable: true as boolean,
       value: input.payer ?? null,
     },
     systemProgram: {
-      index: 6,
+      index: 7,
       isWritable: false as boolean,
       value: input.systemProgram ?? null,
     },
@@ -115,6 +122,9 @@ export function submitVote(
   const resolvedArgs: SubmitVoteInstructionArgs = { ...input };
 
   // Default values.
+  if (!resolvedAccounts.oracle.value) {
+    resolvedAccounts.oracle.value = findOraclePda(context);
+  }
   if (!resolvedAccounts.voting.value) {
     resolvedAccounts.voting.value = findVotingPda(context, {
       request: expectPublicKey(resolvedAccounts.request.value),

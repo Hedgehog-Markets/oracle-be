@@ -5,6 +5,7 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
+use crate::generated::types::Config;
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::pubkey::Pubkey;
 
@@ -17,5 +18,6 @@ pub enum CreateOracleArgs {
             serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
         )]
         authority: Pubkey,
+        config: Config,
     },
 }

@@ -10,54 +10,63 @@ use thiserror::Error;
 
 #[derive(Clone, Debug, Eq, Error, FromPrimitive, PartialEq)]
 pub enum OptimisticOracleError {
-    /// 0 (0x0) - Program arithmetic overflowed
-    #[error("Program arithmetic overflowed")]
-    ArithmeticOverflow,
-    /// 1 (0x1) - Insufficient bond
+    /// 0 (0x0) - Insufficient bond
     #[error("Insufficient bond")]
     InsufficientBond,
-    /// 2 (0x2) - Request does not have an assertion
+    /// 1 (0x1) - Request does not have an assertion
     #[error("Request does not have an assertion")]
     NotAsserted,
-    /// 3 (0x3) - Request is not disputed
+    /// 2 (0x2) - Request is not disputed
     #[error("Request is not disputed")]
     NotDisputed,
-    /// 4 (0x4) - Request already has an assertion
+    /// 3 (0x3) - Request already has an assertion
     #[error("Request already has an assertion")]
     AlreadyAsserted,
-    /// 5 (0x5) - Assertion has already been disputed
+    /// 4 (0x4) - Assertion has already been disputed
     #[error("Assertion has already been disputed")]
     AlreadyDisputed,
-    /// 6 (0x6) - Request has already been resolved
+    /// 5 (0x5) - Request has already been resolved
     #[error("Request has already been resolved")]
     AlreadyResolved,
-    /// 7 (0x7) - Request is not accepting assertion yet
+    /// 6 (0x6) - Request is not accepting assertion yet
     #[error("Request is not accepting assertion yet")]
     AssertionTooEarly,
-    /// 8 (0x8) - Dispute window has not expired
+    /// 7 (0x7) - Dispute window has not expired
     #[error("Dispute window has not expired")]
     DisputeWindowNotExpired,
-    /// 9 (0x9) - Dispute window has expired
+    /// 8 (0x8) - Dispute window has expired
     #[error("Dispute window has expired")]
     DisputeWindowExpired,
-    /// 10 (0xA) - Value is not valid for the request
+    /// 9 (0x9) - Value is not valid for the request
     #[error("Value is not valid for the request")]
     InvalidValue,
-    /// 11 (0xB) - Disputed value falls within range of acceptable deviation for asserted value
+    /// 10 (0xA) - Disputed value falls within range of acceptable deviation for asserted value
     #[error("Disputed value falls within range of acceptable deviation for asserted value")]
     InvalidDispute,
-    /// 12 (0xC) - Disputer cannot be the same as the asserter
+    /// 11 (0xB) - Disputer cannot be the same as the asserter
     #[error("Disputer cannot be the same as the asserter")]
     DisputerIsAsserter,
-    /// 13 (0xD) - Bond mint address does not match
+    /// 12 (0xC) - Bond mint address does not match
     #[error("Bond mint address does not match")]
-    BondMismatch,
-    /// 14 (0xE) - Voting window has not expired
+    BondMintMismatch,
+    /// 13 (0xD) - Voting window has not expired
     #[error("Voting window has not expired")]
     VotingWindowNotExpired,
-    /// 15 (0xF) - Voting window has expired
+    /// 14 (0xE) - Voting window has expired
     #[error("Voting window has expired")]
     VotingWindowExpired,
+    /// 15 (0xF) - Reward mint address does not match
+    #[error("Reward mint address does not match")]
+    RewardMintMismatch,
+    /// 16 (0x10) - Reward must be within valid bounds
+    #[error("Reward must be within valid bounds")]
+    RewardBounds,
+    /// 17 (0x11) - Bond must be within valid bounds
+    #[error("Bond must be within valid bounds")]
+    BondBounds,
+    /// 18 (0x12) - Oracle authority address does not match
+    #[error("Oracle authority address does not match")]
+    OracleAuthorityMismatch,
 }
 
 impl solana_program::program_error::PrintProgramError for OptimisticOracleError {

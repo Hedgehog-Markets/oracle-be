@@ -76,10 +76,10 @@ fn create_v1(
     }
 
     // Check the reward and bond bounds.
-    if !reward_currency.reward_range.contains(&reward) {
+    if !range_contains(reward_currency.reward_range, reward) {
         return Err(OracleError::RewardBounds.into());
     }
-    if !bond_currency.bond_range.contains(&bond) {
+    if !range_contains(bond_currency.bond_range, bond) {
         return Err(OracleError::BondBounds.into());
     }
 
@@ -159,4 +159,8 @@ fn create_v1(
     // TODO: Emit an event?
 
     Ok(())
+}
+
+const fn range_contains((start, end): (u64, u64), value: u64) -> bool {
+    start <= value && value < end
 }

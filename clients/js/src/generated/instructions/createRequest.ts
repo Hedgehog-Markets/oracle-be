@@ -22,18 +22,20 @@ import { getCreateRequestArgsSerializer } from "../types";
 
 // Accounts.
 export type CreateRequestInstructionAccounts = {
-  /** Program oracle account */
+  /** Oracle account */
   oracle?: PublicKey | Pda;
   /** Request */
   request: PublicKey | Pda;
+  /** Reward currency */
+  rewardCurrency: PublicKey | Pda;
+  /** Bond currency */
+  bondCurrency: PublicKey | Pda;
   /** Reward mint */
   rewardMint: PublicKey | Pda;
   /** Reward source token account */
   rewardSource?: PublicKey | Pda;
   /** Reward escrow token account */
   rewardEscrow?: PublicKey | Pda;
-  /** Bond mint */
-  bondMint: PublicKey | Pda;
   /** Creator */
   creator?: Signer;
   /** Payer */
@@ -96,43 +98,48 @@ export function createRequest(
       isWritable: true as boolean,
       value: input.request ?? null,
     },
-    rewardMint: {
+    rewardCurrency: {
       index: 2,
+      isWritable: false as boolean,
+      value: input.rewardCurrency ?? null,
+    },
+    bondCurrency: {
+      index: 3,
+      isWritable: false as boolean,
+      value: input.bondCurrency ?? null,
+    },
+    rewardMint: {
+      index: 4,
       isWritable: false as boolean,
       value: input.rewardMint ?? null,
     },
     rewardSource: {
-      index: 3,
+      index: 5,
       isWritable: true as boolean,
       value: input.rewardSource ?? null,
     },
     rewardEscrow: {
-      index: 4,
+      index: 6,
       isWritable: true as boolean,
       value: input.rewardEscrow ?? null,
     },
-    bondMint: {
-      index: 5,
-      isWritable: false as boolean,
-      value: input.bondMint ?? null,
-    },
     creator: {
-      index: 6,
+      index: 7,
       isWritable: false as boolean,
       value: input.creator ?? null,
     },
     payer: {
-      index: 7,
+      index: 8,
       isWritable: true as boolean,
       value: input.payer ?? null,
     },
     tokenProgram: {
-      index: 8,
+      index: 9,
       isWritable: false as boolean,
       value: input.tokenProgram ?? null,
     },
     systemProgram: {
-      index: 9,
+      index: 10,
       isWritable: false as boolean,
       value: input.systemProgram ?? null,
     },

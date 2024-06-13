@@ -6,7 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import type { AccountTypeArgs } from "../types";
+import type { AccountTypeArgs, Config, ConfigArgs } from "../types";
 import type {
   Account,
   Context,
@@ -32,7 +32,7 @@ import {
   u64,
 } from "@metaplex-foundation/umi/serializers";
 
-import { AccountType, getAccountTypeSerializer } from "../types";
+import { AccountType, getAccountTypeSerializer, getConfigSerializer } from "../types";
 
 export type Oracle = Account<OracleAccountData>;
 
@@ -40,11 +40,13 @@ export type OracleAccountData = {
   accountType: AccountType;
   nextIndex: bigint;
   authority: PublicKey;
+  config: Config;
 };
 
 export type OracleAccountDataArgs = {
   nextIndex: number | bigint;
   authority: PublicKey;
+  config: ConfigArgs;
 };
 
 export function getOracleAccountDataSerializer(): Serializer<
@@ -57,6 +59,7 @@ export function getOracleAccountDataSerializer(): Serializer<
         ["accountType", getAccountTypeSerializer()],
         ["nextIndex", u64()],
         ["authority", publicKeySerializer()],
+        ["config", getConfigSerializer()],
       ],
       { description: "OracleAccountData" },
     ),
@@ -126,17 +129,19 @@ export function getOracleGpaBuilder(context: Pick<Context, "rpc" | "programs">) 
       accountType: AccountTypeArgs;
       nextIndex: number | bigint;
       authority: PublicKey;
+      config: ConfigArgs;
     }>({
       accountType: [0, getAccountTypeSerializer()],
       nextIndex: [1, u64()],
       authority: [9, publicKeySerializer()],
+      config: [41, getConfigSerializer()],
     })
     .deserializeUsing<Oracle>((account) => deserializeOracle(account))
     .whereField("accountType", AccountType.Oracle);
 }
 
 export function getOracleSize(): number {
-  return 41;
+  return 51;
 }
 
 export function findOraclePda(context: Pick<Context, "eddsa" | "programs">): Pda {

@@ -14,12 +14,14 @@ import type { Serializer } from "@metaplex-foundation/umi/serializers";
 import { transactionBuilder } from "@metaplex-foundation/umi";
 import { mapSerializer, struct, u8 } from "@metaplex-foundation/umi/serializers";
 
-import { findAssertionPda } from "../accounts";
+import { findAssertionPda, findOraclePda } from "../accounts";
 import { expectPublicKey, getAccountMetasAndSigners } from "../shared";
 import { getExpireAssertionArgsSerializer } from "../types";
 
 // Accounts.
 export type ExpireAssertionInstructionAccounts = {
+  /** Oracle account */
+  oracle?: PublicKey | Pda;
   /** Request */
   request: PublicKey | Pda;
   /** Assertion */
@@ -68,13 +70,18 @@ export function expireAssertion(
 
   // Accounts.
   const resolvedAccounts = {
-    request: {
+    oracle: {
       index: 0,
+      isWritable: false as boolean,
+      value: input.oracle ?? null,
+    },
+    request: {
+      index: 1,
       isWritable: true as boolean,
       value: input.request ?? null,
     },
     assertion: {
-      index: 1,
+      index: 2,
       isWritable: false as boolean,
       value: input.assertion ?? null,
     },
@@ -84,6 +91,9 @@ export function expireAssertion(
   const resolvedArgs: ExpireAssertionInstructionArgs = { ...input };
 
   // Default values.
+  if (!resolvedAccounts.oracle.value) {
+    resolvedAccounts.oracle.value = findOraclePda(context);
+  }
   if (!resolvedAccounts.assertion.value) {
     resolvedAccounts.assertion.value = findAssertionPda(context, {
       request: expectPublicKey(resolvedAccounts.request.value),

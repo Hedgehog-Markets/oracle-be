@@ -6,12 +6,9 @@
 //!
 
 use borsh::{BorshDeserialize, BorshSerialize};
-use num_derive::FromPrimitive;
 
-#[derive(
-    BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq, PartialOrd, Hash, FromPrimitive,
-)]
+#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum FinalizeVotingArgs {
-    V1,
+pub enum CreateCurrencyArgs {
+    V1 { reward_range: (u64, u64), bond_range: (u64, u64) },
 }

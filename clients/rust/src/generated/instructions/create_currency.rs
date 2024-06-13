@@ -5,25 +5,19 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-use crate::generated::types::CreateAssertionArgs;
+use crate::generated::types::CreateCurrencyArgs;
 use borsh::{BorshDeserialize, BorshSerialize};
 
 /// Accounts.
-pub struct CreateAssertion {
+pub struct CreateCurrency {
     /// Oracle account
     pub oracle: solana_program::pubkey::Pubkey,
-    /// Request
-    pub request: solana_program::pubkey::Pubkey,
-    /// Assertion
-    pub assertion: solana_program::pubkey::Pubkey,
-    /// Bond mint
-    pub bond_mint: solana_program::pubkey::Pubkey,
-    /// Bond source token account
-    pub bond_source: solana_program::pubkey::Pubkey,
-    /// Bond escrow token account
-    pub bond_escrow: solana_program::pubkey::Pubkey,
-    /// Asserter
-    pub asserter: solana_program::pubkey::Pubkey,
+    /// Currency
+    pub currency: solana_program::pubkey::Pubkey,
+    /// Mint
+    pub mint: solana_program::pubkey::Pubkey,
+    /// Oracle authority
+    pub authority: solana_program::pubkey::Pubkey,
     /// Payer
     pub payer: solana_program::pubkey::Pubkey,
     /// SPL token program
@@ -32,29 +26,26 @@ pub struct CreateAssertion {
     pub system_program: solana_program::pubkey::Pubkey,
 }
 
-impl CreateAssertion {
+impl CreateCurrency {
     pub fn instruction(
         &self,
-        args: CreateAssertionInstructionArgs,
+        args: CreateCurrencyInstructionArgs,
     ) -> solana_program::instruction::Instruction {
         self.instruction_with_remaining_accounts(args, &[])
     }
     #[allow(clippy::vec_init_then_push)]
     pub fn instruction_with_remaining_accounts(
         &self,
-        args: CreateAssertionInstructionArgs,
+        args: CreateCurrencyInstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
-        let mut accounts = Vec::with_capacity(10 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(7 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(self.oracle, false));
-        accounts.push(solana_program::instruction::AccountMeta::new(self.request, false));
-        accounts.push(solana_program::instruction::AccountMeta::new(self.assertion, false));
+        accounts.push(solana_program::instruction::AccountMeta::new(self.currency, false));
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(self.mint, false));
         accounts
-            .push(solana_program::instruction::AccountMeta::new_readonly(self.bond_mint, false));
-        accounts.push(solana_program::instruction::AccountMeta::new(self.bond_source, false));
-        accounts.push(solana_program::instruction::AccountMeta::new(self.bond_escrow, false));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(self.asserter, true));
-        accounts.push(solana_program::instruction::AccountMeta::new(self.payer, true));
+            .push(solana_program::instruction::AccountMeta::new_readonly(self.authority, false));
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(self.payer, false));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             self.token_program,
             false,
@@ -64,7 +55,7 @@ impl CreateAssertion {
             false,
         ));
         accounts.extend_from_slice(remaining_accounts);
-        let mut data = CreateAssertionInstructionData::new().try_to_vec().unwrap();
+        let mut data = CreateCurrencyInstructionData::new().try_to_vec().unwrap();
         let mut args = args.try_to_vec().unwrap();
         data.append(&mut args);
 
@@ -77,53 +68,47 @@ impl CreateAssertion {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-pub struct CreateAssertionInstructionData {
+pub struct CreateCurrencyInstructionData {
     discriminator: u8,
 }
 
-impl CreateAssertionInstructionData {
+impl CreateCurrencyInstructionData {
     pub fn new() -> Self {
-        Self { discriminator: 2 }
+        Self { discriminator: 7 }
     }
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct CreateAssertionInstructionArgs {
-    pub create_assertion_args: CreateAssertionArgs,
+pub struct CreateCurrencyInstructionArgs {
+    pub create_currency_args: CreateCurrencyArgs,
 }
 
-/// Instruction builder for `CreateAssertion`.
+/// Instruction builder for `CreateCurrency`.
 ///
 /// ### Accounts:
 ///
 ///   0. `[]` oracle
-///   1. `[writable]` request
-///   2. `[writable]` assertion
-///   3. `[]` bond_mint
-///   4. `[writable]` bond_source
-///   5. `[writable]` bond_escrow
-///   6. `[signer]` asserter
-///   7. `[writable, signer]` payer
-///   8. `[optional]` token_program (default to `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA`)
-///   9. `[optional]` system_program (default to `11111111111111111111111111111111`)
+///   1. `[writable]` currency
+///   2. `[]` mint
+///   3. `[]` authority
+///   4. `[]` payer
+///   5. `[optional]` token_program (default to `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA`)
+///   6. `[optional]` system_program (default to `11111111111111111111111111111111`)
 #[derive(Clone, Debug, Default)]
-pub struct CreateAssertionBuilder {
+pub struct CreateCurrencyBuilder {
     oracle: Option<solana_program::pubkey::Pubkey>,
-    request: Option<solana_program::pubkey::Pubkey>,
-    assertion: Option<solana_program::pubkey::Pubkey>,
-    bond_mint: Option<solana_program::pubkey::Pubkey>,
-    bond_source: Option<solana_program::pubkey::Pubkey>,
-    bond_escrow: Option<solana_program::pubkey::Pubkey>,
-    asserter: Option<solana_program::pubkey::Pubkey>,
+    currency: Option<solana_program::pubkey::Pubkey>,
+    mint: Option<solana_program::pubkey::Pubkey>,
+    authority: Option<solana_program::pubkey::Pubkey>,
     payer: Option<solana_program::pubkey::Pubkey>,
     token_program: Option<solana_program::pubkey::Pubkey>,
     system_program: Option<solana_program::pubkey::Pubkey>,
-    create_assertion_args: Option<CreateAssertionArgs>,
+    create_currency_args: Option<CreateCurrencyArgs>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
-impl CreateAssertionBuilder {
+impl CreateCurrencyBuilder {
     pub fn new() -> Self {
         Self::default()
     }
@@ -133,40 +118,22 @@ impl CreateAssertionBuilder {
         self.oracle = Some(oracle);
         self
     }
-    /// Request
+    /// Currency
     #[inline(always)]
-    pub fn request(&mut self, request: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.request = Some(request);
+    pub fn currency(&mut self, currency: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.currency = Some(currency);
         self
     }
-    /// Assertion
+    /// Mint
     #[inline(always)]
-    pub fn assertion(&mut self, assertion: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.assertion = Some(assertion);
+    pub fn mint(&mut self, mint: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.mint = Some(mint);
         self
     }
-    /// Bond mint
+    /// Oracle authority
     #[inline(always)]
-    pub fn bond_mint(&mut self, bond_mint: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.bond_mint = Some(bond_mint);
-        self
-    }
-    /// Bond source token account
-    #[inline(always)]
-    pub fn bond_source(&mut self, bond_source: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.bond_source = Some(bond_source);
-        self
-    }
-    /// Bond escrow token account
-    #[inline(always)]
-    pub fn bond_escrow(&mut self, bond_escrow: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.bond_escrow = Some(bond_escrow);
-        self
-    }
-    /// Asserter
-    #[inline(always)]
-    pub fn asserter(&mut self, asserter: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.asserter = Some(asserter);
+    pub fn authority(&mut self, authority: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.authority = Some(authority);
         self
     }
     /// Payer
@@ -190,11 +157,8 @@ impl CreateAssertionBuilder {
         self
     }
     #[inline(always)]
-    pub fn create_assertion_args(
-        &mut self,
-        create_assertion_args: CreateAssertionArgs,
-    ) -> &mut Self {
-        self.create_assertion_args = Some(create_assertion_args);
+    pub fn create_currency_args(&mut self, create_currency_args: CreateCurrencyArgs) -> &mut Self {
+        self.create_currency_args = Some(create_currency_args);
         self
     }
     /// Add an aditional account to the instruction.
@@ -217,14 +181,11 @@ impl CreateAssertionBuilder {
     }
     #[allow(clippy::clone_on_copy)]
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
-        let accounts = CreateAssertion {
+        let accounts = CreateCurrency {
             oracle: self.oracle.expect("oracle is not set"),
-            request: self.request.expect("request is not set"),
-            assertion: self.assertion.expect("assertion is not set"),
-            bond_mint: self.bond_mint.expect("bond_mint is not set"),
-            bond_source: self.bond_source.expect("bond_source is not set"),
-            bond_escrow: self.bond_escrow.expect("bond_escrow is not set"),
-            asserter: self.asserter.expect("asserter is not set"),
+            currency: self.currency.expect("currency is not set"),
+            mint: self.mint.expect("mint is not set"),
+            authority: self.authority.expect("authority is not set"),
             payer: self.payer.expect("payer is not set"),
             token_program: self
                 .token_program
@@ -233,33 +194,27 @@ impl CreateAssertionBuilder {
                 .system_program
                 .unwrap_or(solana_program::pubkey!("11111111111111111111111111111111")),
         };
-        let args = CreateAssertionInstructionArgs {
-            create_assertion_args: self
-                .create_assertion_args
+        let args = CreateCurrencyInstructionArgs {
+            create_currency_args: self
+                .create_currency_args
                 .clone()
-                .expect("create_assertion_args is not set"),
+                .expect("create_currency_args is not set"),
         };
 
         accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
     }
 }
 
-/// `create_assertion` CPI accounts.
-pub struct CreateAssertionCpiAccounts<'a, 'b> {
+/// `create_currency` CPI accounts.
+pub struct CreateCurrencyCpiAccounts<'a, 'b> {
     /// Oracle account
     pub oracle: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Request
-    pub request: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Assertion
-    pub assertion: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Bond mint
-    pub bond_mint: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Bond source token account
-    pub bond_source: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Bond escrow token account
-    pub bond_escrow: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Asserter
-    pub asserter: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Currency
+    pub currency: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Mint
+    pub mint: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Oracle authority
+    pub authority: &'b solana_program::account_info::AccountInfo<'a>,
     /// Payer
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
     /// SPL token program
@@ -268,24 +223,18 @@ pub struct CreateAssertionCpiAccounts<'a, 'b> {
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
-/// `create_assertion` CPI instruction.
-pub struct CreateAssertionCpi<'a, 'b> {
+/// `create_currency` CPI instruction.
+pub struct CreateCurrencyCpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
     /// Oracle account
     pub oracle: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Request
-    pub request: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Assertion
-    pub assertion: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Bond mint
-    pub bond_mint: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Bond source token account
-    pub bond_source: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Bond escrow token account
-    pub bond_escrow: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Asserter
-    pub asserter: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Currency
+    pub currency: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Mint
+    pub mint: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Oracle authority
+    pub authority: &'b solana_program::account_info::AccountInfo<'a>,
     /// Payer
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
     /// SPL token program
@@ -293,24 +242,21 @@ pub struct CreateAssertionCpi<'a, 'b> {
     /// System program
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
     /// The arguments for the instruction.
-    pub __args: CreateAssertionInstructionArgs,
+    pub __args: CreateCurrencyInstructionArgs,
 }
 
-impl<'a, 'b> CreateAssertionCpi<'a, 'b> {
+impl<'a, 'b> CreateCurrencyCpi<'a, 'b> {
     pub fn new(
         program: &'b solana_program::account_info::AccountInfo<'a>,
-        accounts: CreateAssertionCpiAccounts<'a, 'b>,
-        args: CreateAssertionInstructionArgs,
+        accounts: CreateCurrencyCpiAccounts<'a, 'b>,
+        args: CreateCurrencyInstructionArgs,
     ) -> Self {
         Self {
             __program: program,
             oracle: accounts.oracle,
-            request: accounts.request,
-            assertion: accounts.assertion,
-            bond_mint: accounts.bond_mint,
-            bond_source: accounts.bond_source,
-            bond_escrow: accounts.bond_escrow,
-            asserter: accounts.asserter,
+            currency: accounts.currency,
+            mint: accounts.mint,
+            authority: accounts.authority,
             payer: accounts.payer,
             token_program: accounts.token_program,
             system_program: accounts.system_program,
@@ -342,20 +288,18 @@ impl<'a, 'b> CreateAssertionCpi<'a, 'b> {
         signers_seeds: &[&[&[u8]]],
         remaining_accounts: &[(&'b solana_program::account_info::AccountInfo<'a>, bool, bool)],
     ) -> solana_program::entrypoint::ProgramResult {
-        let mut accounts = Vec::with_capacity(10 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(7 + remaining_accounts.len());
         accounts
             .push(solana_program::instruction::AccountMeta::new_readonly(*self.oracle.key, false));
-        accounts.push(solana_program::instruction::AccountMeta::new(*self.request.key, false));
-        accounts.push(solana_program::instruction::AccountMeta::new(*self.assertion.key, false));
+        accounts.push(solana_program::instruction::AccountMeta::new(*self.currency.key, false));
+        accounts
+            .push(solana_program::instruction::AccountMeta::new_readonly(*self.mint.key, false));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.bond_mint.key,
+            *self.authority.key,
             false,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new(*self.bond_source.key, false));
-        accounts.push(solana_program::instruction::AccountMeta::new(*self.bond_escrow.key, false));
         accounts
-            .push(solana_program::instruction::AccountMeta::new_readonly(*self.asserter.key, true));
-        accounts.push(solana_program::instruction::AccountMeta::new(*self.payer.key, true));
+            .push(solana_program::instruction::AccountMeta::new_readonly(*self.payer.key, false));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             *self.token_program.key,
             false,
@@ -371,7 +315,7 @@ impl<'a, 'b> CreateAssertionCpi<'a, 'b> {
                 is_writable: remaining_account.2,
             })
         });
-        let mut data = CreateAssertionInstructionData::new().try_to_vec().unwrap();
+        let mut data = CreateCurrencyInstructionData::new().try_to_vec().unwrap();
         let mut args = self.__args.try_to_vec().unwrap();
         data.append(&mut args);
 
@@ -380,15 +324,12 @@ impl<'a, 'b> CreateAssertionCpi<'a, 'b> {
             accounts,
             data,
         };
-        let mut account_infos = Vec::with_capacity(10 + 1 + remaining_accounts.len());
+        let mut account_infos = Vec::with_capacity(7 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
         account_infos.push(self.oracle.clone());
-        account_infos.push(self.request.clone());
-        account_infos.push(self.assertion.clone());
-        account_infos.push(self.bond_mint.clone());
-        account_infos.push(self.bond_source.clone());
-        account_infos.push(self.bond_escrow.clone());
-        account_infos.push(self.asserter.clone());
+        account_infos.push(self.currency.clone());
+        account_infos.push(self.mint.clone());
+        account_infos.push(self.authority.clone());
         account_infos.push(self.payer.clone());
         account_infos.push(self.token_program.clone());
         account_infos.push(self.system_program.clone());
@@ -404,40 +345,34 @@ impl<'a, 'b> CreateAssertionCpi<'a, 'b> {
     }
 }
 
-/// Instruction builder for `CreateAssertion` via CPI.
+/// Instruction builder for `CreateCurrency` via CPI.
 ///
 /// ### Accounts:
 ///
 ///   0. `[]` oracle
-///   1. `[writable]` request
-///   2. `[writable]` assertion
-///   3. `[]` bond_mint
-///   4. `[writable]` bond_source
-///   5. `[writable]` bond_escrow
-///   6. `[signer]` asserter
-///   7. `[writable, signer]` payer
-///   8. `[]` token_program
-///   9. `[]` system_program
+///   1. `[writable]` currency
+///   2. `[]` mint
+///   3. `[]` authority
+///   4. `[]` payer
+///   5. `[]` token_program
+///   6. `[]` system_program
 #[derive(Clone, Debug)]
-pub struct CreateAssertionCpiBuilder<'a, 'b> {
-    instruction: Box<CreateAssertionCpiBuilderInstruction<'a, 'b>>,
+pub struct CreateCurrencyCpiBuilder<'a, 'b> {
+    instruction: Box<CreateCurrencyCpiBuilderInstruction<'a, 'b>>,
 }
 
-impl<'a, 'b> CreateAssertionCpiBuilder<'a, 'b> {
+impl<'a, 'b> CreateCurrencyCpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
-        let instruction = Box::new(CreateAssertionCpiBuilderInstruction {
+        let instruction = Box::new(CreateCurrencyCpiBuilderInstruction {
             __program: program,
             oracle: None,
-            request: None,
-            assertion: None,
-            bond_mint: None,
-            bond_source: None,
-            bond_escrow: None,
-            asserter: None,
+            currency: None,
+            mint: None,
+            authority: None,
             payer: None,
             token_program: None,
             system_program: None,
-            create_assertion_args: None,
+            create_currency_args: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
@@ -451,58 +386,28 @@ impl<'a, 'b> CreateAssertionCpiBuilder<'a, 'b> {
         self.instruction.oracle = Some(oracle);
         self
     }
-    /// Request
+    /// Currency
     #[inline(always)]
-    pub fn request(
+    pub fn currency(
         &mut self,
-        request: &'b solana_program::account_info::AccountInfo<'a>,
+        currency: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
-        self.instruction.request = Some(request);
+        self.instruction.currency = Some(currency);
         self
     }
-    /// Assertion
+    /// Mint
     #[inline(always)]
-    pub fn assertion(
-        &mut self,
-        assertion: &'b solana_program::account_info::AccountInfo<'a>,
-    ) -> &mut Self {
-        self.instruction.assertion = Some(assertion);
+    pub fn mint(&mut self, mint: &'b solana_program::account_info::AccountInfo<'a>) -> &mut Self {
+        self.instruction.mint = Some(mint);
         self
     }
-    /// Bond mint
+    /// Oracle authority
     #[inline(always)]
-    pub fn bond_mint(
+    pub fn authority(
         &mut self,
-        bond_mint: &'b solana_program::account_info::AccountInfo<'a>,
+        authority: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
-        self.instruction.bond_mint = Some(bond_mint);
-        self
-    }
-    /// Bond source token account
-    #[inline(always)]
-    pub fn bond_source(
-        &mut self,
-        bond_source: &'b solana_program::account_info::AccountInfo<'a>,
-    ) -> &mut Self {
-        self.instruction.bond_source = Some(bond_source);
-        self
-    }
-    /// Bond escrow token account
-    #[inline(always)]
-    pub fn bond_escrow(
-        &mut self,
-        bond_escrow: &'b solana_program::account_info::AccountInfo<'a>,
-    ) -> &mut Self {
-        self.instruction.bond_escrow = Some(bond_escrow);
-        self
-    }
-    /// Asserter
-    #[inline(always)]
-    pub fn asserter(
-        &mut self,
-        asserter: &'b solana_program::account_info::AccountInfo<'a>,
-    ) -> &mut Self {
-        self.instruction.asserter = Some(asserter);
+        self.instruction.authority = Some(authority);
         self
     }
     /// Payer
@@ -530,11 +435,8 @@ impl<'a, 'b> CreateAssertionCpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
-    pub fn create_assertion_args(
-        &mut self,
-        create_assertion_args: CreateAssertionArgs,
-    ) -> &mut Self {
-        self.instruction.create_assertion_args = Some(create_assertion_args);
+    pub fn create_currency_args(&mut self, create_currency_args: CreateCurrencyArgs) -> &mut Self {
+        self.instruction.create_currency_args = Some(create_currency_args);
         self
     }
     /// Add an additional account to the instruction.
@@ -570,29 +472,23 @@ impl<'a, 'b> CreateAssertionCpiBuilder<'a, 'b> {
         &self,
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
-        let args = CreateAssertionInstructionArgs {
-            create_assertion_args: self
+        let args = CreateCurrencyInstructionArgs {
+            create_currency_args: self
                 .instruction
-                .create_assertion_args
+                .create_currency_args
                 .clone()
-                .expect("create_assertion_args is not set"),
+                .expect("create_currency_args is not set"),
         };
-        let instruction = CreateAssertionCpi {
+        let instruction = CreateCurrencyCpi {
             __program: self.instruction.__program,
 
             oracle: self.instruction.oracle.expect("oracle is not set"),
 
-            request: self.instruction.request.expect("request is not set"),
+            currency: self.instruction.currency.expect("currency is not set"),
 
-            assertion: self.instruction.assertion.expect("assertion is not set"),
+            mint: self.instruction.mint.expect("mint is not set"),
 
-            bond_mint: self.instruction.bond_mint.expect("bond_mint is not set"),
-
-            bond_source: self.instruction.bond_source.expect("bond_source is not set"),
-
-            bond_escrow: self.instruction.bond_escrow.expect("bond_escrow is not set"),
-
-            asserter: self.instruction.asserter.expect("asserter is not set"),
+            authority: self.instruction.authority.expect("authority is not set"),
 
             payer: self.instruction.payer.expect("payer is not set"),
 
@@ -609,19 +505,16 @@ impl<'a, 'b> CreateAssertionCpiBuilder<'a, 'b> {
 }
 
 #[derive(Clone, Debug)]
-struct CreateAssertionCpiBuilderInstruction<'a, 'b> {
+struct CreateCurrencyCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     oracle: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    request: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    assertion: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    bond_mint: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    bond_source: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    bond_escrow: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    asserter: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    currency: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    mint: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     payer: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     token_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     system_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    create_assertion_args: Option<CreateAssertionArgs>,
+    create_currency_args: Option<CreateCurrencyArgs>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(&'b solana_program::account_info::AccountInfo<'a>, bool, bool)>,
 }

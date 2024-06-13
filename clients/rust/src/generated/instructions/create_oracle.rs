@@ -10,7 +10,7 @@ use borsh::{BorshDeserialize, BorshSerialize};
 
 /// Accounts.
 pub struct CreateOracle {
-    /// Program oracle account
+    /// Oracle account
     pub oracle: solana_program::pubkey::Pubkey,
     /// Payer
     pub payer: solana_program::pubkey::Pubkey,
@@ -52,12 +52,12 @@ impl CreateOracle {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct CreateOracleInstructionData {
+pub struct CreateOracleInstructionData {
     discriminator: u8,
 }
 
 impl CreateOracleInstructionData {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self { discriminator: 0 }
     }
 }
@@ -75,7 +75,7 @@ pub struct CreateOracleInstructionArgs {
 ///   0. `[writable]` oracle
 ///   1. `[writable, signer]` payer
 ///   2. `[optional]` system_program (default to `11111111111111111111111111111111`)
-#[derive(Default)]
+#[derive(Clone, Debug, Default)]
 pub struct CreateOracleBuilder {
     oracle: Option<solana_program::pubkey::Pubkey>,
     payer: Option<solana_program::pubkey::Pubkey>,
@@ -88,7 +88,7 @@ impl CreateOracleBuilder {
     pub fn new() -> Self {
         Self::default()
     }
-    /// Program oracle account
+    /// Oracle account
     #[inline(always)]
     pub fn oracle(&mut self, oracle: solana_program::pubkey::Pubkey) -> &mut Self {
         self.oracle = Some(oracle);
@@ -152,7 +152,7 @@ impl CreateOracleBuilder {
 
 /// `create_oracle` CPI accounts.
 pub struct CreateOracleCpiAccounts<'a, 'b> {
-    /// Program oracle account
+    /// Oracle account
     pub oracle: &'b solana_program::account_info::AccountInfo<'a>,
     /// Payer
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
@@ -164,7 +164,7 @@ pub struct CreateOracleCpiAccounts<'a, 'b> {
 pub struct CreateOracleCpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Program oracle account
+    /// Oracle account
     pub oracle: &'b solana_program::account_info::AccountInfo<'a>,
     /// Payer
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
@@ -260,6 +260,7 @@ impl<'a, 'b> CreateOracleCpi<'a, 'b> {
 ///   0. `[writable]` oracle
 ///   1. `[writable, signer]` payer
 ///   2. `[]` system_program
+#[derive(Clone, Debug)]
 pub struct CreateOracleCpiBuilder<'a, 'b> {
     instruction: Box<CreateOracleCpiBuilderInstruction<'a, 'b>>,
 }
@@ -276,7 +277,7 @@ impl<'a, 'b> CreateOracleCpiBuilder<'a, 'b> {
         });
         Self { instruction }
     }
-    /// Program oracle account
+    /// Oracle account
     #[inline(always)]
     pub fn oracle(
         &mut self,
@@ -362,6 +363,7 @@ impl<'a, 'b> CreateOracleCpiBuilder<'a, 'b> {
     }
 }
 
+#[derive(Clone, Debug)]
 struct CreateOracleCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     oracle: Option<&'b solana_program::account_info::AccountInfo<'a>>,

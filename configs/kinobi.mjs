@@ -19,7 +19,7 @@ const start = Date.now();
 
 console.log("generating client code...");
 
-const kinobi = k.createFromIdls([path.join(idlDir, "oracle.json")]);
+const kinobi = k.createFromIdl(path.join(idlDir, "oracle.json"), undefined, true);
 
 kinobi.update(
   k.updateProgramsVisitor({
@@ -29,24 +29,22 @@ kinobi.update(
   }),
 );
 
-kinobi.update(k.defaultVisitor());
-
 // Update accounts.
 kinobi.update(
   k.updateAccountsVisitor({
     oracle: {
-      seeds: [k.constantPdaSeedNodeFromString("oracle")],
+      seeds: [k.constantPdaSeedNodeFromString("utf8", "oracle")],
     },
     currency: {
       seeds: [
-        k.constantPdaSeedNodeFromString("currency"),
+        k.constantPdaSeedNodeFromString("utf8", "currency"),
         k.variablePdaSeedNode("mint", k.publicKeyTypeNode(), "The address of the currency mint."),
       ],
     },
     request: {
       size: null,
       seeds: [
-        k.constantPdaSeedNodeFromString("request"),
+        k.constantPdaSeedNodeFromString("utf8", "request"),
         k.variablePdaSeedNode(
           "index",
           k.numberTypeNode("u64"),
@@ -56,26 +54,26 @@ kinobi.update(
     },
     assertion: {
       seeds: [
-        k.constantPdaSeedNodeFromString("assertion"),
+        k.constantPdaSeedNodeFromString("utf8", "assertion"),
         k.variablePdaSeedNode("request", k.publicKeyTypeNode(), "The address of the request."),
       ],
     },
     stake: {
       seeds: [
-        k.constantPdaSeedNodeFromString("stake"),
+        k.constantPdaSeedNodeFromString("utf8", "stake"),
         k.variablePdaSeedNode("wallet", k.publicKeyTypeNode(), "The address of the wallet."),
       ],
     },
     voting: {
       size: null,
       seeds: [
-        k.constantPdaSeedNodeFromString("voting"),
+        k.constantPdaSeedNodeFromString("utf8", "voting"),
         k.variablePdaSeedNode("request", k.publicKeyTypeNode(), "The address of the request."),
       ],
     },
     vote: {
       seeds: [
-        k.constantPdaSeedNodeFromString("vote"),
+        k.constantPdaSeedNodeFromString("utf8", "vote"),
         k.variablePdaSeedNode(
           "voting",
           k.publicKeyTypeNode(),
@@ -87,7 +85,7 @@ kinobi.update(
   }),
 );
 
-const ataPdaDefault = (mint = "mint", owner = "owner") =>
+const ataPdaValueNode = (mint = "mint", owner = "owner") =>
   k.pdaValueNode(k.pdaLinkNode("associatedToken", "mplToolbox"), [
     k.pdaSeedValueNode("mint", k.accountValueNode(mint)),
     k.pdaSeedValueNode("owner", k.accountValueNode(owner)),
@@ -133,7 +131,7 @@ kinobi.update(
       accounts: {
         // TODO: Default rewardMint to SOL/USDC?
         rewardSource: {
-          defaultValue: ataPdaDefault("rewardMint", "creator"),
+          defaultValue: ataPdaValueNode("rewardMint", "creator"),
         },
         rewardEscrow: {
           defaultValue: k.pdaValueNode(k.pdaLinkNode("reward", "hooked"), [
@@ -148,7 +146,7 @@ kinobi.update(
     createAssertion: {
       accounts: {
         bondSource: {
-          defaultValue: ataPdaDefault("bondMint", "asserter"),
+          defaultValue: ataPdaValueNode("bondMint", "asserter"),
         },
         bondEscrow: {
           defaultValue: k.pdaValueNode(k.pdaLinkNode("assertBond", "hooked"), [
@@ -156,7 +154,7 @@ kinobi.update(
           ]),
         },
         governanceSource: {
-          defaultValue: ataPdaDefault("governanceMint", "asserter"),
+          defaultValue: ataPdaValueNode("governanceMint", "asserter"),
         },
         governanceEscrow: {
           defaultValue: k.pdaValueNode(k.pdaLinkNode("assertGovernanceBond", "hooked"), [
@@ -199,6 +197,20 @@ kinobi.update(
   }),
 );
 
+// Fix UnixTimestamp type.
+kinobi.update(
+  k.bottomUpTransformerVisitor([
+    {
+      select: (node) => node.kind === "definedTypeLinkNode" && node.name === "unixTimestamp",
+      transform: (node) => {
+        k.assertIsNode(node, "definedTypeLinkNode");
+
+        return k.dateTimeTypeNode(k.numberTypeNode("i64"));
+      },
+    },
+  ]),
+);
+
 // Render Rust.
 {
   const crateDir = path.join(clientDir, "rust");
@@ -208,8 +220,8 @@ kinobi.update(
 
   kinobi.accept(
     k.renderRustVisitor(rustDir, {
-      formatCode: true,
       crateFolder: crateDir,
+      formatCode: true,
     }),
   );
 

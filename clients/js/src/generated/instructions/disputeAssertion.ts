@@ -14,12 +14,14 @@ import type { Serializer } from "@metaplex-foundation/umi/serializers";
 import { transactionBuilder } from "@metaplex-foundation/umi";
 import { mapSerializer, struct, u8 } from "@metaplex-foundation/umi/serializers";
 
-import { findAssertionPda, findVotingPda } from "../accounts";
+import { findAssertionPda, findOraclePda, findVotingPda } from "../accounts";
 import { expectPublicKey, getAccountMetasAndSigners } from "../shared";
 import { getDisputeAssertionArgsSerializer } from "../types";
 
 // Accounts.
 export type DisputeAssertionInstructionAccounts = {
+  /** Oracle account */
+  oracle?: PublicKey | Pda;
   /** Request */
   request: PublicKey | Pda;
   /** Assertion */
@@ -84,53 +86,58 @@ export function disputeAssertion(
 
   // Accounts.
   const resolvedAccounts = {
-    request: {
+    oracle: {
       index: 0,
+      isWritable: false as boolean,
+      value: input.oracle ?? null,
+    },
+    request: {
+      index: 1,
       isWritable: true as boolean,
       value: input.request ?? null,
     },
     assertion: {
-      index: 1,
+      index: 2,
       isWritable: true as boolean,
       value: input.assertion ?? null,
     },
     voting: {
-      index: 2,
+      index: 3,
       isWritable: true as boolean,
       value: input.voting ?? null,
     },
     bondMint: {
-      index: 3,
+      index: 4,
       isWritable: false as boolean,
       value: input.bondMint ?? null,
     },
     bondSource: {
-      index: 4,
+      index: 5,
       isWritable: true as boolean,
       value: input.bondSource ?? null,
     },
     bondEscrow: {
-      index: 5,
+      index: 6,
       isWritable: true as boolean,
       value: input.bondEscrow ?? null,
     },
     disputer: {
-      index: 6,
+      index: 7,
       isWritable: false as boolean,
       value: input.disputer ?? null,
     },
     payer: {
-      index: 7,
+      index: 8,
       isWritable: true as boolean,
       value: input.payer ?? null,
     },
     tokenProgram: {
-      index: 8,
+      index: 9,
       isWritable: false as boolean,
       value: input.tokenProgram ?? null,
     },
     systemProgram: {
-      index: 9,
+      index: 10,
       isWritable: false as boolean,
       value: input.systemProgram ?? null,
     },
@@ -140,6 +147,9 @@ export function disputeAssertion(
   const resolvedArgs: DisputeAssertionInstructionArgs = { ...input };
 
   // Default values.
+  if (!resolvedAccounts.oracle.value) {
+    resolvedAccounts.oracle.value = findOraclePda(context);
+  }
   if (!resolvedAccounts.assertion.value) {
     resolvedAccounts.assertion.value = findAssertionPda(context, {
       request: expectPublicKey(resolvedAccounts.request.value),

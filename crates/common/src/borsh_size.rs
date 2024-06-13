@@ -2,7 +2,6 @@ use std::num::{
     NonZeroI128, NonZeroI16, NonZeroI32, NonZeroI64, NonZeroI8, NonZeroU128, NonZeroU16,
     NonZeroU32, NonZeroU64, NonZeroU8,
 };
-use std::ops::{Range, RangeFrom};
 
 use solana_program::pubkey::{Pubkey, PUBKEY_BYTES};
 
@@ -57,20 +56,49 @@ where
     const SIZE: usize = 1 + max(T::SIZE, E::SIZE);
 }
 
-impl<T> BorshSize for Range<T>
-where
-    T: BorshSize,
-{
-    const SIZE: usize = 2 * T::SIZE;
-}
-
-impl<T> BorshSize for RangeFrom<T>
-where
-    T: BorshSize,
-{
-    const SIZE: usize = 2 * T::SIZE;
-}
-
 const fn max(x: usize, y: usize) -> usize {
     if x >= y { x } else { y }
+}
+
+macro_rules! tuple_impl {
+    (
+        @__stack [$($t:ident)*]
+        @__rest []
+    ) => {
+        impl<$($t),*> BorshSize for ($($t,)*)
+        where
+            $($t: BorshSize,)*
+        {
+            const SIZE: usize = 0 $(+ $t::SIZE)*;
+        }
+    };
+    (
+        @__stack [$($t:ident)*]
+        @__rest [$next:ident $($rest:ident)*]
+    ) => {
+        impl<$($t),*> BorshSize for ($($t,)*)
+        where
+            $($t: BorshSize,)*
+        {
+            const SIZE: usize = 0 $(+ $t::SIZE)*;
+        }
+
+        tuple_impl! {
+            @__stack [$($t)* $next]
+            @__rest [$($rest)*]
+        }
+    };
+    ($($t:ident)*) => {
+        tuple_impl! {
+            @__stack []
+            @__rest [$($t)*]
+        }
+    };
+}
+
+tuple_impl! {
+     _1  _2  _3  _4  _5  _6  _7  _8  _9 _10
+    _11 _12 _13 _14 _15 _16 _17 _18 _19 _20
+    _21 _22 _23 _24 _25 _26 _27 _28 _29 _30
+    _31 _32
 }

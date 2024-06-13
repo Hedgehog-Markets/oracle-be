@@ -10,6 +10,8 @@ use borsh::{BorshDeserialize, BorshSerialize};
 
 /// Accounts.
 pub struct SubmitVote {
+    /// Oracle account
+    pub oracle: solana_program::pubkey::Pubkey,
     /// Request
     pub request: solana_program::pubkey::Pubkey,
     /// Voting
@@ -39,7 +41,8 @@ impl SubmitVote {
         args: SubmitVoteInstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
-        let mut accounts = Vec::with_capacity(7 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(8 + remaining_accounts.len());
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(self.oracle, false));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(self.request, false));
         accounts.push(solana_program::instruction::AccountMeta::new(self.voting, false));
         accounts.push(solana_program::instruction::AccountMeta::new(self.vote, false));
@@ -64,12 +67,12 @@ impl SubmitVote {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct SubmitVoteInstructionData {
+pub struct SubmitVoteInstructionData {
     discriminator: u8,
 }
 
 impl SubmitVoteInstructionData {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self { discriminator: 5 }
     }
 }
@@ -84,15 +87,17 @@ pub struct SubmitVoteInstructionArgs {
 ///
 /// ### Accounts:
 ///
-///   0. `[]` request
-///   1. `[writable]` voting
-///   2. `[writable]` vote
-///   3. `[]` stake
-///   4. `[signer]` voter
-///   5. `[writable, signer]` payer
-///   6. `[optional]` system_program (default to `11111111111111111111111111111111`)
-#[derive(Default)]
+///   0. `[]` oracle
+///   1. `[]` request
+///   2. `[writable]` voting
+///   3. `[writable]` vote
+///   4. `[]` stake
+///   5. `[signer]` voter
+///   6. `[writable, signer]` payer
+///   7. `[optional]` system_program (default to `11111111111111111111111111111111`)
+#[derive(Clone, Debug, Default)]
 pub struct SubmitVoteBuilder {
+    oracle: Option<solana_program::pubkey::Pubkey>,
     request: Option<solana_program::pubkey::Pubkey>,
     voting: Option<solana_program::pubkey::Pubkey>,
     vote: Option<solana_program::pubkey::Pubkey>,
@@ -107,6 +112,12 @@ pub struct SubmitVoteBuilder {
 impl SubmitVoteBuilder {
     pub fn new() -> Self {
         Self::default()
+    }
+    /// Oracle account
+    #[inline(always)]
+    pub fn oracle(&mut self, oracle: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.oracle = Some(oracle);
+        self
     }
     /// Request
     #[inline(always)]
@@ -177,6 +188,7 @@ impl SubmitVoteBuilder {
     #[allow(clippy::clone_on_copy)]
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
         let accounts = SubmitVote {
+            oracle: self.oracle.expect("oracle is not set"),
             request: self.request.expect("request is not set"),
             voting: self.voting.expect("voting is not set"),
             vote: self.vote.expect("vote is not set"),
@@ -197,6 +209,8 @@ impl SubmitVoteBuilder {
 
 /// `submit_vote` CPI accounts.
 pub struct SubmitVoteCpiAccounts<'a, 'b> {
+    /// Oracle account
+    pub oracle: &'b solana_program::account_info::AccountInfo<'a>,
     /// Request
     pub request: &'b solana_program::account_info::AccountInfo<'a>,
     /// Voting
@@ -217,6 +231,8 @@ pub struct SubmitVoteCpiAccounts<'a, 'b> {
 pub struct SubmitVoteCpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Oracle account
+    pub oracle: &'b solana_program::account_info::AccountInfo<'a>,
     /// Request
     pub request: &'b solana_program::account_info::AccountInfo<'a>,
     /// Voting
@@ -243,6 +259,7 @@ impl<'a, 'b> SubmitVoteCpi<'a, 'b> {
     ) -> Self {
         Self {
             __program: program,
+            oracle: accounts.oracle,
             request: accounts.request,
             voting: accounts.voting,
             vote: accounts.vote,
@@ -278,7 +295,9 @@ impl<'a, 'b> SubmitVoteCpi<'a, 'b> {
         signers_seeds: &[&[&[u8]]],
         remaining_accounts: &[(&'b solana_program::account_info::AccountInfo<'a>, bool, bool)],
     ) -> solana_program::entrypoint::ProgramResult {
-        let mut accounts = Vec::with_capacity(7 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(8 + remaining_accounts.len());
+        accounts
+            .push(solana_program::instruction::AccountMeta::new_readonly(*self.oracle.key, false));
         accounts
             .push(solana_program::instruction::AccountMeta::new_readonly(*self.request.key, false));
         accounts.push(solana_program::instruction::AccountMeta::new(*self.voting.key, false));
@@ -308,8 +327,9 @@ impl<'a, 'b> SubmitVoteCpi<'a, 'b> {
             accounts,
             data,
         };
-        let mut account_infos = Vec::with_capacity(7 + 1 + remaining_accounts.len());
+        let mut account_infos = Vec::with_capacity(8 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
+        account_infos.push(self.oracle.clone());
         account_infos.push(self.request.clone());
         account_infos.push(self.voting.clone());
         account_infos.push(self.vote.clone());
@@ -333,13 +353,15 @@ impl<'a, 'b> SubmitVoteCpi<'a, 'b> {
 ///
 /// ### Accounts:
 ///
-///   0. `[]` request
-///   1. `[writable]` voting
-///   2. `[writable]` vote
-///   3. `[]` stake
-///   4. `[signer]` voter
-///   5. `[writable, signer]` payer
-///   6. `[]` system_program
+///   0. `[]` oracle
+///   1. `[]` request
+///   2. `[writable]` voting
+///   3. `[writable]` vote
+///   4. `[]` stake
+///   5. `[signer]` voter
+///   6. `[writable, signer]` payer
+///   7. `[]` system_program
+#[derive(Clone, Debug)]
 pub struct SubmitVoteCpiBuilder<'a, 'b> {
     instruction: Box<SubmitVoteCpiBuilderInstruction<'a, 'b>>,
 }
@@ -348,6 +370,7 @@ impl<'a, 'b> SubmitVoteCpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
         let instruction = Box::new(SubmitVoteCpiBuilderInstruction {
             __program: program,
+            oracle: None,
             request: None,
             voting: None,
             vote: None,
@@ -359,6 +382,15 @@ impl<'a, 'b> SubmitVoteCpiBuilder<'a, 'b> {
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
+    }
+    /// Oracle account
+    #[inline(always)]
+    pub fn oracle(
+        &mut self,
+        oracle: &'b solana_program::account_info::AccountInfo<'a>,
+    ) -> &mut Self {
+        self.instruction.oracle = Some(oracle);
+        self
     }
     /// Request
     #[inline(always)]
@@ -459,6 +491,8 @@ impl<'a, 'b> SubmitVoteCpiBuilder<'a, 'b> {
         let instruction = SubmitVoteCpi {
             __program: self.instruction.__program,
 
+            oracle: self.instruction.oracle.expect("oracle is not set"),
+
             request: self.instruction.request.expect("request is not set"),
 
             voting: self.instruction.voting.expect("voting is not set"),
@@ -481,8 +515,10 @@ impl<'a, 'b> SubmitVoteCpiBuilder<'a, 'b> {
     }
 }
 
+#[derive(Clone, Debug)]
 struct SubmitVoteCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
+    oracle: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     request: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     voting: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     vote: Option<&'b solana_program::account_info::AccountInfo<'a>>,

@@ -7,7 +7,9 @@
  */
 
 export * from "./accountType";
+export * from "./config";
 export * from "./createAssertionArgs";
+export * from "./createCurrencyArgs";
 export * from "./createOracleArgs";
 export * from "./createRequestArgs";
 export * from "./disputeAssertionArgs";

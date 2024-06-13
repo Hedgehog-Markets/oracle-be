@@ -10,6 +10,8 @@ import type { AccountTypeArgs } from "../types";
 import type {
   Account,
   Context,
+  DateTime,
+  DateTimeInput,
   Pda,
   PublicKey,
   RpcAccount,
@@ -22,6 +24,7 @@ import {
   assertAccountExists,
   deserializeAccount,
   gpaBuilder,
+  mapDateTimeSerializer,
   publicKey as toPublicKey,
 } from "@metaplex-foundation/umi";
 import {
@@ -40,8 +43,8 @@ export type Assertion = Account<AssertionAccountData>;
 export type AssertionAccountData = {
   accountType: AccountType;
   request: PublicKey;
-  assertionTimestamp: bigint;
-  expirationTimestamp: bigint;
+  assertionTimestamp: DateTime;
+  expirationTimestamp: DateTime;
   asserter: PublicKey;
   disputer: PublicKey;
   assertedValue: bigint;
@@ -50,8 +53,8 @@ export type AssertionAccountData = {
 
 export type AssertionAccountDataArgs = {
   request: PublicKey;
-  assertionTimestamp: number | bigint;
-  expirationTimestamp: number | bigint;
+  assertionTimestamp: DateTimeInput;
+  expirationTimestamp: DateTimeInput;
   asserter: PublicKey;
   disputer: PublicKey;
   assertedValue: number | bigint;
@@ -67,8 +70,8 @@ export function getAssertionAccountDataSerializer(): Serializer<
       [
         ["accountType", getAccountTypeSerializer()],
         ["request", publicKeySerializer()],
-        ["assertionTimestamp", i64()],
-        ["expirationTimestamp", i64()],
+        ["assertionTimestamp", mapDateTimeSerializer(i64())],
+        ["expirationTimestamp", mapDateTimeSerializer(i64())],
         ["asserter", publicKeySerializer()],
         ["disputer", publicKeySerializer()],
         ["assertedValue", u64()],
@@ -141,8 +144,8 @@ export function getAssertionGpaBuilder(context: Pick<Context, "rpc" | "programs"
     .registerFields<{
       accountType: AccountTypeArgs;
       request: PublicKey;
-      assertionTimestamp: number | bigint;
-      expirationTimestamp: number | bigint;
+      assertionTimestamp: DateTimeInput;
+      expirationTimestamp: DateTimeInput;
       asserter: PublicKey;
       disputer: PublicKey;
       assertedValue: number | bigint;
@@ -150,8 +153,8 @@ export function getAssertionGpaBuilder(context: Pick<Context, "rpc" | "programs"
     }>({
       accountType: [0, getAccountTypeSerializer()],
       request: [1, publicKeySerializer()],
-      assertionTimestamp: [33, i64()],
-      expirationTimestamp: [41, i64()],
+      assertionTimestamp: [33, mapDateTimeSerializer(i64())],
+      expirationTimestamp: [41, mapDateTimeSerializer(i64())],
       asserter: [49, publicKeySerializer()],
       disputer: [81, publicKeySerializer()],
       assertedValue: [113, u64()],
@@ -159,10 +162,6 @@ export function getAssertionGpaBuilder(context: Pick<Context, "rpc" | "programs"
     })
     .deserializeUsing<Assertion>((account) => deserializeAssertion(account))
     .whereField("accountType", AccountType.Assertion);
-}
-
-export function getAssertionSize(): number {
-  return 129;
 }
 
 export function findAssertionPda(

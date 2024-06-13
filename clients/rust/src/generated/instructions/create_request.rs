@@ -10,18 +10,20 @@ use borsh::{BorshDeserialize, BorshSerialize};
 
 /// Accounts.
 pub struct CreateRequest {
-    /// Program oracle account
+    /// Oracle account
     pub oracle: solana_program::pubkey::Pubkey,
     /// Request
     pub request: solana_program::pubkey::Pubkey,
+    /// Reward currency
+    pub reward_currency: solana_program::pubkey::Pubkey,
+    /// Bond currency
+    pub bond_currency: solana_program::pubkey::Pubkey,
     /// Reward mint
     pub reward_mint: solana_program::pubkey::Pubkey,
     /// Reward source token account
     pub reward_source: solana_program::pubkey::Pubkey,
     /// Reward escrow token account
     pub reward_escrow: solana_program::pubkey::Pubkey,
-    /// Bond mint
-    pub bond_mint: solana_program::pubkey::Pubkey,
     /// Creator
     pub creator: solana_program::pubkey::Pubkey,
     /// Payer
@@ -45,15 +47,21 @@ impl CreateRequest {
         args: CreateRequestInstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
-        let mut accounts = Vec::with_capacity(10 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(11 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(self.oracle, false));
         accounts.push(solana_program::instruction::AccountMeta::new(self.request, false));
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+            self.reward_currency,
+            false,
+        ));
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+            self.bond_currency,
+            false,
+        ));
         accounts
             .push(solana_program::instruction::AccountMeta::new_readonly(self.reward_mint, false));
         accounts.push(solana_program::instruction::AccountMeta::new(self.reward_source, false));
         accounts.push(solana_program::instruction::AccountMeta::new(self.reward_escrow, false));
-        accounts
-            .push(solana_program::instruction::AccountMeta::new_readonly(self.bond_mint, false));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(self.creator, true));
         accounts.push(solana_program::instruction::AccountMeta::new(self.payer, true));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
@@ -78,12 +86,12 @@ impl CreateRequest {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct CreateRequestInstructionData {
+pub struct CreateRequestInstructionData {
     discriminator: u8,
 }
 
 impl CreateRequestInstructionData {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self { discriminator: 1 }
     }
 }
@@ -100,22 +108,24 @@ pub struct CreateRequestInstructionArgs {
 ///
 ///   0. `[writable]` oracle
 ///   1. `[writable]` request
-///   2. `[]` reward_mint
-///   3. `[writable]` reward_source
-///   4. `[writable]` reward_escrow
-///   5. `[]` bond_mint
-///   6. `[signer]` creator
-///   7. `[writable, signer]` payer
-///   8. `[optional]` token_program (default to `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA`)
-///   9. `[optional]` system_program (default to `11111111111111111111111111111111`)
-#[derive(Default)]
+///   2. `[]` reward_currency
+///   3. `[]` bond_currency
+///   4. `[]` reward_mint
+///   5. `[writable]` reward_source
+///   6. `[writable]` reward_escrow
+///   7. `[signer]` creator
+///   8. `[writable, signer]` payer
+///   9. `[optional]` token_program (default to `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA`)
+///   10. `[optional]` system_program (default to `11111111111111111111111111111111`)
+#[derive(Clone, Debug, Default)]
 pub struct CreateRequestBuilder {
     oracle: Option<solana_program::pubkey::Pubkey>,
     request: Option<solana_program::pubkey::Pubkey>,
+    reward_currency: Option<solana_program::pubkey::Pubkey>,
+    bond_currency: Option<solana_program::pubkey::Pubkey>,
     reward_mint: Option<solana_program::pubkey::Pubkey>,
     reward_source: Option<solana_program::pubkey::Pubkey>,
     reward_escrow: Option<solana_program::pubkey::Pubkey>,
-    bond_mint: Option<solana_program::pubkey::Pubkey>,
     creator: Option<solana_program::pubkey::Pubkey>,
     payer: Option<solana_program::pubkey::Pubkey>,
     token_program: Option<solana_program::pubkey::Pubkey>,
@@ -128,7 +138,7 @@ impl CreateRequestBuilder {
     pub fn new() -> Self {
         Self::default()
     }
-    /// Program oracle account
+    /// Oracle account
     #[inline(always)]
     pub fn oracle(&mut self, oracle: solana_program::pubkey::Pubkey) -> &mut Self {
         self.oracle = Some(oracle);
@@ -138,6 +148,21 @@ impl CreateRequestBuilder {
     #[inline(always)]
     pub fn request(&mut self, request: solana_program::pubkey::Pubkey) -> &mut Self {
         self.request = Some(request);
+        self
+    }
+    /// Reward currency
+    #[inline(always)]
+    pub fn reward_currency(
+        &mut self,
+        reward_currency: solana_program::pubkey::Pubkey,
+    ) -> &mut Self {
+        self.reward_currency = Some(reward_currency);
+        self
+    }
+    /// Bond currency
+    #[inline(always)]
+    pub fn bond_currency(&mut self, bond_currency: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.bond_currency = Some(bond_currency);
         self
     }
     /// Reward mint
@@ -156,12 +181,6 @@ impl CreateRequestBuilder {
     #[inline(always)]
     pub fn reward_escrow(&mut self, reward_escrow: solana_program::pubkey::Pubkey) -> &mut Self {
         self.reward_escrow = Some(reward_escrow);
-        self
-    }
-    /// Bond mint
-    #[inline(always)]
-    pub fn bond_mint(&mut self, bond_mint: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.bond_mint = Some(bond_mint);
         self
     }
     /// Creator
@@ -218,10 +237,11 @@ impl CreateRequestBuilder {
         let accounts = CreateRequest {
             oracle: self.oracle.expect("oracle is not set"),
             request: self.request.expect("request is not set"),
+            reward_currency: self.reward_currency.expect("reward_currency is not set"),
+            bond_currency: self.bond_currency.expect("bond_currency is not set"),
             reward_mint: self.reward_mint.expect("reward_mint is not set"),
             reward_source: self.reward_source.expect("reward_source is not set"),
             reward_escrow: self.reward_escrow.expect("reward_escrow is not set"),
-            bond_mint: self.bond_mint.expect("bond_mint is not set"),
             creator: self.creator.expect("creator is not set"),
             payer: self.payer.expect("payer is not set"),
             token_program: self
@@ -244,18 +264,20 @@ impl CreateRequestBuilder {
 
 /// `create_request` CPI accounts.
 pub struct CreateRequestCpiAccounts<'a, 'b> {
-    /// Program oracle account
+    /// Oracle account
     pub oracle: &'b solana_program::account_info::AccountInfo<'a>,
     /// Request
     pub request: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Reward currency
+    pub reward_currency: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Bond currency
+    pub bond_currency: &'b solana_program::account_info::AccountInfo<'a>,
     /// Reward mint
     pub reward_mint: &'b solana_program::account_info::AccountInfo<'a>,
     /// Reward source token account
     pub reward_source: &'b solana_program::account_info::AccountInfo<'a>,
     /// Reward escrow token account
     pub reward_escrow: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Bond mint
-    pub bond_mint: &'b solana_program::account_info::AccountInfo<'a>,
     /// Creator
     pub creator: &'b solana_program::account_info::AccountInfo<'a>,
     /// Payer
@@ -270,18 +292,20 @@ pub struct CreateRequestCpiAccounts<'a, 'b> {
 pub struct CreateRequestCpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Program oracle account
+    /// Oracle account
     pub oracle: &'b solana_program::account_info::AccountInfo<'a>,
     /// Request
     pub request: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Reward currency
+    pub reward_currency: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Bond currency
+    pub bond_currency: &'b solana_program::account_info::AccountInfo<'a>,
     /// Reward mint
     pub reward_mint: &'b solana_program::account_info::AccountInfo<'a>,
     /// Reward source token account
     pub reward_source: &'b solana_program::account_info::AccountInfo<'a>,
     /// Reward escrow token account
     pub reward_escrow: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Bond mint
-    pub bond_mint: &'b solana_program::account_info::AccountInfo<'a>,
     /// Creator
     pub creator: &'b solana_program::account_info::AccountInfo<'a>,
     /// Payer
@@ -304,10 +328,11 @@ impl<'a, 'b> CreateRequestCpi<'a, 'b> {
             __program: program,
             oracle: accounts.oracle,
             request: accounts.request,
+            reward_currency: accounts.reward_currency,
+            bond_currency: accounts.bond_currency,
             reward_mint: accounts.reward_mint,
             reward_source: accounts.reward_source,
             reward_escrow: accounts.reward_escrow,
-            bond_mint: accounts.bond_mint,
             creator: accounts.creator,
             payer: accounts.payer,
             token_program: accounts.token_program,
@@ -340,9 +365,17 @@ impl<'a, 'b> CreateRequestCpi<'a, 'b> {
         signers_seeds: &[&[&[u8]]],
         remaining_accounts: &[(&'b solana_program::account_info::AccountInfo<'a>, bool, bool)],
     ) -> solana_program::entrypoint::ProgramResult {
-        let mut accounts = Vec::with_capacity(10 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(11 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(*self.oracle.key, false));
         accounts.push(solana_program::instruction::AccountMeta::new(*self.request.key, false));
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+            *self.reward_currency.key,
+            false,
+        ));
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+            *self.bond_currency.key,
+            false,
+        ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             *self.reward_mint.key,
             false,
@@ -351,10 +384,6 @@ impl<'a, 'b> CreateRequestCpi<'a, 'b> {
             .push(solana_program::instruction::AccountMeta::new(*self.reward_source.key, false));
         accounts
             .push(solana_program::instruction::AccountMeta::new(*self.reward_escrow.key, false));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.bond_mint.key,
-            false,
-        ));
         accounts
             .push(solana_program::instruction::AccountMeta::new_readonly(*self.creator.key, true));
         accounts.push(solana_program::instruction::AccountMeta::new(*self.payer.key, true));
@@ -382,14 +411,15 @@ impl<'a, 'b> CreateRequestCpi<'a, 'b> {
             accounts,
             data,
         };
-        let mut account_infos = Vec::with_capacity(10 + 1 + remaining_accounts.len());
+        let mut account_infos = Vec::with_capacity(11 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
         account_infos.push(self.oracle.clone());
         account_infos.push(self.request.clone());
+        account_infos.push(self.reward_currency.clone());
+        account_infos.push(self.bond_currency.clone());
         account_infos.push(self.reward_mint.clone());
         account_infos.push(self.reward_source.clone());
         account_infos.push(self.reward_escrow.clone());
-        account_infos.push(self.bond_mint.clone());
         account_infos.push(self.creator.clone());
         account_infos.push(self.payer.clone());
         account_infos.push(self.token_program.clone());
@@ -412,14 +442,16 @@ impl<'a, 'b> CreateRequestCpi<'a, 'b> {
 ///
 ///   0. `[writable]` oracle
 ///   1. `[writable]` request
-///   2. `[]` reward_mint
-///   3. `[writable]` reward_source
-///   4. `[writable]` reward_escrow
-///   5. `[]` bond_mint
-///   6. `[signer]` creator
-///   7. `[writable, signer]` payer
-///   8. `[]` token_program
-///   9. `[]` system_program
+///   2. `[]` reward_currency
+///   3. `[]` bond_currency
+///   4. `[]` reward_mint
+///   5. `[writable]` reward_source
+///   6. `[writable]` reward_escrow
+///   7. `[signer]` creator
+///   8. `[writable, signer]` payer
+///   9. `[]` token_program
+///   10. `[]` system_program
+#[derive(Clone, Debug)]
 pub struct CreateRequestCpiBuilder<'a, 'b> {
     instruction: Box<CreateRequestCpiBuilderInstruction<'a, 'b>>,
 }
@@ -430,10 +462,11 @@ impl<'a, 'b> CreateRequestCpiBuilder<'a, 'b> {
             __program: program,
             oracle: None,
             request: None,
+            reward_currency: None,
+            bond_currency: None,
             reward_mint: None,
             reward_source: None,
             reward_escrow: None,
-            bond_mint: None,
             creator: None,
             payer: None,
             token_program: None,
@@ -443,7 +476,7 @@ impl<'a, 'b> CreateRequestCpiBuilder<'a, 'b> {
         });
         Self { instruction }
     }
-    /// Program oracle account
+    /// Oracle account
     #[inline(always)]
     pub fn oracle(
         &mut self,
@@ -459,6 +492,24 @@ impl<'a, 'b> CreateRequestCpiBuilder<'a, 'b> {
         request: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
         self.instruction.request = Some(request);
+        self
+    }
+    /// Reward currency
+    #[inline(always)]
+    pub fn reward_currency(
+        &mut self,
+        reward_currency: &'b solana_program::account_info::AccountInfo<'a>,
+    ) -> &mut Self {
+        self.instruction.reward_currency = Some(reward_currency);
+        self
+    }
+    /// Bond currency
+    #[inline(always)]
+    pub fn bond_currency(
+        &mut self,
+        bond_currency: &'b solana_program::account_info::AccountInfo<'a>,
+    ) -> &mut Self {
+        self.instruction.bond_currency = Some(bond_currency);
         self
     }
     /// Reward mint
@@ -486,15 +537,6 @@ impl<'a, 'b> CreateRequestCpiBuilder<'a, 'b> {
         reward_escrow: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
         self.instruction.reward_escrow = Some(reward_escrow);
-        self
-    }
-    /// Bond mint
-    #[inline(always)]
-    pub fn bond_mint(
-        &mut self,
-        bond_mint: &'b solana_program::account_info::AccountInfo<'a>,
-    ) -> &mut Self {
-        self.instruction.bond_mint = Some(bond_mint);
         self
     }
     /// Creator
@@ -582,13 +624,15 @@ impl<'a, 'b> CreateRequestCpiBuilder<'a, 'b> {
 
             request: self.instruction.request.expect("request is not set"),
 
+            reward_currency: self.instruction.reward_currency.expect("reward_currency is not set"),
+
+            bond_currency: self.instruction.bond_currency.expect("bond_currency is not set"),
+
             reward_mint: self.instruction.reward_mint.expect("reward_mint is not set"),
 
             reward_source: self.instruction.reward_source.expect("reward_source is not set"),
 
             reward_escrow: self.instruction.reward_escrow.expect("reward_escrow is not set"),
-
-            bond_mint: self.instruction.bond_mint.expect("bond_mint is not set"),
 
             creator: self.instruction.creator.expect("creator is not set"),
 
@@ -606,14 +650,16 @@ impl<'a, 'b> CreateRequestCpiBuilder<'a, 'b> {
     }
 }
 
+#[derive(Clone, Debug)]
 struct CreateRequestCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     oracle: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     request: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    reward_currency: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    bond_currency: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     reward_mint: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     reward_source: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     reward_escrow: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    bond_mint: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     creator: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     payer: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     token_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,

@@ -18,11 +18,10 @@ pub struct Stake {
     #[cfg_attr(feature = "serde", serde(with = "serde_with::As::<serde_with::DisplayFromStr>"))]
     pub delegate: Pubkey,
     pub amount: u64,
+    pub lock_timestamp: i64,
 }
 
 impl Stake {
-    pub const LEN: usize = 73;
-
     /// Prefix values used to generate a PDA for this account.
     ///
     /// Values are positional and appear in the following order:
