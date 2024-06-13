@@ -1,3 +1,4 @@
+use common::cpi;
 use solana_program::account_info::AccountInfo;
 use solana_program::clock::Clock;
 use solana_program::entrypoint::ProgramResult;
@@ -5,7 +6,6 @@ use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
 use solana_program::sysvar::Sysvar;
 
-use crate::cpi::spl::{CreateTokenAccount, TransferChecked};
 use crate::error::OracleError;
 use crate::instruction::accounts::{Context, CreateAssertionAccounts};
 use crate::instruction::CreateAssertionArgs;
@@ -13,7 +13,7 @@ use crate::state::{
     Account, AccountSized, Assertion, InitAccount, InitAssertion, InitContext, Oracle, Request,
     RequestState,
 };
-use crate::{cpi, pda, utils};
+use crate::{pda, utils};
 
 pub fn create<'a>(
     program_id: &'a Pubkey,
@@ -55,7 +55,7 @@ fn create_v1(
     utils::assert_system_program(system_program.key)?;
 
     let bond: u64;
-    let dispute_window: i64;
+    let dispute_window: u32;
 
     // Get oracle dispute window.
     {
@@ -112,7 +112,7 @@ fn create_v1(
 
     // Step 3: Transfer bond to escrow.
     {
-        let mint_decimals = cpi::spl::get_decimals(bond_mint)?;
+        let mint_decimals = cpi::spl::mint_decimals(bond_mint)?;
 
         // Step 3.1: Initialize `bond_escrow` account.
         {
@@ -121,7 +121,7 @@ fn create_v1(
 
             cpi::spl::create_token_account(
                 request.key,
-                CreateTokenAccount {
+                cpi::spl::CreateTokenAccount {
                     account: bond_escrow,
                     mint: bond_mint,
                     payer,
@@ -136,7 +136,7 @@ fn create_v1(
         cpi::spl::transfer_checked(
             bond,
             mint_decimals,
-            TransferChecked {
+            cpi::spl::TransferChecked {
                 source: bond_source,
                 destination: bond_escrow,
                 mint: bond_mint,

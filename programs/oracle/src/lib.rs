@@ -2,7 +2,6 @@
 
 #[macro_use]
 mod macros;
-mod cpi;
 mod utils;
 
 #[cfg(not(feature = "no-entrypoint"))]

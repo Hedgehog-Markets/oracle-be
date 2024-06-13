@@ -1,6 +1,8 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 use common::BorshSize;
 use shank::ShankAccount;
+use solana_program::clock::UnixTimestamp;
+use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
 
 use crate::error::OracleError;
@@ -28,9 +30,9 @@ pub struct Request {
     pub bond_mint: Pubkey,
 
     /// Unix timestamp after which a value can be asserted.
-    pub assertion_timestamp: i64,
+    pub assertion_timestamp: UnixTimestamp,
     /// Unix timestamp at which the request was resolved.
-    pub resolve_timestamp: i64,
+    pub resolve_timestamp: UnixTimestamp,
 
     /// Request state.
     pub state: RequestState,
@@ -133,7 +135,7 @@ impl AccountSized for Request {
 }
 
 impl TryFrom<InitRequest> for (Request, usize) {
-    type Error = OracleError;
+    type Error = ProgramError;
 
     fn try_from(params: InitRequest) -> Result<(Request, usize), Self::Error> {
         let InitRequest { index, creator, reward, reward_mint, bond, bond_mint, timestamp, data } =
@@ -154,7 +156,7 @@ impl TryFrom<InitRequest> for (Request, usize) {
             data,
         };
 
-        let space = request.serialized_size().ok_or(OracleError::ArithmeticOverflow)?;
+        let space = request.serialized_size().ok_or(ProgramError::ArithmeticOverflow)?;
 
         Ok((request, space))
     }

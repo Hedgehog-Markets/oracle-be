@@ -31,7 +31,7 @@ fn finalize_v1(
 
     let FinalizeVotingAccounts { oracle, request, voting } = ctx.accounts;
 
-    let voting_window: i64;
+    let voting_window: u32;
 
     // Get oracle voting window.
     {
@@ -70,7 +70,7 @@ fn finalize_v1(
         log!("No votes cast - starting new vote window");
 
         voting.start_timestamp = now.unix_timestamp;
-        voting.end_timestamp = increment!(now.unix_timestamp, voting_window)?;
+        voting.end_timestamp = checked_add!(now.unix_timestamp, i64::from(voting_window))?;
 
         voting.save()?;
 

@@ -10,13 +10,13 @@ pub struct Transfer<'a, 'info> {
 }
 
 /// Transfers lamports from the source account to the destination account.
-pub fn transfer(lamports: u64, accounts: Transfer, signer_seeds: &[&[&[u8]]]) -> ProgramResult {
+pub fn transfer(lamports: u64, accounts: Transfer, signers_seeds: &[&[&[u8]]]) -> ProgramResult {
     let Transfer { source, destination, system_program } = accounts;
 
     invoke_signed(
         &system_instruction::transfer(source.key, destination.key, lamports),
         &[source.clone(), destination.clone(), system_program.clone()],
-        signer_seeds,
+        signers_seeds,
     )?;
 
     Ok(())

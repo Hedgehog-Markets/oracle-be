@@ -22,9 +22,9 @@ pub struct Oracle {
 #[derive(Clone, Debug, BorshDeserialize, BorshSerialize, BorshSize)]
 pub struct Config {
     /// The duration of the dispute window in seconds.
-    pub dispute_window: i64,
+    pub dispute_window: u32,
     /// The duration of the voting window in seconds.
-    pub voting_window: i64,
+    pub voting_window: u32,
     /// The fee taken, in basis points, from the bond of the incorrect party in a dispute.
     pub bond_fee_bps: u16,
 }

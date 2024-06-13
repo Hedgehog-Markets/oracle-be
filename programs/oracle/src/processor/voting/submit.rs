@@ -44,7 +44,7 @@ fn submit_v1(
 
     utils::assert_system_program(system_program.key)?;
 
-    let voting_window: i64;
+    let voting_window: u32;
 
     // Get oracle voting window.
     {
@@ -84,7 +84,7 @@ fn submit_v1(
         log!("No votes cast - starting new vote window");
 
         voting.start_timestamp = now.unix_timestamp;
-        voting.end_timestamp = increment!(now.unix_timestamp, voting_window)?;
+        voting.end_timestamp = checked_add!(now.unix_timestamp, i64::from(voting_window))?;
     }
 
     // TODO: Implement staking for votes.
@@ -107,7 +107,7 @@ fn submit_v1(
     let freq = match voting.votes.entry(value) {
         Entry::Occupied(mut entry) => {
             let entry = entry.get_mut();
-            let freq = increment!(entry, votes)?;
+            let freq = checked_add!(entry, votes)?;
 
             *entry = freq;
 
@@ -120,7 +120,7 @@ fn submit_v1(
         }
     };
 
-    voting.vote_count = increment!(voting.vote_count, votes)?;
+    voting.vote_count = checked_add!(voting.vote_count, votes)?;
 
     // Maybe update the mode value.
     if freq > voting.votes.get(&voting.mode_value).copied().unwrap_or_default() {

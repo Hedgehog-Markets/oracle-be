@@ -3,9 +3,9 @@ use std::collections::BTreeMap;
 use borsh::{BorshDeserialize, BorshSerialize};
 use common::BorshSize;
 use shank::ShankAccount;
+use solana_program::clock::UnixTimestamp;
+use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
-
-use crate::error::OracleError;
 
 use super::{Account, AccountSized, AccountType};
 
@@ -19,9 +19,9 @@ pub struct Voting {
     pub request: Pubkey,
 
     /// The Unix timestamp when voting started.
-    pub start_timestamp: i64,
+    pub start_timestamp: UnixTimestamp,
     /// The Unix timestamp when voting ends.
-    pub end_timestamp: i64,
+    pub end_timestamp: UnixTimestamp,
 
     /// The number of votes that have been added.
     pub vote_count: u64,
@@ -36,8 +36,8 @@ impl Voting {
     const BASE_SIZE: usize =
         AccountType::SIZE       // account_type
         + Pubkey::SIZE          // request
-        + i64::SIZE             // start_timestamp
-        + i64::SIZE             // end_timestamp
+        + UnixTimestamp::SIZE   // start_timestamp
+        + UnixTimestamp::SIZE   // end_timestamp
         + u64::SIZE             // vote_count
         + u64::SIZE             // mode_value
         + u32::SIZE             // votes.len()
@@ -57,13 +57,12 @@ impl AccountSized for Voting {
 }
 
 impl TryFrom<InitVoting> for (Voting, usize) {
-    type Error = OracleError;
+    type Error = ProgramError;
 
     fn try_from(params: InitVoting) -> Result<(Voting, usize), Self::Error> {
         let InitVoting { request, start_timestamp, voting_window } = params;
 
-        let end_timestamp =
-            start_timestamp.checked_add(voting_window).ok_or(OracleError::ArithmeticOverflow)?;
+        let end_timestamp = checked_add!(start_timestamp, i64::from(voting_window))?;
 
         Ok((
             Voting {
@@ -82,7 +81,7 @@ impl TryFrom<InitVoting> for (Voting, usize) {
 
 pub(crate) struct InitVoting {
     pub request: Pubkey,
-    pub start_timestamp: i64,
+    pub start_timestamp: UnixTimestamp,
 
-    pub voting_window: i64,
+    pub voting_window: u32,
 }

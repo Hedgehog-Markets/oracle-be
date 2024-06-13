@@ -3,7 +3,7 @@ use std::convert::Infallible;
 use std::ops::{Deref, DerefMut};
 
 use borsh::{BorshDeserialize, BorshSerialize};
-use common::BorshSize;
+use common::{cpi, BorshSize};
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
 use solana_program::account_info::AccountInfo;
@@ -12,10 +12,6 @@ use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
 use solana_program::rent::Rent;
 use solana_program::sysvar::Sysvar;
-
-use crate::cpi::sys::Transfer;
-use crate::error::OracleError;
-use crate::{cpi, utils};
 
 mod assertion;
 mod currency;
@@ -169,7 +165,7 @@ impl<'a, 'info, T: AccountSized> AccountSizedMut<'a, 'info, T> {
             return Ok(());
         }
 
-        let new_size = self.account.serialized_size().ok_or(OracleError::ArithmeticOverflow)?;
+        let new_size = self.account.serialized_size().ok_or(ProgramError::ArithmeticOverflow)?;
         let current_size = self.data.len();
 
         if new_size <= current_size {
@@ -186,14 +182,14 @@ impl<'a, 'info, T: AccountSized> AccountSizedMut<'a, 'info, T> {
         log!("Reallocating account data");
 
         // Reallocate the account and update the data reference.
-        self.data = utils::realloc_account_mut(self.info, new_size)?;
+        self.data = common::realloc_account_mut(self.info, new_size)?;
 
         log!("Transferring {rent_diff} lamports for additional rent");
 
         // Transfer the additional rent required.
         cpi::sys::transfer(
             rent_diff,
-            Transfer { source: payer, destination: self.info, system_program },
+            cpi::sys::Transfer { source: payer, destination: self.info, system_program },
             &[],
         )?;
 
@@ -202,7 +198,7 @@ impl<'a, 'info, T: AccountSized> AccountSizedMut<'a, 'info, T> {
 
     pub fn save(mut self) -> ProgramResult {
         if !T::IS_FIXED_SIZE
-            && self.serialized_size().ok_or(OracleError::ArithmeticOverflow)? > self.data.len()
+            && self.serialized_size().ok_or(ProgramError::ArithmeticOverflow)? > self.data.len()
         {
             err!("Account cannot be saved as it overflows allocation");
             return Err(ProgramError::InvalidAccountData);
@@ -265,7 +261,7 @@ impl<T: Account> AccountInitializer<T> {
         let InitContext { account: account_info, payer, system_program, program_id, signer_seeds } =
             context;
 
-        utils::create_or_allocate_account(
+        common::create_or_allocate_account(
             account_info,
             payer,
             system_program,

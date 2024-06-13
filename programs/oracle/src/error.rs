@@ -5,83 +5,79 @@ use thiserror::Error;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Error, FromPrimitive)]
 pub enum OracleError {
-    /// 0 - Arithmetic overflow.
-    #[error("Program arithmetic overflowed")]
-    ArithmeticOverflow,
-
-    /// 1 - Insufficient bond.
+    /// 0 - Insufficient bond.
     #[error("Insufficient bond")]
     InsufficientBond,
 
-    /// 2 - Not asserted.
+    /// 1 - Not asserted.
     #[error("Request does not have an assertion")]
     NotAsserted,
 
-    /// 3 - Not disputed.
+    /// 2 - Not disputed.
     #[error("Request is not disputed")]
     NotDisputed,
 
-    /// 4 - Already asserted.
+    /// 3 - Already asserted.
     #[error("Request already has an assertion")]
     AlreadyAsserted,
 
-    /// 5 - Already disputed.
+    /// 4 - Already disputed.
     #[error("Assertion has already been disputed")]
     AlreadyDisputed,
 
-    /// 6 - Already resolved.
+    /// 5 - Already resolved.
     #[error("Request has already been resolved")]
     AlreadyResolved,
 
-    /// 7 - Request not accepting assertions yet.
+    /// 6 - Request not accepting assertions yet.
     #[error("Request is not accepting assertion yet")]
     AssertionTooEarly,
 
-    /// 8 - Dispute window has not expired.
+    /// 7 - Dispute window has not expired.
     #[error("Dispute window has not expired")]
     DisputeWindowNotExpired,
 
-    /// 9 - Dispute window has expired.
+    /// 8 - Dispute window has expired.
     #[error("Dispute window has expired")]
     DisputeWindowExpired,
 
-    /// 10 - Invalid value.
+    /// 9 - Invalid value.
     #[error("Value is not valid for the request")]
     InvalidValue,
 
-    /// 11 - Invalid dispute.
+    /// 10 - Invalid dispute.
     #[error("Disputed value falls within range of acceptable deviation for asserted value")]
     InvalidDispute,
 
-    /// 12 - Invalid disputer.
+    /// 11 - Invalid disputer.
     #[error("Disputer cannot be the same as the asserter")]
     DisputerIsAsserter,
 
-    /// 13 - Bond mint mismatch.
+    /// 12 - Bond mint mismatch.
     #[error("Bond mint address does not match")]
     BondMintMismatch,
 
-    /// 14 - Voting window has not expired.
+    /// 13 - Voting window has not expired.
     #[error("Voting window has not expired")]
     VotingWindowNotExpired,
 
-    /// 15 - Voting window has expired.
+    /// 14 - Voting window has expired.
     #[error("Voting window has expired")]
     VotingWindowExpired,
 
-    /// 16 - Reward mint mismatch.
+    /// 15 - Reward mint mismatch.
     #[error("Reward mint address does not match")]
     RewardMintMismatch,
 
-    /// 17 - Reward out of bounds.
+    /// 16 - Reward out of bounds.
     #[error("Reward must be within valid bounds")]
     RewardBounds,
 
-    /// 18 - Bond out of bounds.
+    /// 17 - Bond out of bounds.
     #[error("Bond must be within valid bounds")]
     BondBounds,
 
-    /// 18 - Oracle authority mismatch.
+    /// 19 - Oracle authority mismatch.
     #[error("Oracle authority address does not match")]
     OracleAuthorityMismatch,
 }

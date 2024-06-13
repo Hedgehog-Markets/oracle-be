@@ -1,16 +1,16 @@
+use common::cpi;
 use solana_program::account_info::AccountInfo;
 use solana_program::entrypoint::ProgramResult;
 use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
 
-use crate::cpi::spl::{CreateTokenAccount, TransferChecked};
 use crate::error::OracleError;
 use crate::instruction::accounts::{Context, CreateRequestAccounts};
 use crate::instruction::CreateRequestArgs;
 use crate::state::{
     Account, AccountSized, Currency, InitAccount, InitContext, InitRequest, Oracle, Request,
 };
-use crate::{cpi, pda, utils};
+use crate::{pda, utils};
 
 pub fn create<'a>(
     program_id: &'a Pubkey,
@@ -91,7 +91,7 @@ fn create_v1(
 
         request_index = oracle.next_index;
 
-        oracle.next_index = increment!(oracle.next_index)?;
+        oracle.next_index = checked_add!(oracle.next_index, 1)?;
         oracle.save()?;
     }
 
@@ -121,7 +121,7 @@ fn create_v1(
 
     // Step 3: Transfer reward to escrow.
     if reward > 0 {
-        let mint_decimals = cpi::spl::get_decimals(reward_mint)?;
+        let mint_decimals = cpi::spl::mint_decimals(reward_mint)?;
 
         // Step 3.1: Initialize `reward_escrow` account.
         {
@@ -130,7 +130,7 @@ fn create_v1(
 
             cpi::spl::create_token_account(
                 request.key,
-                CreateTokenAccount {
+                cpi::spl::CreateTokenAccount {
                     account: reward_escrow,
                     mint: reward_mint,
                     payer,
@@ -145,7 +145,7 @@ fn create_v1(
         cpi::spl::transfer_checked(
             reward,
             mint_decimals,
-            TransferChecked {
+            cpi::spl::TransferChecked {
                 source: reward_source,
                 destination: reward_escrow,
                 mint: reward_mint,

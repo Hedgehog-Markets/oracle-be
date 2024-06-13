@@ -1,6 +1,8 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 use common::BorshSize;
 use shank::ShankAccount;
+use solana_program::clock::UnixTimestamp;
+use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
 
 use crate::error::OracleError;
@@ -17,7 +19,7 @@ pub struct Assertion {
     pub request: Pubkey,
 
     /// Unix timestamp of the assertion.
-    pub assertion_timestamp: i64,
+    pub assertion_timestamp: UnixTimestamp,
     /// Unix timestamp at which the dispute window expires and the assertion
     /// can be resolved.
     ///
@@ -25,7 +27,7 @@ pub struct Assertion {
     ///
     /// [`assertion_timestamp`]: Assertion::assertion_timestamp
     /// [`DISPUTE_WINDOW`]: crate::DISPUTE_WINDOW
-    pub expiration_timestamp: i64,
+    pub expiration_timestamp: UnixTimestamp,
 
     /// Asserter address.
     pub asserter: Pubkey,
@@ -63,7 +65,7 @@ impl Account for Assertion {
 }
 
 impl TryFrom<InitAssertion> for (Assertion, usize) {
-    type Error = OracleError;
+    type Error = ProgramError;
 
     fn try_from(params: InitAssertion) -> Result<(Assertion, usize), Self::Error> {
         let InitAssertion {
@@ -74,9 +76,7 @@ impl TryFrom<InitAssertion> for (Assertion, usize) {
             dispute_window,
         } = params;
 
-        let expiration_timestamp = assertion_timestamp
-            .checked_add(dispute_window)
-            .ok_or(OracleError::ArithmeticOverflow)?;
+        let expiration_timestamp = checked_add!(assertion_timestamp, i64::from(dispute_window))?;
 
         Ok((
             Assertion {
@@ -97,9 +97,9 @@ impl TryFrom<InitAssertion> for (Assertion, usize) {
 pub(crate) struct InitAssertion {
     pub request: Pubkey,
 
-    pub assertion_timestamp: i64,
+    pub assertion_timestamp: UnixTimestamp,
     pub asserter: Pubkey,
     pub asserted_value: u64,
 
-    pub dispute_window: i64,
+    pub dispute_window: u32,
 }
