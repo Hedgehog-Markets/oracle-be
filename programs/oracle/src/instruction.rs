@@ -8,13 +8,16 @@ use crate::state::RequestData;
 #[rustfmt::skip::attributes(account)]
 #[derive(Clone, VariantName, ShankContext, ShankInstruction, BorshDeserialize)]
 pub enum OracleInstruction {
-    /// Creates program [`Oracle`].
-    ///
-    /// [`Oracle`]: crate::state::Oracle
+    /// Creates program oracle.
     #[account(0, writable, name = "oracle", desc = "Oracle account")]
     #[account(1, signer, writable, name = "payer", desc = "Payer")]
     #[account(2, name = "system_program", desc = "System program")]
     CreateOracleV1(CreateOracleV1Args),
+
+    /// Updates program oracle.
+    #[account(0, writable, name = "oracle", desc = "Oracle account")]
+    #[account(1, signer, name = "authority", desc = "Oracle authority")]
+    UpdateOracleV1(UpdateOracleV1Args),
 
     /// Creates a new [`Request`].
     ///

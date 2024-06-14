@@ -9,9 +9,7 @@ use crate::{pda, utils};
 
 #[derive(Clone, BorshDeserialize)]
 pub struct CreateOracleV1Args {
-    /// Authority.
     pub authority: Pubkey,
-    /// Config.
     pub config: Config,
 }
 

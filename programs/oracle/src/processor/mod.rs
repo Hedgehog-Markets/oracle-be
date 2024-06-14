@@ -10,8 +10,10 @@ mod request;
 mod voting;
 
 mod create_oracle_v1;
+mod update_oracle_v1;
 
 pub(crate) use self::create_oracle_v1::*;
+pub(crate) use self::update_oracle_v1::*;
 
 pub fn process_instruction<'a>(
     program_id: &'a Pubkey,
@@ -26,6 +28,7 @@ pub fn process_instruction<'a>(
 
     match instruction {
         I::CreateOracleV1(args) => create_oracle_v1(program_id, accounts, args),
+        I::UpdateOracleV1(args) => update_oracle_v1(program_id, accounts, args),
         I::CreateRequest(args) => request::create(program_id, accounts, args),
         I::CreateAssertion(args) => assertion::create(program_id, accounts, args),
         I::ExpireAssertion(args) => assertion::expire(program_id, accounts, args),
