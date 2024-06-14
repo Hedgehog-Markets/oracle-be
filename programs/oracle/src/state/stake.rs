@@ -43,3 +43,25 @@ impl StakeV1 {
 impl Account for StakeV1 {
     const TYPE: AccountType = AccountType::StakeV1;
 }
+
+impl From<InitStake> for (StakeV1, usize) {
+    fn from(params: InitStake) -> (StakeV1, usize) {
+        let InitStake { owner, amount } = params;
+
+        (
+            StakeV1 {
+                account_type: StakeV1::TYPE,
+                owner,
+                delegate: owner,
+                amount,
+                lock_timestamp: UnixTimestamp::MIN,
+            },
+            StakeV1::SIZE,
+        )
+    }
+}
+
+pub(crate) struct InitStake {
+    pub owner: Pubkey,
+    pub amount: u64,
+}

@@ -1,4 +1,5 @@
 use borsh::BorshDeserialize;
+use common::cpi;
 use solana_program::account_info::AccountInfo;
 use solana_program::entrypoint::ProgramResult;
 use solana_program::pubkey::Pubkey;
@@ -28,20 +29,26 @@ pub fn create_oracle_v1<'a>(
     // Guard programs.
     utils::assert_system_program(ctx.accounts.system_program.key)?;
 
-    // Step 1: Initialize `oracle` account.
+    // Step 1: Check governance mint exists.
+    cpi::spl::mint_decimals(ctx.accounts.governance_mint)?;
+
+    // Step 2: Initialize `oracle` account.
     {
         let bump = pda::oracle::assert_pda(ctx.accounts.oracle.key)?;
         let signer_seeds = pda::oracle::seeds_with_bump(&bump);
 
-        OracleV1::init(InitOracle { authority: args.authority, config: args.config }).save(
-            InitContext {
-                account: ctx.accounts.oracle,
-                payer: ctx.accounts.payer,
-                system_program: ctx.accounts.system_program,
-                program_id,
-                signers_seeds: &[&signer_seeds],
-            },
-        )?;
+        OracleV1::init(InitOracle {
+            authority: args.authority,
+            governance_mint: *ctx.accounts.governance_mint.key,
+            config: args.config,
+        })
+        .save(InitContext {
+            account: ctx.accounts.oracle,
+            payer: ctx.accounts.payer,
+            system_program: ctx.accounts.system_program,
+            program_id,
+            signers_seeds: &[&signer_seeds],
+        })?;
     }
 
     Ok(())

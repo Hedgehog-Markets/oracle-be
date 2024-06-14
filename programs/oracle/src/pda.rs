@@ -61,6 +61,8 @@ pdas! {
     "Oracle": oracle();
     "Currency": currency(mint: Pubkey);
 
+    "Stake escrow": stake_escrow(stake: Pubkey);
+
     "Request": request(index: u64);
     "Reward": reward(request: Pubkey);
 

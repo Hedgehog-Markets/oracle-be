@@ -9,6 +9,7 @@ mod create_assertion_v1;
 mod create_currency_v1;
 mod create_oracle_v1;
 mod create_request_v1;
+mod create_stake_v1;
 mod dispute_assertion_v1;
 mod resolve_assertion_v1;
 mod submit_vote_v1;
@@ -20,6 +21,7 @@ pub(crate) use self::create_assertion_v1::*;
 pub(crate) use self::create_currency_v1::*;
 pub(crate) use self::create_oracle_v1::*;
 pub(crate) use self::create_request_v1::*;
+pub(crate) use self::create_stake_v1::*;
 pub(crate) use self::dispute_assertion_v1::*;
 pub(crate) use self::resolve_assertion_v1::*;
 pub(crate) use self::submit_vote_v1::*;
@@ -48,5 +50,6 @@ pub fn process_instruction<'a>(
         I::DisputeAssertionV1 => dispute_assertion_v1(program_id, accounts),
         I::SubmitVoteV1(args) => submit_vote_v1(program_id, accounts, args),
         I::CloseVotingV1 => close_voting_v1(program_id, accounts),
+        I::CreateStakeV1(args) => create_stake_v1(program_id, accounts, args),
     }
 }

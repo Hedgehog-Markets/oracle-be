@@ -9,8 +9,9 @@ use crate::processor::*;
 pub enum OracleInstruction {
     /// Creates program oracle.
     #[account(0, writable, name = "oracle", desc = "Oracle account")]
-    #[account(1, signer, writable, name = "payer", desc = "Payer")]
-    #[account(2, name = "system_program", desc = "System program")]
+    #[account(1, name = "governance_mint", desc = "Governance token mint")]
+    #[account(2, signer, writable, name = "payer", desc = "Payer")]
+    #[account(3, name = "system_program", desc = "System program")]
     CreateOracleV1(CreateOracleV1Args),
 
     /// Updates program oracle.
@@ -97,4 +98,16 @@ pub enum OracleInstruction {
     #[account(1, writable, name = "request", desc = "Request")]
     #[account(2, writable, name = "voting", desc = "Voting")]
     CloseVotingV1,
+
+    /// Creates a stake account.
+    #[account(0, name = "oracle", desc = "Oracle account")]
+    #[account(1, signer, writable, name = "stake", desc = "Stake")]
+    #[account(2, signer, writable, name = "mint", desc = "Stake")]
+    #[account(3, signer, writable, name = "stake_source", desc = "Stake source token account")]
+    #[account(4, signer, writable, name = "stake_escrow", desc = "Stake escrow token account")]
+    #[account(5, signer, writable, name = "wallet", desc = "Stake owner")]
+    #[account(6, signer, writable, name = "payer", desc = "Payer")]
+    #[account(7, name = "token_program", desc = "SPL token program")]
+    #[account(8, name = "system_program", desc = "System program")]
+    CreateStakeV1(CreateStakeV1Args),
 }

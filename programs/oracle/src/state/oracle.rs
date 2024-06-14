@@ -16,6 +16,8 @@ pub struct OracleV1 {
 
     /// Authority address.
     pub authority: Pubkey,
+    /// Governance token mint address.
+    pub governance_mint: Pubkey,
 
     /// Oracle config.
     pub config: Config,
@@ -46,10 +48,16 @@ impl Account for OracleV1 {
 
 impl From<InitOracle> for (OracleV1, usize) {
     fn from(params: InitOracle) -> (OracleV1, usize) {
-        let InitOracle { authority, config } = params;
+        let InitOracle { authority, governance_mint, config } = params;
 
         (
-            OracleV1 { account_type: OracleV1::TYPE, next_index: 0, authority, config },
+            OracleV1 {
+                account_type: OracleV1::TYPE,
+                next_index: 0,
+                authority,
+                governance_mint,
+                config,
+            },
             OracleV1::SIZE,
         )
     }
@@ -57,5 +65,6 @@ impl From<InitOracle> for (OracleV1, usize) {
 
 pub(crate) struct InitOracle {
     pub authority: Pubkey,
+    pub governance_mint: Pubkey,
     pub config: Config,
 }

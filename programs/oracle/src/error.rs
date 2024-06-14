@@ -92,6 +92,10 @@ pub enum OracleError {
     /// 22 - Stake voter mismatch.
     #[error("Stake delegate does not match voter")]
     StakeVoterMismatch,
+
+    /// 23 - Stake mint mismatch.
+    #[error("Stake mint address does not match")]
+    StakeMintMismatch,
 }
 
 impl PrintProgramError for OracleError {
