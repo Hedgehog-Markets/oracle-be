@@ -8,7 +8,7 @@ use crate::error::OracleError;
 use crate::instruction::accounts::{Context, ExpireAssertionAccounts};
 use crate::instruction::ExpireAssertionArgs;
 use crate::pda;
-use crate::state::{Account, AccountSized, AssertionV1, RequestV1, RequestState};
+use crate::state::{Account, AccountSized, AssertionV1, RequestState, RequestV1};
 
 pub fn expire<'a>(
     program_id: &'a Pubkey,
@@ -29,7 +29,7 @@ fn expire_v1(
 ) -> ProgramResult {
     let ExpireAssertionArgs::V1 {} = args;
 
-    let ExpireAssertionAccounts { oracle, request, assertion } = ctx.accounts;
+    let ExpireAssertionAccounts { request, assertion, .. } = ctx.accounts;
 
     let request_address = request.key;
 
@@ -37,7 +37,7 @@ fn expire_v1(
 
     // Check request state.
     {
-        pda::request::assert_pda(request_address, oracle.key, &request.index)?;
+        pda::request::assert_pda(request_address, &request.index)?;
 
         match request.state {
             RequestState::Asserted => {}

@@ -1,7 +1,10 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 use common::BorshSize;
 use shank::ShankAccount;
+use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
+
+use crate::pda;
 
 use super::{Account, AccountType};
 
@@ -20,6 +23,12 @@ pub struct CurrencyV1 {
     ///
     /// [`Assertion`]: crate::state::Assertion
     pub bond_range: (u64, u64),
+}
+
+impl CurrencyV1 {
+    pub fn assert_pda(&self, currency: &Pubkey) -> Result<u8, ProgramError> {
+        pda::currency::assert_pda(currency, &self.mint)
+    }
 }
 
 impl Account for CurrencyV1 {

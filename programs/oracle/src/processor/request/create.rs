@@ -57,8 +57,8 @@ fn create_v1(
     let reward_currency = CurrencyV1::from_account_info(reward_currency_info)?;
     let bond_currency = CurrencyV1::from_account_info(bond_currency_info)?;
 
-    pda::currency::assert_pda(reward_currency_info.key, oracle.key, &reward_currency.mint)?;
-    pda::currency::assert_pda(bond_currency_info.key, oracle.key, &bond_currency.mint)?;
+    pda::currency::assert_pda(reward_currency_info.key, &reward_currency.mint)?;
+    pda::currency::assert_pda(bond_currency_info.key, &bond_currency.mint)?;
 
     // Check the reward mint matches the reward currency.
     if !common::cmp_pubkeys(&reward_currency.mint, reward_mint.key) {
@@ -87,8 +87,8 @@ fn create_v1(
 
     // Step 2: Initialize `request` account.
     {
-        let request_bump = pda::request::assert_pda(request.key, oracle.key, &request_index)?;
-        let signer_seeds = pda::request::seeds_with_bump(oracle.key, &request_index, &request_bump);
+        let request_bump = pda::request::assert_pda(request.key, &request_index)?;
+        let signer_seeds = pda::request::seeds_with_bump(&request_index, &request_bump);
 
         RequestV1::try_init(InitRequest {
             index: request_index,

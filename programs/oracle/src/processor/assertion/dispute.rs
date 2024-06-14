@@ -75,7 +75,7 @@ fn dispute_v1(
 
         // Check request state.
         {
-            pda::request::assert_pda(request_address, oracle.key, &request.index)?;
+            pda::request::assert_pda(request_address, &request.index)?;
 
             match request.state {
                 RequestState::Asserted => {}

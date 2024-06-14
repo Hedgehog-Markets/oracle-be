@@ -59,7 +59,7 @@ fn submit_v1(
 
         let request = RequestV1::from_account_info(request)?;
 
-        pda::request::assert_pda(request_address, oracle.key, &request.index)?;
+        pda::request::assert_pda(request_address, &request.index)?;
 
         if request.state != RequestState::Disputed {
             return Err(OracleError::NotDisputed.into());

@@ -29,6 +29,12 @@ pub enum OracleInstruction {
     #[account(6, name = "system_program", desc = "System program")]
     CreateCurrencyV1(CreateCurrencyV1Args),
 
+    /// Updates a currency.
+    #[account(0, name = "oracle", desc = "Oracle account")]
+    #[account(1, writable, name = "currency", desc = "Currency")]
+    #[account(2, name = "authority", desc = "Oracle authority")]
+    UpdateCurrencyV1(UpdateCurrencyV1Args),
+
     /// Creates a new [`Request`].
     ///
     /// [`Request`]: crate::state::Request

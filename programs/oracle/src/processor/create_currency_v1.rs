@@ -45,13 +45,8 @@ pub fn create_currency_v1<'a>(
 
     // Step 2: Initialize currency account.
     {
-        let bump = pda::currency::assert_pda(
-            ctx.accounts.currency.key,
-            ctx.accounts.oracle.key,
-            ctx.accounts.mint.key,
-        )?;
-        let signer_seeds =
-            pda::currency::seeds_with_bump(ctx.accounts.oracle.key, ctx.accounts.mint.key, &bump);
+        let bump = pda::currency::assert_pda(ctx.accounts.currency.key, ctx.accounts.mint.key)?;
+        let signer_seeds = pda::currency::seeds_with_bump(ctx.accounts.mint.key, &bump);
 
         CurrencyV1::init(InitCurrency {
             mint: *ctx.accounts.mint.key,

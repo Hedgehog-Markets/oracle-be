@@ -10,8 +10,8 @@ use crate::error::OracleError;
 use crate::instruction::accounts::{Context, CreateAssertionAccounts};
 use crate::instruction::CreateAssertionArgs;
 use crate::state::{
-    Account, AccountSized, AssertionV1, InitAccount, InitAssertion, InitContext, OracleV1, RequestV1,
-    RequestState,
+    Account, AccountSized, AssertionV1, InitAccount, InitAssertion, InitContext, OracleV1,
+    RequestState, RequestV1,
 };
 use crate::{pda, utils};
 
@@ -72,7 +72,7 @@ fn create_v1(
 
         let mut request = RequestV1::from_account_info_mut(request)?;
 
-        pda::request::assert_pda(request_address, oracle.key, &request.index)?;
+        pda::request::assert_pda(request_address, &request.index)?;
 
         if request.state != RequestState::Requested {
             return Err(OracleError::AlreadyAsserted.into());

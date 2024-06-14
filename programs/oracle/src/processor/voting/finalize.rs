@@ -46,7 +46,7 @@ fn finalize_v1(
 
     // Check request.
     {
-        pda::request::assert_pda(request_address, oracle.key, &request.index)?;
+        pda::request::assert_pda(request_address, &request.index)?;
 
         // Check request is not disputed.
         if request.state != RequestState::Disputed {
