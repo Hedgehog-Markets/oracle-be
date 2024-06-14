@@ -116,13 +116,6 @@ impl RequestData {
         if valid { Ok(()) } else { Err(OracleError::InvalidValue) }
     }
 
-    pub fn validate_dispute(&self, asserted: u64, disputed: u64) -> Result<(), OracleError> {
-        let valid = match self {
-            Self::YesNo { .. } => asserted != disputed,
-        };
-        if valid { Ok(()) } else { Err(OracleError::InvalidDispute) }
-    }
-
     fn serialized_size(&self) -> Option<usize> {
         let variant_size = match self {
             Self::YesNo { question } => 4usize.checked_add(question.len())?,

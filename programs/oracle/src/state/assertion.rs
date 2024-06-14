@@ -36,8 +36,6 @@ pub struct AssertionV1 {
 
     /// Value submitted by the asserter.
     pub asserted_value: u64,
-    /// Value submitted by the disputer.
-    pub disputed_value: u64,
 }
 
 impl AssertionV1 {
@@ -87,7 +85,6 @@ impl TryFrom<InitAssertion> for (AssertionV1, usize) {
                 asserter,
                 disputer: Pubkey::default(),
                 asserted_value,
-                disputed_value: 0,
             },
             AssertionV1::SIZE,
         ))
