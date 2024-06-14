@@ -35,8 +35,6 @@ pub fn create_assertion_v1<'a>(
     utils::assert_token_program(ctx.accounts.token_program.key)?;
     utils::assert_system_program(ctx.accounts.system_program.key)?;
 
-    let now = Clock::get()?.unix_timestamp;
-
     let dispute_window: u32;
 
     // Step 1: Get oracle dispute window.
@@ -47,6 +45,7 @@ pub fn create_assertion_v1<'a>(
     }
 
     let bond: u64;
+    let now = Clock::get()?.unix_timestamp;
 
     // Step 2: Update request state.
     {

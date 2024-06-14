@@ -34,9 +34,7 @@ pub enum OracleInstruction {
     #[account(2, name = "authority", desc = "Oracle authority")]
     UpdateCurrencyV1(UpdateCurrencyV1Args),
 
-    /// Creates a new [`Request`].
-    ///
-    /// [`Request`]: crate::state::Request
+    /// Creates a new request.
     #[account(0, writable, name = "oracle", desc = "Oracle account")]
     #[account(1, writable, name = "request", desc = "Request")]
     #[account(2, name = "reward_currency", desc = "Reward currency")]
@@ -50,10 +48,7 @@ pub enum OracleInstruction {
     #[account(10, name = "system_program", desc = "System program")]
     CreateRequestV1(CreateRequestV1Args),
 
-    /// Creates an [`Assertion`] for a [`Request`].
-    ///
-    /// [`Assertion`]: crate::state::Assertion
-    /// [`Request`]: crate::state::Request
+    /// Creates an assertion for a request.
     #[account(0, name = "oracle", desc = "Oracle account")]
     #[account(1, writable, name = "request", desc = "Request")]
     #[account(2, writable, name = "assertion", desc = "Assertion")]
@@ -66,13 +61,11 @@ pub enum OracleInstruction {
     #[account(9, name = "system_program", desc = "System program")]
     CreateAssertionV1(CreateAssertionV1Args),
 
-    /// Resolves an [`Assertion`] after the expiration timestamp.
-    ///
-    /// [`Assertion`]: crate::state::Assertion
+    /// Resolves an undisputed assertion after the expiration timestamp.
     #[account(0, name = "oracle", desc = "Oracle account")]
     #[account(1, writable, name = "request", desc = "Request")]
     #[account(2, name = "assertion", desc = "Assertion")]
-    ExpireAssertion(ExpireAssertionArgs),
+    ResolveAssertionV1,
 
     /// Disputes an [`Assertion`] for a [`Request`].
     ///
@@ -112,11 +105,6 @@ pub enum OracleInstruction {
     #[account(1, writable, name = "request", desc = "Request")]
     #[account(2, writable, name = "voting", desc = "Voting")]
     FinalizeVoting(FinalizeVotingArgs),
-}
-
-#[derive(Clone, BorshDeserialize, BorshSerialize)]
-pub enum ExpireAssertionArgs {
-    V1 {},
 }
 
 #[derive(Clone, BorshDeserialize, BorshSerialize)]
