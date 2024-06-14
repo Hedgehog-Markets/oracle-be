@@ -81,10 +81,7 @@ pub enum OracleInstruction {
     #[account(10, name = "system_program", desc = "System program")]
     DisputeAssertionV1,
 
-    /// Submits a [`Vote`] for [`Voting`].
-    ///
-    /// [`Vote`]: crate::state::Vote
-    /// [`Voting`]: crate::state::Voting
+    /// Submits a vote for resolving a disputed assertion.
     #[account(0, name = "oracle", desc = "Oracle account")]
     #[account(1, name = "request", desc = "Request")]
     #[account(2, writable, name = "voting", desc = "Voting")]
@@ -93,7 +90,7 @@ pub enum OracleInstruction {
     #[account(5, signer, name = "voter", desc = "Voter")]
     #[account(6, signer, writable, name = "payer", desc = "Payer")]
     #[account(7, name = "system_program", desc = "System program")]
-    SubmitVote(SubmitVoteArgs),
+    SubmitVoteV1(SubmitVoteV1Args),
 
     /// Finalizes [`Voting`].
     ///
@@ -102,14 +99,6 @@ pub enum OracleInstruction {
     #[account(1, writable, name = "request", desc = "Request")]
     #[account(2, writable, name = "voting", desc = "Voting")]
     FinalizeVoting(FinalizeVotingArgs),
-}
-
-#[derive(Clone, BorshDeserialize, BorshSerialize)]
-pub enum SubmitVoteArgs {
-    V1 {
-        /// Value to vote for.
-        value: u64,
-    },
 }
 
 #[derive(Clone, BorshDeserialize, BorshSerialize)]

@@ -4,6 +4,8 @@ use shank::ShankAccount;
 use solana_program::clock::UnixTimestamp;
 use solana_program::pubkey::Pubkey;
 
+use crate::error::OracleError;
+
 use super::{Account, AccountType};
 
 // TODO:
@@ -27,6 +29,15 @@ pub struct StakeV1 {
 
     /// The Unix timestamp the stake is locked until.
     pub lock_timestamp: UnixTimestamp,
+}
+
+impl StakeV1 {
+    pub fn assert_voter(&self, voter: &Pubkey) -> Result<(), OracleError> {
+        if !common::cmp_pubkeys(&self.owner, voter) && !common::cmp_pubkeys(&self.delegate, voter) {
+            return Err(OracleError::StakeVoterMismatch);
+        }
+        Ok(())
+    }
 }
 
 impl Account for StakeV1 {

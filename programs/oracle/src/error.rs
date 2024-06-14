@@ -88,6 +88,10 @@ pub enum OracleError {
     /// 21 - Serialization error.
     #[error("Failed to serialize account")]
     SerializationError,
+
+    /// 22 - Stake voter mismatch.
+    #[error("Stake delegate does not match voter")]
+    StakeVoterMismatch,
 }
 
 impl PrintProgramError for OracleError {

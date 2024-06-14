@@ -69,5 +69,5 @@ pdas! {
     "Dispute bond": dispute_bond(request: Pubkey);
 
     "Voting": voting(request: Pubkey);
-    "Vote": vote(voting: Pubkey, wallet: Pubkey);
+    "Vote": vote(voting: Pubkey, stake: Pubkey);
 }
