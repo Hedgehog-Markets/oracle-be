@@ -64,7 +64,7 @@ pub enum OracleInstruction {
     #[account(7, signer, writable, name = "payer", desc = "Payer")]
     #[account(8, name = "token_program", desc = "SPL token program")]
     #[account(9, name = "system_program", desc = "System program")]
-    CreateAssertion(CreateAssertionArgs),
+    CreateAssertionV1(CreateAssertionV1Args),
 
     /// Resolves an [`Assertion`] after the expiration timestamp.
     ///
@@ -112,14 +112,6 @@ pub enum OracleInstruction {
     #[account(1, writable, name = "request", desc = "Request")]
     #[account(2, writable, name = "voting", desc = "Voting")]
     FinalizeVoting(FinalizeVotingArgs),
-}
-
-#[derive(Clone, BorshDeserialize, BorshSerialize)]
-pub enum CreateAssertionArgs {
-    V1 {
-        /// Value to assert.
-        value: u64,
-    },
 }
 
 #[derive(Clone, BorshDeserialize, BorshSerialize)]

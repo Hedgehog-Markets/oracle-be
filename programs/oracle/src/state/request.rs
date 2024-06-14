@@ -6,6 +6,7 @@ use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
 
 use crate::error::OracleError;
+use crate::pda;
 
 use super::{Account, AccountSized, AccountType};
 
@@ -83,6 +84,10 @@ impl RequestV1 {
         + RequestState::SIZE    // state
         + u64::SIZE             // value
         ;
+
+    pub fn assert_pda(&self, request: &Pubkey) -> Result<u8, ProgramError> {
+        pda::request::assert_pda(request, &self.index)
+    }
 
     pub fn validate_bond_mint(&self, mint: &Pubkey) -> Result<(), OracleError> {
         if !common::cmp_pubkeys(&self.bond_mint, mint) {
