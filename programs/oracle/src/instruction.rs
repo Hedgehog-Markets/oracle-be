@@ -3,7 +3,6 @@ use common::VariantName;
 use shank::{ShankContext, ShankInstruction};
 
 use crate::processor::*;
-use crate::state::RequestData;
 
 #[rustfmt::skip::attributes(account)]
 #[derive(Clone, VariantName, ShankContext, ShankInstruction, BorshDeserialize)]
@@ -49,7 +48,7 @@ pub enum OracleInstruction {
     #[account(8, signer, writable, name = "payer", desc = "Payer")]
     #[account(9, name = "token_program", desc = "SPL token program")]
     #[account(10, name = "system_program", desc = "System program")]
-    CreateRequest(CreateRequestArgs),
+    CreateRequestV1(CreateRequestV1Args),
 
     /// Creates an [`Assertion`] for a [`Request`].
     ///
@@ -113,20 +112,6 @@ pub enum OracleInstruction {
     #[account(1, writable, name = "request", desc = "Request")]
     #[account(2, writable, name = "voting", desc = "Voting")]
     FinalizeVoting(FinalizeVotingArgs),
-}
-
-#[derive(Clone, BorshDeserialize, BorshSerialize)]
-pub enum CreateRequestArgs {
-    V1 {
-        /// Amount rewarded to the asserter/disputer on resolution.
-        reward: u64,
-        /// Amount to required to bond in order to assert/dispute value.
-        bond: u64,
-        /// Unix timestamp after which a value can be asserted.
-        timestamp: i64,
-        /// Request data.
-        data: RequestData,
-    },
 }
 
 #[derive(Clone, BorshDeserialize, BorshSerialize)]

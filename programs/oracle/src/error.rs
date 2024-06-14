@@ -65,9 +65,9 @@ pub enum OracleError {
     #[error("Voting window has expired")]
     VotingWindowExpired,
 
-    /// 15 - Reward mint mismatch.
-    #[error("Reward mint address does not match")]
-    RewardMintMismatch,
+    /// 15 - Currency mint mismatch.
+    #[error("Currency mint address does not match")]
+    CurrencyMintMismatch,
 
     /// 16 - Reward out of bounds.
     #[error("Reward must be within valid bounds")]

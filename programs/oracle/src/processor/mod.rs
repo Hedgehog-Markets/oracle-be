@@ -5,16 +5,17 @@ use solana_program::entrypoint::ProgramResult;
 use solana_program::pubkey::Pubkey;
 
 mod assertion;
-mod request;
 mod voting;
 
 mod create_currency_v1;
 mod create_oracle_v1;
+mod create_request_v1;
 mod update_currency_v1;
 mod update_oracle_v1;
 
 pub(crate) use self::create_currency_v1::*;
 pub(crate) use self::create_oracle_v1::*;
+pub(crate) use self::create_request_v1::*;
 pub(crate) use self::update_currency_v1::*;
 pub(crate) use self::update_oracle_v1::*;
 
@@ -34,7 +35,8 @@ pub fn process_instruction<'a>(
         I::UpdateOracleV1(args) => update_oracle_v1(program_id, accounts, args),
         I::CreateCurrencyV1(args) => create_currency_v1(program_id, accounts, args),
         I::UpdateCurrencyV1(args) => update_currency_v1(program_id, accounts, args),
-        I::CreateRequest(args) => request::create(program_id, accounts, args),
+        I::CreateRequestV1(args) => create_request_v1(program_id, accounts, args),
+
         I::CreateAssertion(args) => assertion::create(program_id, accounts, args),
         I::ExpireAssertion(args) => assertion::expire(program_id, accounts, args),
         I::DisputeAssertion(args) => assertion::dispute(program_id, accounts, args),

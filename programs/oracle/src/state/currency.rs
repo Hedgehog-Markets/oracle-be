@@ -4,7 +4,9 @@ use shank::ShankAccount;
 use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
 
+use crate::error::OracleError;
 use crate::pda;
+use crate::utils::Bounds;
 
 use super::{Account, AccountType};
 
@@ -18,16 +20,23 @@ pub struct CurrencyV1 {
     /// The valid reward range when creating a [`Request`].
     ///
     /// [`Request`]: crate::state::Request
-    pub reward_range: (u64, u64),
+    pub reward_range: Bounds,
     /// The valid bond range when creating an [`Assertion`].
     ///
     /// [`Assertion`]: crate::state::Assertion
-    pub bond_range: (u64, u64),
+    pub bond_range: Bounds,
 }
 
 impl CurrencyV1 {
     pub fn assert_pda(&self, currency: &Pubkey) -> Result<u8, ProgramError> {
         pda::currency::assert_pda(currency, &self.mint)
+    }
+
+    pub fn assert_mint(&self, mint: &Pubkey) -> Result<(), OracleError> {
+        if !common::cmp_pubkeys(&self.mint, mint) {
+            return Err(OracleError::CurrencyMintMismatch);
+        }
+        Ok(())
     }
 }
 
@@ -48,6 +57,6 @@ impl From<InitCurrency> for (CurrencyV1, usize) {
 
 pub(crate) struct InitCurrency {
     pub mint: Pubkey,
-    pub reward_range: (u64, u64),
-    pub bond_range: (u64, u64),
+    pub reward_range: Bounds,
+    pub bond_range: Bounds,
 }

@@ -5,6 +5,7 @@ use solana_program::pubkey::Pubkey;
 
 use crate::instruction::accounts::CreateCurrencyV1Accounts;
 use crate::state::{Account, CurrencyV1, InitAccount, InitContext, InitCurrency, OracleV1};
+use crate::utils::Bounds;
 use crate::{pda, utils};
 
 // TODO: Validate ranges.
@@ -14,11 +15,11 @@ pub struct CreateCurrencyV1Args {
     /// The valid reward range when creating a [`Request`].
     ///
     /// [`Request`]: crate::state::Request
-    pub reward_range: (u64, u64),
+    pub reward_range: Bounds,
     /// The valid bond range when creating an [`Assertion`].
     ///
     /// [`Assertion`]: crate::state::Assertion
-    pub bond_range: (u64, u64),
+    pub bond_range: Bounds,
 }
 
 pub fn create_currency_v1<'a>(

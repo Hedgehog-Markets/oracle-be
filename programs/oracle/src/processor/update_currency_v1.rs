@@ -5,12 +5,13 @@ use solana_program::pubkey::Pubkey;
 
 use crate::instruction::accounts::UpdateCurrencyV1Accounts;
 use crate::state::{Account, AccountSized, CurrencyV1, OracleV1};
+use crate::utils::Bounds;
 use crate::{pda, utils};
 
 #[derive(Clone, BorshDeserialize)]
 pub struct UpdateCurrencyV1Args {
-    pub new_reward_range: (u64, u64),
-    pub new_bond_range: (u64, u64),
+    pub new_reward_range: Bounds,
+    pub new_bond_range: Bounds,
 }
 
 pub fn update_currency_v1<'a>(

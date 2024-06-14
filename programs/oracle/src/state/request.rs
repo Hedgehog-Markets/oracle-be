@@ -172,7 +172,7 @@ pub(crate) struct InitRequest {
     pub bond: u64,
     pub bond_mint: Pubkey,
 
-    pub timestamp: i64,
+    pub timestamp: UnixTimestamp,
     pub data: RequestData,
 }
 
