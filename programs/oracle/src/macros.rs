@@ -12,13 +12,6 @@ macro_rules! log {
     };
 }
 
-/// Print an error message to the log.
-macro_rules! err {
-    ($($args:tt)*) => {
-        ::solana_program::log::sol_log(&format!("Error: {}", format_args!($($args)*)))
-    };
-}
-
 /// Adds numbers checking for overflow.
 macro_rules! checked_add {
     ($left:expr, $right:expr $(,)?) => {

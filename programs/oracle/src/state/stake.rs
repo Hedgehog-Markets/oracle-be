@@ -11,8 +11,8 @@ use super::{Account, AccountType};
 // - merging staking accounts
 //   - cannot be done if an account has a lock for an active vote
 
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize, BorshSize, ShankAccount)]
-pub struct Stake {
+#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSize, ShankAccount)]
+pub struct StakeV1 {
     account_type: AccountType,
 
     /// Owner of the stake.
@@ -29,6 +29,6 @@ pub struct Stake {
     pub lock_timestamp: UnixTimestamp,
 }
 
-impl Account for Stake {
-    const TYPE: AccountType = AccountType::Stake;
+impl Account for StakeV1 {
+    const TYPE: AccountType = AccountType::StakeV1;
 }

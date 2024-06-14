@@ -8,7 +8,7 @@ use crate::error::OracleError;
 use crate::instruction::accounts::{Context, CreateRequestAccounts};
 use crate::instruction::CreateRequestArgs;
 use crate::state::{
-    Account, AccountSized, Currency, InitAccount, InitContext, InitRequest, Oracle, Request,
+    Account, AccountSized, CurrencyV1, InitAccount, InitContext, InitRequest, OracleV1, RequestV1,
 };
 use crate::{pda, utils};
 
@@ -54,8 +54,8 @@ fn create_v1(
 
     pda::oracle::assert_pda(oracle.key)?;
 
-    let reward_currency = Currency::from_account_info(reward_currency_info)?;
-    let bond_currency = Currency::from_account_info(bond_currency_info)?;
+    let reward_currency = CurrencyV1::from_account_info(reward_currency_info)?;
+    let bond_currency = CurrencyV1::from_account_info(bond_currency_info)?;
 
     pda::currency::assert_pda(
         reward_currency_info.key,
@@ -87,7 +87,7 @@ fn create_v1(
 
     // Step 1: Get and increment next request index.
     {
-        let mut oracle = Oracle::from_account_info_mut(oracle)?;
+        let mut oracle = OracleV1::from_account_info_mut(oracle)?;
 
         request_index = oracle.next_index;
 
@@ -100,7 +100,7 @@ fn create_v1(
         let request_bump = pda::request::assert_pda(request.key, oracle.key, &request_index)?;
         let signer_seeds = pda::request::seeds_with_bump(oracle.key, &request_index, &request_bump);
 
-        Request::try_init(InitRequest {
+        RequestV1::try_init(InitRequest {
             index: request_index,
             creator: *creator.key,
             reward,
@@ -115,7 +115,7 @@ fn create_v1(
             payer,
             system_program,
             program_id,
-            signer_seeds: &[&signer_seeds],
+            signers_seeds: &[&signer_seeds],
         })?;
     }
 

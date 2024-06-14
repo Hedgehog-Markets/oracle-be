@@ -5,8 +5,8 @@ use solana_program::pubkey::Pubkey;
 
 use super::{Account, AccountType};
 
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize, BorshSize, ShankAccount)]
-pub struct Currency {
+#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSize, ShankAccount)]
+pub struct CurrencyV1 {
     account_type: AccountType,
 
     /// The mint address.
@@ -22,15 +22,18 @@ pub struct Currency {
     pub bond_range: (u64, u64),
 }
 
-impl Account for Currency {
-    const TYPE: AccountType = AccountType::Currency;
+impl Account for CurrencyV1 {
+    const TYPE: AccountType = AccountType::CurrencyV1;
 }
 
-impl From<InitCurrency> for (Currency, usize) {
-    fn from(params: InitCurrency) -> (Currency, usize) {
+impl From<InitCurrency> for (CurrencyV1, usize) {
+    fn from(params: InitCurrency) -> (CurrencyV1, usize) {
         let InitCurrency { mint, reward_range, bond_range } = params;
 
-        (Currency { account_type: Currency::TYPE, mint, reward_range, bond_range }, Currency::SIZE)
+        (
+            CurrencyV1 { account_type: CurrencyV1::TYPE, mint, reward_range, bond_range },
+            CurrencyV1::SIZE,
+        )
     }
 }
 

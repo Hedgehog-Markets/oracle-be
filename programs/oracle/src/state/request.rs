@@ -9,8 +9,8 @@ use crate::error::OracleError;
 
 use super::{Account, AccountSized, AccountType};
 
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize, ShankAccount)]
-pub struct Request {
+#[derive(Clone, BorshDeserialize, BorshSerialize, ShankAccount)]
+pub struct RequestV1 {
     account_type: AccountType,
 
     /// Index of the request in the oracle.
@@ -45,7 +45,7 @@ pub struct Request {
     pub data: RequestData,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, BorshDeserialize, BorshSerialize, BorshSize)]
+#[derive(Clone, Copy, PartialEq, Eq, BorshDeserialize, BorshSerialize, BorshSize)]
 #[repr(u8)]
 pub enum RequestState {
     /// Request pending a proposal.
@@ -58,7 +58,7 @@ pub enum RequestState {
     Resolved,
 }
 
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize)]
+#[derive(Clone, BorshDeserialize, BorshSerialize)]
 pub enum RequestData {
     /// Yes/No request:
     /// - 0 = No
@@ -69,7 +69,7 @@ pub enum RequestData {
     },
 }
 
-impl Request {
+impl RequestV1 {
     const BASE_SIZE: usize =
         AccountType::SIZE       // account_type
         + u64::SIZE             // index
@@ -99,8 +99,8 @@ impl Request {
     }
 }
 
-impl Account for Request {
-    const TYPE: AccountType = AccountType::Request;
+impl Account for RequestV1 {
+    const TYPE: AccountType = AccountType::RequestV1;
 }
 
 impl RequestData {
@@ -126,7 +126,7 @@ impl RequestData {
     }
 }
 
-impl AccountSized for Request {
+impl AccountSized for RequestV1 {
     const IS_FIXED_SIZE: bool = false;
 
     fn serialized_size(&self) -> Option<usize> {
@@ -134,15 +134,15 @@ impl AccountSized for Request {
     }
 }
 
-impl TryFrom<InitRequest> for (Request, usize) {
+impl TryFrom<InitRequest> for (RequestV1, usize) {
     type Error = ProgramError;
 
-    fn try_from(params: InitRequest) -> Result<(Request, usize), Self::Error> {
+    fn try_from(params: InitRequest) -> Result<(RequestV1, usize), Self::Error> {
         let InitRequest { index, creator, reward, reward_mint, bond, bond_mint, timestamp, data } =
             params;
 
-        let request = Request {
-            account_type: Request::TYPE,
+        let request = RequestV1 {
+            account_type: RequestV1::TYPE,
             index,
             creator,
             reward,
@@ -204,7 +204,7 @@ mod tests {
             data: RequestData::YesNo { question: "another example question?".to_owned() },
         };
 
-        let (request, expected) = <(Request, usize)>::try_from(init).unwrap();
+        let (request, expected) = <(RequestV1, usize)>::try_from(init).unwrap();
         let actual = common_test::serialized_len(&request).unwrap();
 
         assert_eq!(expected, actual);

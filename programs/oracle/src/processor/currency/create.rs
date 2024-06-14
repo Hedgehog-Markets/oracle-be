@@ -6,7 +6,7 @@ use solana_program::pubkey::Pubkey;
 use crate::error::OracleError;
 use crate::instruction::accounts::{Context, CreateCurrencyAccounts};
 use crate::instruction::CreateCurrencyArgs;
-use crate::state::{Account, Currency, InitAccount, InitContext, InitCurrency, Oracle};
+use crate::state::{Account, CurrencyV1, InitAccount, InitContext, InitCurrency, OracleV1};
 use crate::{pda, utils};
 
 pub fn create<'a>(
@@ -49,7 +49,7 @@ fn create_v1(
 
     // Step 1: Check authority.
     {
-        let oracle = Oracle::from_account_info(oracle)?;
+        let oracle = OracleV1::from_account_info(oracle)?;
 
         if !common::cmp_pubkeys(&oracle.authority, authority.key) {
             return Err(OracleError::OracleAuthorityMismatch.into());
@@ -63,13 +63,13 @@ fn create_v1(
         let signer_seeds =
             pda::currency::seeds_with_bump(oracle.key, mint.key, token_program.key, &currency_bump);
 
-        Currency::init(InitCurrency { mint: *mint.key, reward_range, bond_range }).save(
+        CurrencyV1::init(InitCurrency { mint: *mint.key, reward_range, bond_range }).save(
             InitContext {
                 account: currency,
                 payer,
                 system_program,
                 program_id,
-                signer_seeds: &[&signer_seeds],
+                signers_seeds: &[&signer_seeds],
             },
         )?;
     }

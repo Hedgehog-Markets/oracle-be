@@ -6,9 +6,12 @@ use solana_program::pubkey::Pubkey;
 
 mod assertion;
 mod currency;
-mod oracle;
 mod request;
 mod voting;
+
+mod create_oracle_v1;
+
+pub(crate) use self::create_oracle_v1::*;
 
 pub fn process_instruction<'a>(
     program_id: &'a Pubkey,
@@ -22,7 +25,7 @@ pub fn process_instruction<'a>(
     log!("Instruction: {}", instruction.variant_name());
 
     match instruction {
-        I::CreateOracle(args) => oracle::create(program_id, accounts, args),
+        I::CreateOracleV1(args) => create_oracle_v1(program_id, accounts, args),
         I::CreateRequest(args) => request::create(program_id, accounts, args),
         I::CreateAssertion(args) => assertion::create(program_id, accounts, args),
         I::ExpireAssertion(args) => assertion::expire(program_id, accounts, args),

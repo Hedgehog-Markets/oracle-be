@@ -8,7 +8,7 @@ use crate::error::OracleError;
 use crate::instruction::accounts::{Context, ExpireAssertionAccounts};
 use crate::instruction::ExpireAssertionArgs;
 use crate::pda;
-use crate::state::{Account, AccountSized, Assertion, Request, RequestState};
+use crate::state::{Account, AccountSized, AssertionV1, RequestV1, RequestState};
 
 pub fn expire<'a>(
     program_id: &'a Pubkey,
@@ -33,7 +33,7 @@ fn expire_v1(
 
     let request_address = request.key;
 
-    let mut request = Request::from_account_info_mut(request)?;
+    let mut request = RequestV1::from_account_info_mut(request)?;
 
     // Check request state.
     {
@@ -50,7 +50,7 @@ fn expire_v1(
     // Check assertion address.
     pda::assertion::assert_pda(assertion.key, request_address)?;
 
-    let assertion = Assertion::from_account_info(assertion)?;
+    let assertion = AssertionV1::from_account_info(assertion)?;
     let now = Clock::get()?;
 
     // Check expiration timestamp.

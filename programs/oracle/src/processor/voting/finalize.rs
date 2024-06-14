@@ -8,7 +8,7 @@ use crate::error::OracleError;
 use crate::instruction::accounts::{Context, FinalizeVotingAccounts};
 use crate::instruction::FinalizeVotingArgs;
 use crate::pda;
-use crate::state::{Account, AccountSized, Oracle, Request, RequestState, Voting};
+use crate::state::{Account, AccountSized, OracleV1, RequestState, RequestV1, VotingV1};
 
 pub fn finalize<'a>(
     program_id: &'a Pubkey,
@@ -35,14 +35,14 @@ fn finalize_v1(
 
     // Get oracle voting window.
     {
-        let oracle = Oracle::from_account_info(oracle)?;
+        let oracle = OracleV1::from_account_info(oracle)?;
 
         voting_window = oracle.config.voting_window;
     }
 
     let request_address = request.key;
 
-    let mut request = Request::from_account_info_mut(request)?;
+    let mut request = RequestV1::from_account_info_mut(request)?;
 
     // Check request.
     {
@@ -58,7 +58,7 @@ fn finalize_v1(
 
     let now = Clock::get()?;
 
-    let mut voting = Voting::from_account_info_mut(voting)?;
+    let mut voting = VotingV1::from_account_info_mut(voting)?;
 
     // Check the voting window has expired.
     if now.unix_timestamp < voting.end_timestamp {

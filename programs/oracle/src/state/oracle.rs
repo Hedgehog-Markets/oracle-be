@@ -3,10 +3,12 @@ use common::BorshSize;
 use shank::ShankAccount;
 use solana_program::pubkey::Pubkey;
 
+use crate::error::OracleError;
+
 use super::{Account, AccountType};
 
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize, BorshSize, ShankAccount)]
-pub struct Oracle {
+#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSize, ShankAccount)]
+pub struct OracleV1 {
     account_type: AccountType,
 
     /// Index for the next request.
@@ -19,7 +21,7 @@ pub struct Oracle {
     pub config: Config,
 }
 
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize, BorshSize)]
+#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSize)]
 pub struct Config {
     /// The duration of the dispute window in seconds.
     pub dispute_window: u32,
@@ -29,15 +31,27 @@ pub struct Config {
     pub bond_fee_bps: u16,
 }
 
-impl Account for Oracle {
-    const TYPE: AccountType = AccountType::Oracle;
+impl OracleV1 {
+    pub fn assert_authority(&self, authority: &Pubkey) -> Result<(), OracleError> {
+        if !common::cmp_pubkeys(&self.authority, authority) {
+            return Err(OracleError::OracleAuthorityMismatch);
+        }
+        Ok(())
+    }
 }
 
-impl From<InitOracle> for (Oracle, usize) {
-    fn from(params: InitOracle) -> (Oracle, usize) {
+impl Account for OracleV1 {
+    const TYPE: AccountType = AccountType::OracleV1;
+}
+
+impl From<InitOracle> for (OracleV1, usize) {
+    fn from(params: InitOracle) -> (OracleV1, usize) {
         let InitOracle { authority, config } = params;
 
-        (Oracle { account_type: Oracle::TYPE, next_index: 0, authority, config }, Oracle::SIZE)
+        (
+            OracleV1 { account_type: OracleV1::TYPE, next_index: 0, authority, config },
+            OracleV1::SIZE,
+        )
     }
 }
 

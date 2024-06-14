@@ -80,6 +80,14 @@ pub enum OracleError {
     /// 19 - Oracle authority mismatch.
     #[error("Oracle authority address does not match")]
     OracleAuthorityMismatch,
+
+    /// 20 - Deserialization error.
+    #[error("Failed to deserialize account")]
+    DeserializationError,
+
+    /// 21 - Serialization error.
+    #[error("Failed to serialize account")]
+    SerializationError,
 }
 
 impl PrintProgramError for OracleError {

@@ -11,8 +11,8 @@ use crate::error::OracleError;
 use crate::instruction::accounts::{Context, SubmitVoteAccounts};
 use crate::instruction::SubmitVoteArgs;
 use crate::state::{
-    Account, AccountSized, InitAccount, InitContext, InitVote, Oracle, Request, RequestState, Vote,
-    Voting,
+    Account, AccountSized, InitAccount, InitContext, InitVote, OracleV1, RequestState, RequestV1,
+    VoteV1, VotingV1,
 };
 use crate::{pda, utils};
 
@@ -48,7 +48,7 @@ fn submit_v1(
 
     // Get oracle voting window.
     {
-        let oracle = Oracle::from_account_info(oracle)?;
+        let oracle = OracleV1::from_account_info(oracle)?;
 
         voting_window = oracle.config.voting_window;
     }
@@ -57,7 +57,7 @@ fn submit_v1(
     {
         let request_address = request.key;
 
-        let request = Request::from_account_info(request)?;
+        let request = RequestV1::from_account_info(request)?;
 
         pda::request::assert_pda(request_address, oracle.key, &request.index)?;
 
@@ -72,7 +72,7 @@ fn submit_v1(
 
     let voting_address = voting.key;
 
-    let mut voting = Voting::from_account_info_mut(voting)?;
+    let mut voting = VotingV1::from_account_info_mut(voting)?;
 
     // Step 1: Check the voting window hasn't expired.
     if voting.end_timestamp <= now.unix_timestamp {
@@ -95,12 +95,12 @@ fn submit_v1(
         let vote_bump = pda::vote::assert_pda(vote.key, voting_address, stake.key)?;
         let signer_seeds = pda::vote::seeds_with_bump(voting_address, stake.key, &vote_bump);
 
-        Vote::init(InitVote { stake: *stake.key, value, votes }).save(InitContext {
+        VoteV1::init(InitVote { stake: *stake.key, value, votes }).save(InitContext {
             account: vote,
             payer,
             system_program,
             program_id,
-            signer_seeds: &[&signer_seeds],
+            signers_seeds: &[&signer_seeds],
         })?;
     }
 

@@ -9,8 +9,8 @@ use crate::error::OracleError;
 
 use super::{Account, AccountType};
 
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize, ShankAccount, BorshSize)]
-pub struct Assertion {
+#[derive(Clone, BorshDeserialize, BorshSerialize, ShankAccount, BorshSize)]
+pub struct AssertionV1 {
     account_type: AccountType,
 
     /// The [`Request`]` this assertion is for.
@@ -40,7 +40,7 @@ pub struct Assertion {
     pub disputed_value: u64,
 }
 
-impl Assertion {
+impl AssertionV1 {
     pub fn in_dispute_window(&self, timestamp: i64) -> bool {
         timestamp < self.expiration_timestamp
     }
@@ -60,14 +60,14 @@ impl Assertion {
     }
 }
 
-impl Account for Assertion {
-    const TYPE: AccountType = AccountType::Assertion;
+impl Account for AssertionV1 {
+    const TYPE: AccountType = AccountType::AssertionV1;
 }
 
-impl TryFrom<InitAssertion> for (Assertion, usize) {
+impl TryFrom<InitAssertion> for (AssertionV1, usize) {
     type Error = ProgramError;
 
-    fn try_from(params: InitAssertion) -> Result<(Assertion, usize), Self::Error> {
+    fn try_from(params: InitAssertion) -> Result<(AssertionV1, usize), Self::Error> {
         let InitAssertion {
             request,
             assertion_timestamp,
@@ -79,8 +79,8 @@ impl TryFrom<InitAssertion> for (Assertion, usize) {
         let expiration_timestamp = checked_add!(assertion_timestamp, i64::from(dispute_window))?;
 
         Ok((
-            Assertion {
-                account_type: Assertion::TYPE,
+            AssertionV1 {
+                account_type: AssertionV1::TYPE,
                 request,
                 assertion_timestamp,
                 expiration_timestamp,
@@ -89,7 +89,7 @@ impl TryFrom<InitAssertion> for (Assertion, usize) {
                 asserted_value,
                 disputed_value: 0,
             },
-            Assertion::SIZE,
+            AssertionV1::SIZE,
         ))
     }
 }

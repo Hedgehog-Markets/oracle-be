@@ -10,8 +10,8 @@ use crate::error::OracleError;
 use crate::instruction::accounts::{Context, DisputeAssertionAccounts};
 use crate::instruction::DisputeAssertionArgs;
 use crate::state::{
-    Account, AccountSized, Assertion, InitAccount, InitContext, InitVoting, Oracle, Request,
-    RequestState, Voting,
+    Account, AccountSized, AssertionV1, InitAccount, InitContext, InitVoting, OracleV1,
+    RequestState, RequestV1, VotingV1,
 };
 use crate::{pda, utils};
 
@@ -60,7 +60,7 @@ fn dispute_v1(
 
     // Get oracle voting window.
     {
-        let oracle = Oracle::from_account_info(oracle)?;
+        let oracle = OracleV1::from_account_info(oracle)?;
 
         voting_window = oracle.config.voting_window;
     }
@@ -71,7 +71,7 @@ fn dispute_v1(
     {
         let request_address = request.key;
 
-        let mut request = Request::from_account_info_mut(request)?;
+        let mut request = RequestV1::from_account_info_mut(request)?;
 
         // Check request state.
         {
@@ -93,7 +93,7 @@ fn dispute_v1(
 
         bond = request.bond;
 
-        let mut assertion = Assertion::from_account_info_mut(assertion)?;
+        let mut assertion = AssertionV1::from_account_info_mut(assertion)?;
 
         // Check the disputer differs from the asserter.
         if !common::cmp_pubkeys(&assertion.asserter, disputer.key) {
@@ -165,7 +165,7 @@ fn dispute_v1(
         let voting_bump = pda::voting::assert_pda(voting.key, request.key)?;
         let signer_seeds = pda::voting::seeds_with_bump(request.key, &voting_bump);
 
-        Voting::try_init(InitVoting {
+        VotingV1::try_init(InitVoting {
             request: *request.key,
             start_timestamp: now.unix_timestamp,
             voting_window,
@@ -175,7 +175,7 @@ fn dispute_v1(
             payer,
             system_program,
             program_id,
-            signer_seeds: &[&signer_seeds],
+            signers_seeds: &[&signer_seeds],
         })?;
     }
 

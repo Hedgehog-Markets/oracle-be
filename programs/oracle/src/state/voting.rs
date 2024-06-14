@@ -9,8 +9,8 @@ use solana_program::pubkey::Pubkey;
 
 use super::{Account, AccountSized, AccountType};
 
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize, ShankAccount)]
-pub struct Voting {
+#[derive(Clone, BorshDeserialize, BorshSerialize, ShankAccount)]
+pub struct VotingV1 {
     account_type: AccountType,
 
     /// The [`Request`]` this assertion is for.
@@ -32,7 +32,7 @@ pub struct Voting {
     pub votes: BTreeMap<u64, u64>,
 }
 
-impl Voting {
+impl VotingV1 {
     const BASE_SIZE: usize =
         AccountType::SIZE       // account_type
         + Pubkey::SIZE          // request
@@ -44,11 +44,11 @@ impl Voting {
         ;
 }
 
-impl Account for Voting {
-    const TYPE: AccountType = AccountType::Voting;
+impl Account for VotingV1 {
+    const TYPE: AccountType = AccountType::VotingV1;
 }
 
-impl AccountSized for Voting {
+impl AccountSized for VotingV1 {
     const IS_FIXED_SIZE: bool = false;
 
     fn serialized_size(&self) -> Option<usize> {
@@ -56,17 +56,17 @@ impl AccountSized for Voting {
     }
 }
 
-impl TryFrom<InitVoting> for (Voting, usize) {
+impl TryFrom<InitVoting> for (VotingV1, usize) {
     type Error = ProgramError;
 
-    fn try_from(params: InitVoting) -> Result<(Voting, usize), Self::Error> {
+    fn try_from(params: InitVoting) -> Result<(VotingV1, usize), Self::Error> {
         let InitVoting { request, start_timestamp, voting_window } = params;
 
         let end_timestamp = checked_add!(start_timestamp, i64::from(voting_window))?;
 
         Ok((
-            Voting {
-                account_type: Voting::TYPE,
+            VotingV1 {
+                account_type: VotingV1::TYPE,
                 request,
                 start_timestamp,
                 end_timestamp,
@@ -74,7 +74,7 @@ impl TryFrom<InitVoting> for (Voting, usize) {
                 mode_value: 0,
                 votes: BTreeMap::new(),
             },
-            Voting::BASE_SIZE,
+            VotingV1::BASE_SIZE,
         ))
     }
 }

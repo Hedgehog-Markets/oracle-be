@@ -1,20 +1,12 @@
 use borsh::{BorshDeserialize, BorshSerialize};
-use common::{BuildInstruction, VariantName};
+use common::VariantName;
 use shank::{ShankContext, ShankInstruction};
-use solana_program::pubkey::Pubkey;
 
-use crate::state::{Config, RequestData};
+use crate::processor::*;
+use crate::state::RequestData;
 
 #[rustfmt::skip::attributes(account)]
-#[derive(
-    Clone,
-    VariantName,
-    BuildInstruction,
-    ShankContext,
-    ShankInstruction,
-    BorshDeserialize,
-    BorshSerialize,
-)]
+#[derive(Clone, VariantName, ShankContext, ShankInstruction, BorshDeserialize)]
 pub enum OracleInstruction {
     /// Creates program [`Oracle`].
     ///
@@ -22,7 +14,7 @@ pub enum OracleInstruction {
     #[account(0, writable, name = "oracle", desc = "Oracle account")]
     #[account(1, signer, writable, name = "payer", desc = "Payer")]
     #[account(2, name = "system_program", desc = "System program")]
-    CreateOracle(CreateOracleArgs),
+    CreateOracleV1(CreateOracleV1Args),
 
     /// Creates a new [`Request`].
     ///
@@ -116,17 +108,7 @@ pub enum OracleInstruction {
     CreateCurrency(CreateCurrencyArgs),
 }
 
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize)]
-pub enum CreateOracleArgs {
-    V1 {
-        /// Authority.
-        authority: Pubkey,
-        /// Config.
-        config: Config,
-    },
-}
-
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize)]
+#[derive(Clone, BorshDeserialize, BorshSerialize)]
 pub enum CreateRequestArgs {
     V1 {
         /// Amount rewarded to the asserter/disputer on resolution.
@@ -140,7 +122,7 @@ pub enum CreateRequestArgs {
     },
 }
 
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize)]
+#[derive(Clone, BorshDeserialize, BorshSerialize)]
 pub enum CreateAssertionArgs {
     V1 {
         /// Value to assert.
@@ -148,12 +130,12 @@ pub enum CreateAssertionArgs {
     },
 }
 
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize)]
+#[derive(Clone, BorshDeserialize, BorshSerialize)]
 pub enum ExpireAssertionArgs {
     V1 {},
 }
 
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize)]
+#[derive(Clone, BorshDeserialize, BorshSerialize)]
 pub enum DisputeAssertionArgs {
     V1 {
         /// Value to dispute assertion with.
@@ -161,7 +143,7 @@ pub enum DisputeAssertionArgs {
     },
 }
 
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize)]
+#[derive(Clone, BorshDeserialize, BorshSerialize)]
 pub enum SubmitVoteArgs {
     V1 {
         /// Value to vote for.
@@ -169,12 +151,12 @@ pub enum SubmitVoteArgs {
     },
 }
 
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize)]
+#[derive(Clone, BorshDeserialize, BorshSerialize)]
 pub enum FinalizeVotingArgs {
     V1 {},
 }
 
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize)]
+#[derive(Clone, BorshDeserialize, BorshSerialize)]
 pub enum CreateCurrencyArgs {
     V1 {
         /// The valid reward range when creating a [`Request`].

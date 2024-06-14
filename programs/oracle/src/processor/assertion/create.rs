@@ -10,7 +10,7 @@ use crate::error::OracleError;
 use crate::instruction::accounts::{Context, CreateAssertionAccounts};
 use crate::instruction::CreateAssertionArgs;
 use crate::state::{
-    Account, AccountSized, Assertion, InitAccount, InitAssertion, InitContext, Oracle, Request,
+    Account, AccountSized, AssertionV1, InitAccount, InitAssertion, InitContext, OracleV1, RequestV1,
     RequestState,
 };
 use crate::{pda, utils};
@@ -59,7 +59,7 @@ fn create_v1(
 
     // Get oracle dispute window.
     {
-        let oracle = Oracle::from_account_info(oracle)?;
+        let oracle = OracleV1::from_account_info(oracle)?;
 
         dispute_window = oracle.config.dispute_window;
     }
@@ -70,7 +70,7 @@ fn create_v1(
     {
         let request_address = request.key;
 
-        let mut request = Request::from_account_info_mut(request)?;
+        let mut request = RequestV1::from_account_info_mut(request)?;
 
         pda::request::assert_pda(request_address, oracle.key, &request.index)?;
 
@@ -94,7 +94,7 @@ fn create_v1(
         let assertion_bump = pda::assertion::assert_pda(assertion.key, request.key)?;
         let signer_seeds = pda::assertion::seeds_with_bump(request.key, &assertion_bump);
 
-        Assertion::try_init(InitAssertion {
+        AssertionV1::try_init(InitAssertion {
             request: *request.key,
             assertion_timestamp: now.unix_timestamp,
             asserter: *asserter.key,
@@ -106,7 +106,7 @@ fn create_v1(
             payer,
             system_program,
             program_id,
-            signer_seeds: &[&signer_seeds],
+            signers_seeds: &[&signer_seeds],
         })?;
     }
 
