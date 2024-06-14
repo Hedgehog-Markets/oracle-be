@@ -35,6 +35,9 @@ pub fn submit_vote_v1<'a>(
     // Guard programs.
     utils::assert_system_program(ctx.accounts.system_program.key)?;
 
+    // Guard PDAs.
+    pda::oracle::assert_pda(ctx.accounts.oracle.key)?;
+
     let voting_window: u32;
 
     // Step 1: Get oracle voting window.

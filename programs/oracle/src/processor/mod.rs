@@ -4,8 +4,7 @@ use solana_program::account_info::AccountInfo;
 use solana_program::entrypoint::ProgramResult;
 use solana_program::pubkey::Pubkey;
 
-mod voting;
-
+mod close_voting_v1;
 mod create_assertion_v1;
 mod create_currency_v1;
 mod create_oracle_v1;
@@ -16,6 +15,7 @@ mod submit_vote_v1;
 mod update_currency_v1;
 mod update_oracle_v1;
 
+pub(crate) use self::close_voting_v1::*;
 pub(crate) use self::create_assertion_v1::*;
 pub(crate) use self::create_currency_v1::*;
 pub(crate) use self::create_oracle_v1::*;
@@ -47,7 +47,6 @@ pub fn process_instruction<'a>(
         I::ResolveAssertionV1 => resolve_assertion_v1(program_id, accounts),
         I::DisputeAssertionV1 => dispute_assertion_v1(program_id, accounts),
         I::SubmitVoteV1(args) => submit_vote_v1(program_id, accounts, args),
-
-        I::FinalizeVoting(args) => voting::finalize(program_id, accounts, args),
+        I::CloseVotingV1 => close_voting_v1(program_id, accounts),
     }
 }

@@ -1,4 +1,4 @@
-use borsh::{BorshDeserialize, BorshSerialize};
+use borsh::BorshDeserialize;
 use common::VariantName;
 use shank::{ShankContext, ShankInstruction};
 
@@ -92,16 +92,9 @@ pub enum OracleInstruction {
     #[account(7, name = "system_program", desc = "System program")]
     SubmitVoteV1(SubmitVoteV1Args),
 
-    /// Finalizes [`Voting`].
-    ///
-    /// [`Voting`]: crate::state::Voting
+    /// Closes voting and resolves the request.
     #[account(0, name = "oracle", desc = "Oracle account")]
     #[account(1, writable, name = "request", desc = "Request")]
     #[account(2, writable, name = "voting", desc = "Voting")]
-    FinalizeVoting(FinalizeVotingArgs),
-}
-
-#[derive(Clone, BorshDeserialize, BorshSerialize)]
-pub enum FinalizeVotingArgs {
-    V1 {},
+    CloseVotingV1,
 }
