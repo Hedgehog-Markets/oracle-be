@@ -57,18 +57,8 @@ fn create_v1(
     let reward_currency = CurrencyV1::from_account_info(reward_currency_info)?;
     let bond_currency = CurrencyV1::from_account_info(bond_currency_info)?;
 
-    pda::currency::assert_pda(
-        reward_currency_info.key,
-        oracle.key,
-        &reward_currency.mint,
-        token_program.key,
-    )?;
-    pda::currency::assert_pda(
-        bond_currency_info.key,
-        oracle.key,
-        &bond_currency.mint,
-        token_program.key,
-    )?;
+    pda::currency::assert_pda(reward_currency_info.key, oracle.key, &reward_currency.mint)?;
+    pda::currency::assert_pda(bond_currency_info.key, oracle.key, &bond_currency.mint)?;
 
     // Check the reward mint matches the reward currency.
     if !common::cmp_pubkeys(&reward_currency.mint, reward_mint.key) {

@@ -59,9 +59,7 @@ macro_rules! pdas {
 
 pdas! {
     "Oracle": oracle();
-    "Currency": currency(oracle: Pubkey, mint: Pubkey, token_program: Pubkey);
-
-    "Stake": stake(wallet: Pubkey);
+    "Currency": currency(oracle: Pubkey, mint: Pubkey);
 
     "Request": request(oracle: Pubkey, index: u64);
     "Reward": reward(request: Pubkey);
