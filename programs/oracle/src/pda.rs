@@ -60,8 +60,7 @@ macro_rules! pdas {
 pdas! {
     "Oracle": oracle();
     "Currency": currency(mint: Pubkey);
-
-    "Stake escrow": stake_escrow(stake: Pubkey);
+    "Stake pool": stake_pool(mint: Pubkey);
 
     "Request": request(index: u64);
     "Reward": reward(request: Pubkey);

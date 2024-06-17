@@ -53,23 +53,25 @@ pub fn create_stake_v1<'a>(
         },
     )?;
 
-    // Step 3: Create stake escrow account.
+    // Step 3: Create stake pool account if necessary.
     {
-        let bump =
-            pda::stake_escrow::assert_pda(ctx.accounts.stake_escrow.key, ctx.accounts.stake.key)?;
-        let signer_seeds = pda::stake_escrow::seeds_with_bump(ctx.accounts.stake.key, &bump);
+        let bump = pda::stake_pool::assert_pda(ctx.accounts.stake_pool.key, ctx.accounts.mint.key)?;
 
-        cpi::spl::create_token_account(
-            ctx.accounts.stake.key,
-            cpi::spl::CreateTokenAccount {
-                account: ctx.accounts.stake_escrow,
-                mint: ctx.accounts.mint,
-                payer: ctx.accounts.payer,
-                token_program: ctx.accounts.token_program,
-                system_program: ctx.accounts.system_program,
-            },
-            &[&signer_seeds],
-        )?;
+        if ctx.accounts.stake_pool.data_is_empty() {
+            let signer_seeds = pda::stake_pool::seeds_with_bump(ctx.accounts.mint.key, &bump);
+
+            cpi::spl::create_token_account(
+                ctx.accounts.oracle.key,
+                cpi::spl::CreateTokenAccount {
+                    account: ctx.accounts.stake_pool,
+                    mint: ctx.accounts.mint,
+                    payer: ctx.accounts.payer,
+                    token_program: ctx.accounts.token_program,
+                    system_program: ctx.accounts.system_program,
+                },
+                &[&signer_seeds],
+            )?;
+        }
     }
 
     // Step 4: Deposit staked amount into escrow account.
@@ -81,7 +83,7 @@ pub fn create_stake_v1<'a>(
             mint_decimals,
             cpi::spl::TransferChecked {
                 source: ctx.accounts.stake_source,
-                destination: ctx.accounts.stake_escrow,
+                destination: ctx.accounts.stake_pool,
                 mint: ctx.accounts.mint,
                 authority: ctx.accounts.wallet,
                 token_program: ctx.accounts.token_program,
