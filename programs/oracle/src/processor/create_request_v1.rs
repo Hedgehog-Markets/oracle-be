@@ -21,6 +21,8 @@ pub struct CreateRequestV1Args {
     pub bond: u64,
     /// Unix timestamp after which a value can be asserted.
     pub timestamp: UnixTimestamp,
+    /// Arbitrator address.
+    pub arbitrator: Pubkey,
     /// Request data.
     pub data: RequestData,
 }
@@ -99,6 +101,7 @@ pub fn create_request_v1<'a>(
             bond: args.bond,
             bond_mint,
             timestamp: args.timestamp,
+            arbitrator: args.arbitrator,
             data: args.data,
         })?
         .save(InitContext {

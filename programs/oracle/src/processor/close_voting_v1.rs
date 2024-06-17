@@ -53,7 +53,22 @@ pub fn close_voting_v1<'a>(
         return Err(OracleError::VotingWindowNotExpired.into());
     }
 
-    // Step 4: If no votes were cast then start a new vote window.
+    // Step 4: If the request has an arbitrator, check the arbitration window has expired.
+    if request.has_arbitrator() {
+        // let end_timestamp =
+        //     checked_add!(voting.end_timestamp, i64::from(config.arbitration_window))?;
+
+        // Hardcoded 12 hour timeout.
+        const ARBITRATION_WINDOW: i64 = 12 * 60 * 60;
+
+        let end_timestamp = checked_add!(voting.end_timestamp, ARBITRATION_WINDOW)?;
+
+        if now < end_timestamp {
+            return Err(OracleError::ArbitrationWindowNotExpired.into());
+        }
+    }
+
+    // Step 5: If no votes were cast then start a new vote window.
     if voting.vote_count == 0 {
         log!("Not enough votes cast - starting new vote window");
 
@@ -70,7 +85,7 @@ pub fn close_voting_v1<'a>(
     // Voting account is not mutated when resolving.
     let voting = voting.into_inner();
 
-    // Step 5: Resolve the request with the modal voted value.
+    // Step 6: Resolve the request with the modal voted value.
     {
         // Update request with resolved value.
         request.resolve_timestamp = now;

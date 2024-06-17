@@ -40,6 +40,16 @@ pub struct RequestV1 {
     /// Value of the resolved request.
     pub value: u64,
 
+    /// Arbitrator address.
+    ///
+    /// The arbitrator has the ability to override the result of voting. This
+    /// takes the form of a window after voting in which the result can be
+    /// changed.
+    ///
+    /// If the address is the default pubkey (`11111111111111111111111111111111`),
+    /// then the request is considered to have no arbitrator.
+    pub arbitrator: Pubkey,
+
     // Request data may have varying layouts when serialized. It is at the end
     // of the account to avoid interfering with GPA lookups.
     /// Request data.
@@ -83,7 +93,12 @@ impl RequestV1 {
         + UnixTimestamp::SIZE   // resolve_timestamp
         + RequestState::SIZE    // state
         + u64::SIZE             // value
+        + Pubkey::SIZE          // arbitrator
         ;
+
+    pub fn has_arbitrator(&self) -> bool {
+        !common::cmp_pubkeys(&self.arbitrator, &common::DEFAULT_PUBKEY)
+    }
 
     pub fn assert_pda(&self, request: &Pubkey) -> Result<u8, ProgramError> {
         pda::request::assert_pda(request, &self.index)
@@ -136,8 +151,17 @@ impl TryFrom<InitRequest> for (RequestV1, usize) {
     type Error = ProgramError;
 
     fn try_from(params: InitRequest) -> Result<(RequestV1, usize), Self::Error> {
-        let InitRequest { index, creator, reward, reward_mint, bond, bond_mint, timestamp, data } =
-            params;
+        let InitRequest {
+            index,
+            creator,
+            reward,
+            reward_mint,
+            bond,
+            bond_mint,
+            timestamp,
+            arbitrator,
+            data,
+        } = params;
 
         let request = RequestV1 {
             account_type: RequestV1::TYPE,
@@ -151,6 +175,7 @@ impl TryFrom<InitRequest> for (RequestV1, usize) {
             resolve_timestamp: 0,
             state: RequestState::Requested,
             value: 0,
+            arbitrator,
             data,
         };
 
@@ -171,6 +196,8 @@ pub(crate) struct InitRequest {
     pub bond_mint: Pubkey,
 
     pub timestamp: UnixTimestamp,
+    pub arbitrator: Pubkey,
+
     pub data: RequestData,
 }
 
@@ -199,6 +226,7 @@ mod tests {
             bond: 0,
             bond_mint: Pubkey::new_unique(),
             timestamp: 0,
+            arbitrator: common::DEFAULT_PUBKEY,
             data: RequestData::YesNo { question: "another example question?".to_owned() },
         };
 

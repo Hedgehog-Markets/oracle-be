@@ -96,6 +96,10 @@ pub enum OracleError {
     /// 23 - Stake mint mismatch.
     #[error("Stake mint address does not match")]
     StakeMintMismatch,
+
+    /// 24 - Arbitration window has not expired.
+    #[error("Arbitration window has not expired")]
+    ArbitrationWindowNotExpired,
 }
 
 impl PrintProgramError for OracleError {

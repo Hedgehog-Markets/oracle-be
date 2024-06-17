@@ -25,12 +25,13 @@ pub struct OracleV1 {
 
 #[derive(Clone, BorshDeserialize, BorshSerialize, BorshSize)]
 pub struct Config {
+    /// The fee taken, in basis points, from the bond of the incorrect party in a dispute.
+    pub bond_fee_bps: u16,
+
     /// The duration of the dispute window in seconds.
     pub dispute_window: u32,
     /// The duration of the voting window in seconds.
     pub voting_window: u32,
-    /// The fee taken, in basis points, from the bond of the incorrect party in a dispute.
-    pub bond_fee_bps: u16,
 }
 
 impl OracleV1 {
