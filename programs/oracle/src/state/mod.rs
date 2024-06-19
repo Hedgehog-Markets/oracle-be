@@ -15,6 +15,7 @@ use solana_program::rent::Rent;
 use solana_program::sysvar::Sysvar;
 
 mod assertion;
+mod config;
 mod currency;
 mod oracle;
 mod request;
@@ -25,6 +26,7 @@ mod voting;
 use crate::error::OracleError;
 
 pub use self::assertion::*;
+pub use self::config::*;
 pub use self::currency::*;
 pub use self::oracle::*;
 pub use self::request::*;
@@ -49,19 +51,21 @@ pub enum AccountType {
     /// Uninitialized account, which has all bytes set to zero by default.
     #[default]
     Uninitialized,
-    /// Account containing [`Oracle`] state.
+    /// Account containing [`OracleV1`] state.
     OracleV1,
-    /// Account containing [`Stake`] state.
+    /// Account containing [`ConfigV1`] state.
+    ConfigV1,
+    /// Account containing [`StakeV1`] state.
     StakeV1,
-    /// Account containing [`Request`] state.
+    /// Account containing [`RequestV1`] state.
     RequestV1,
-    /// Account containing [`Assertion`] state.
+    /// Account containing [`AssertionV1`] state.
     AssertionV1,
-    /// Account containing [`Currency`] state.
+    /// Account containing [`CurrencyV1`] state.
     CurrencyV1,
-    /// Account containing [`Voting`] state.
+    /// Account containing [`VotingV1`] state.
     VotingV1,
-    /// Account containing [`Vote`] state.
+    /// Account containing [`VoteV1`] state.
     VoteV1,
 }
 

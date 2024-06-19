@@ -10,7 +10,6 @@ use crate::{pda, utils};
 #[derive(Clone, BorshDeserialize)]
 pub enum UpdateOracleV1Args {
     Authority { new_authority: Pubkey },
-    Config { new_dispute_window: u32, new_voting_window: u32, new_bond_fee_bps: u16 },
 }
 
 pub fn update_oracle_v1<'a>(
@@ -36,15 +35,6 @@ pub fn update_oracle_v1<'a>(
         match args {
             UpdateOracleV1Args::Authority { new_authority } => {
                 oracle.authority = new_authority;
-            }
-            UpdateOracleV1Args::Config {
-                new_dispute_window,
-                new_voting_window,
-                new_bond_fee_bps,
-            } => {
-                oracle.config.dispute_window = new_dispute_window;
-                oracle.config.voting_window = new_voting_window;
-                oracle.config.bond_fee_bps = new_bond_fee_bps;
             }
         }
 

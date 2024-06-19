@@ -8,7 +8,7 @@ use solana_program::pubkey::Pubkey;
 use crate::error::OracleError;
 use crate::instruction::accounts::CreateRequestV1Accounts;
 use crate::state::{
-    Account, AccountSized, CurrencyV1, InitAccount, InitContext, InitRequest, OracleV1,
+    Account, AccountSized, ConfigV1, CurrencyV1, InitAccount, InitContext, InitRequest, OracleV1,
     RequestData, RequestV1,
 };
 use crate::{pda, utils};
@@ -51,6 +51,7 @@ pub fn create_request_v1<'a>(
 
         // Guard currency.
         reward_currency.assert_pda(ctx.accounts.reward_currency.key)?;
+        reward_currency.assert_config(ctx.accounts.config.key)?;
         reward_currency.assert_mint(ctx.accounts.reward_mint.key)?;
 
         // Check the reward bounds.
@@ -67,6 +68,7 @@ pub fn create_request_v1<'a>(
 
         // Guard currency.
         bond_currency.assert_pda(ctx.accounts.bond_currency.key)?;
+        bond_currency.assert_config(ctx.accounts.config.key)?;
 
         // Check the bond bounds.
         if !bond_currency.bond_range.contains(args.bond) {
@@ -88,13 +90,17 @@ pub fn create_request_v1<'a>(
         oracle.save()?;
     }
 
-    // Step 4: Initialize request account.
+    // Step 4: Check config.
+    ConfigV1::from_account_info(ctx.accounts.config)?;
+
+    // Step 5: Initialize request account.
     {
         let bump = pda::request::assert_pda(ctx.accounts.request.key, &request_index)?;
         let signer_seeds = pda::request::seeds_with_bump(&request_index, &bump);
 
         RequestV1::try_init(InitRequest {
             index: request_index,
+            config: *ctx.accounts.config.key,
             creator: *ctx.accounts.creator.key,
             reward: args.reward,
             reward_mint: *ctx.accounts.reward_mint.key,
@@ -113,11 +119,11 @@ pub fn create_request_v1<'a>(
         })?;
     }
 
-    // Step 3: Transfer reward to escrow.
+    // Step 6: Transfer reward to escrow.
     if args.reward > 0 {
         let mint_decimals = cpi::spl::mint_decimals(ctx.accounts.reward_mint)?;
 
-        // Step 3.1: Initialize `reward_escrow` account.
+        // Step 6.1: Initialize `reward_escrow` account.
         {
             let bump =
                 pda::reward::assert_pda(ctx.accounts.reward_escrow.key, ctx.accounts.request.key)?;
@@ -136,7 +142,7 @@ pub fn create_request_v1<'a>(
             )?;
         }
 
-        // Step 3.2: Transfer reward from `reward_source` to `reward_escrow`.
+        // Step 6.2: Transfer reward from `reward_source` to `reward_escrow`.
         cpi::spl::transfer_checked(
             args.reward,
             mint_decimals,

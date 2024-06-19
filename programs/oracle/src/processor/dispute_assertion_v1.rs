@@ -8,7 +8,7 @@ use solana_program::sysvar::Sysvar;
 use crate::error::OracleError;
 use crate::instruction::accounts::DisputeAssertionV1Accounts;
 use crate::state::{
-    Account, AccountSized, AssertionV1, InitAccount, InitContext, InitVoting, OracleV1,
+    Account, AccountSized, AssertionV1, ConfigV1, InitAccount, InitContext, InitVoting,
     RequestState, RequestV1, VotingV1,
 };
 use crate::{pda, utils};
@@ -27,16 +27,13 @@ pub fn dispute_assertion_v1<'a>(
     utils::assert_token_program(ctx.accounts.token_program.key)?;
     utils::assert_system_program(ctx.accounts.system_program.key)?;
 
-    // Guard PDAs.
-    pda::oracle::assert_pda(ctx.accounts.oracle.key)?;
-
     let voting_window: u32;
 
-    // Step 1: Get oracle voting window.
+    // Step 1: Get config voting window.
     {
-        let oracle = OracleV1::from_account_info(ctx.accounts.oracle)?;
+        let config = ConfigV1::from_account_info(ctx.accounts.config)?;
 
-        voting_window = oracle.config.voting_window;
+        voting_window = config.voting_window;
     }
 
     let now = Clock::get()?.unix_timestamp;
@@ -48,8 +45,10 @@ pub fn dispute_assertion_v1<'a>(
 
         // Step 2.1: Check request.
         {
-            // Guard request PDA.
+            // Guard request.
             request.assert_pda(ctx.accounts.request.key)?;
+            request.assert_config(ctx.accounts.config.key)?;
+            request.assert_bond_mint(ctx.accounts.bond_mint.key)?;
 
             // The request state must be `Asserted` to dispute.
             match request.state {
@@ -58,9 +57,6 @@ pub fn dispute_assertion_v1<'a>(
                 RequestState::Disputed => return Err(OracleError::AlreadyDisputed.into()),
                 RequestState::Resolved => return Err(OracleError::AlreadyResolved.into()),
             }
-
-            // The bond mint account must match the bond mint on the request.
-            request.validate_bond_mint(ctx.accounts.bond_mint.key)?;
         }
 
         bond = request.bond;

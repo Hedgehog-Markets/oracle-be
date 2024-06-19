@@ -5,7 +5,7 @@ use solana_program::entrypoint::ProgramResult;
 use solana_program::pubkey::Pubkey;
 
 use crate::instruction::accounts::CreateOracleV1Accounts;
-use crate::state::{Config, InitAccount, InitContext, InitOracle, OracleV1};
+use crate::state::{InitAccount, InitContext, InitOracle, OracleV1};
 use crate::{pda, utils};
 
 // TODO: Validate config bps.
@@ -13,7 +13,6 @@ use crate::{pda, utils};
 #[derive(Clone, BorshDeserialize)]
 pub struct CreateOracleV1Args {
     pub authority: Pubkey,
-    pub config: Config,
 }
 
 pub fn create_oracle_v1<'a>(
@@ -40,7 +39,6 @@ pub fn create_oracle_v1<'a>(
         OracleV1::init(InitOracle {
             authority: args.authority,
             governance_mint: *ctx.accounts.governance_mint.key,
-            config: args.config,
         })
         .save(InitContext {
             account: ctx.accounts.oracle,

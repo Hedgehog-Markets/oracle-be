@@ -19,8 +19,19 @@ pub enum OracleInstruction {
     #[account(1, signer, name = "authority", desc = "Oracle authority")]
     UpdateOracleV1(UpdateOracleV1Args),
 
+    // /// Creates config.
+    // #[account(0, writable, name = "config", desc = "Config")]
+    // #[account(1, signer, writable, name = "payer", desc = "Payer")]
+    // #[account(2, name = "system_program", desc = "System program")]
+    // CreateConfigV1(CreateConfigV1Args),
+
+    // /// Updates config.
+    // #[account(0, writable, name = "config", desc = "Config")]
+    // #[account(1, signer, name = "authority", desc = "Config authority")]
+    // UpdateConfigV1(UpdateConfigV1Args),
+
     /// Creates a currency.
-    #[account(0, name = "oracle", desc = "Oracle account")]
+    #[account(0, name = "config", desc = "Config")]
     #[account(1, writable, name = "currency", desc = "Currency")]
     #[account(2, name = "mint", desc = "Mint")]
     #[account(3, name = "authority", desc = "Oracle authority")]
@@ -30,27 +41,28 @@ pub enum OracleInstruction {
     CreateCurrencyV1(CreateCurrencyV1Args),
 
     /// Updates a currency.
-    #[account(0, name = "oracle", desc = "Oracle account")]
+    #[account(0, name = "config", desc = "Config")]
     #[account(1, writable, name = "currency", desc = "Currency")]
     #[account(2, name = "authority", desc = "Oracle authority")]
     UpdateCurrencyV1(UpdateCurrencyV1Args),
 
     /// Creates a new request.
     #[account(0, writable, name = "oracle", desc = "Oracle account")]
-    #[account(1, writable, name = "request", desc = "Request")]
-    #[account(2, name = "reward_currency", desc = "Reward currency")]
-    #[account(3, name = "bond_currency", desc = "Bond currency")]
-    #[account(4, name = "reward_mint", desc = "Reward mint")]
-    #[account(5, writable, name = "reward_source", desc = "Reward source token account")]
-    #[account(6, writable, name = "reward_escrow", desc = "Reward escrow token account")]
-    #[account(7, signer, name = "creator", desc = "Creator")]
-    #[account(8, signer, writable, name = "payer", desc = "Payer")]
-    #[account(9, name = "token_program", desc = "SPL token program")]
-    #[account(10, name = "system_program", desc = "System program")]
+    #[account(1, name = "config", desc = "Config")]
+    #[account(2, writable, name = "request", desc = "Request")]
+    #[account(3, name = "reward_currency", desc = "Reward currency")]
+    #[account(4, name = "bond_currency", desc = "Bond currency")]
+    #[account(5, name = "reward_mint", desc = "Reward mint")]
+    #[account(6, writable, name = "reward_source", desc = "Reward source token account")]
+    #[account(7, writable, name = "reward_escrow", desc = "Reward escrow token account")]
+    #[account(8, signer, name = "creator", desc = "Creator")]
+    #[account(9, signer, writable, name = "payer", desc = "Payer")]
+    #[account(10, name = "token_program", desc = "SPL token program")]
+    #[account(11, name = "system_program", desc = "System program")]
     CreateRequestV1(CreateRequestV1Args),
 
     /// Creates an assertion for a request.
-    #[account(0, name = "oracle", desc = "Oracle account")]
+    #[account(0, name = "config", desc = "Config")]
     #[account(1, writable, name = "request", desc = "Request")]
     #[account(2, writable, name = "assertion", desc = "Assertion")]
     #[account(3, name = "bond_mint", desc = "Bond mint")]
@@ -63,13 +75,13 @@ pub enum OracleInstruction {
     CreateAssertionV1(CreateAssertionV1Args),
 
     /// Resolves an undisputed assertion after the expiration timestamp.
-    #[account(0, name = "oracle", desc = "Oracle account")]
+    #[account(0, name = "config", desc = "Config")]
     #[account(1, writable, name = "request", desc = "Request")]
     #[account(2, name = "assertion", desc = "Assertion")]
     ResolveAssertionV1,
 
     /// Disputes the assertion for a request.
-    #[account(0, name = "oracle", desc = "Oracle account")]
+    #[account(0, name = "config", desc = "Config")]
     #[account(1, writable, name = "request", desc = "Request")]
     #[account(2, writable, name = "assertion", desc = "Assertion")]
     #[account(3, writable, name = "voting", desc = "Voting")]
@@ -83,7 +95,7 @@ pub enum OracleInstruction {
     DisputeAssertionV1,
 
     /// Submits a vote for resolving a disputed assertion.
-    #[account(0, name = "oracle", desc = "Oracle account")]
+    #[account(0, name = "config", desc = "Config")]
     #[account(1, name = "request", desc = "Request")]
     #[account(2, writable, name = "voting", desc = "Voting")]
     #[account(3, writable, name = "vote", desc = "Vote")]
@@ -94,7 +106,7 @@ pub enum OracleInstruction {
     SubmitVoteV1(SubmitVoteV1Args),
 
     /// Closes voting and resolves the request.
-    #[account(0, name = "oracle", desc = "Oracle account")]
+    #[account(0, name = "config", desc = "Config")]
     #[account(1, writable, name = "request", desc = "Request")]
     #[account(2, writable, name = "voting", desc = "Voting")]
     CloseVotingV1,

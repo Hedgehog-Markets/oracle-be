@@ -9,7 +9,7 @@ use solana_program::sysvar::Sysvar;
 use crate::error::OracleError;
 use crate::instruction::accounts::CreateAssertionV1Accounts;
 use crate::state::{
-    Account, AccountSized, AssertionV1, InitAccount, InitAssertion, InitContext, OracleV1,
+    Account, AccountSized, AssertionV1, ConfigV1, InitAccount, InitAssertion, InitContext,
     RequestState, RequestV1,
 };
 use crate::{pda, utils};
@@ -35,16 +35,13 @@ pub fn create_assertion_v1<'a>(
     utils::assert_token_program(ctx.accounts.token_program.key)?;
     utils::assert_system_program(ctx.accounts.system_program.key)?;
 
-    // Guard PDAs.
-    pda::oracle::assert_pda(ctx.accounts.oracle.key)?;
-
     let dispute_window: u32;
 
-    // Step 1: Get oracle dispute window.
+    // Step 1: Get config dispute window.
     {
-        let oracle = OracleV1::from_account_info(ctx.accounts.oracle)?;
+        let config = ConfigV1::from_account_info(ctx.accounts.config)?;
 
-        dispute_window = oracle.config.dispute_window;
+        dispute_window = config.dispute_window;
     }
 
     let bond: u64;
@@ -54,16 +51,16 @@ pub fn create_assertion_v1<'a>(
     {
         let mut request = RequestV1::from_account_info_mut(ctx.accounts.request)?;
 
-        // Guard request PDA.
+        // Guard request.
         request.assert_pda(ctx.accounts.request.key)?;
+        request.assert_config(ctx.accounts.config.key)?;
+        request.assert_bond_mint(ctx.accounts.bond_mint.key)?;
 
         // If the request state is not `Requested`, then an assertion has already been made.
         if request.state != RequestState::Requested {
             return Err(OracleError::AlreadyAsserted.into());
         }
 
-        // The `bond_mint` account address must match the bond mint on the request.
-        request.validate_bond_mint(ctx.accounts.bond_mint.key)?;
         // The assertion timestamp on the request must have been reached.
         request.validate_assertion_timestamp(now)?;
         // The asserted value must be valid for the request data type.

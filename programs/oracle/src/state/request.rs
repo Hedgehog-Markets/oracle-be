@@ -17,6 +17,8 @@ pub struct RequestV1 {
     /// Index of the request in the oracle.
     pub index: u64,
 
+    /// Config address.
+    pub config: Pubkey,
     /// Creator address.
     pub creator: Pubkey,
 
@@ -84,6 +86,7 @@ impl RequestV1 {
     const BASE_SIZE: usize =
         AccountType::SIZE       // account_type
         + u64::SIZE             // index
+        + Pubkey::SIZE          // config
         + Pubkey::SIZE          // creator
         + u64::SIZE             // bond
         + Pubkey::SIZE          // bond_mint
@@ -104,7 +107,14 @@ impl RequestV1 {
         pda::request::assert_pda(request, &self.index)
     }
 
-    pub fn validate_bond_mint(&self, mint: &Pubkey) -> Result<(), OracleError> {
+    pub fn assert_config(&self, config: &Pubkey) -> Result<(), OracleError> {
+        if !common::cmp_pubkeys(&self.config, config) {
+            return Err(OracleError::ConfigMismatch);
+        }
+        Ok(())
+    }
+
+    pub fn assert_bond_mint(&self, mint: &Pubkey) -> Result<(), OracleError> {
         if !common::cmp_pubkeys(&self.bond_mint, mint) {
             return Err(OracleError::BondMintMismatch);
         }
@@ -153,6 +163,7 @@ impl TryFrom<InitRequest> for (RequestV1, usize) {
     fn try_from(params: InitRequest) -> Result<(RequestV1, usize), Self::Error> {
         let InitRequest {
             index,
+            config,
             creator,
             reward,
             reward_mint,
@@ -166,6 +177,7 @@ impl TryFrom<InitRequest> for (RequestV1, usize) {
         let request = RequestV1 {
             account_type: RequestV1::TYPE,
             index,
+            config,
             creator,
             reward,
             reward_mint,
@@ -187,6 +199,8 @@ impl TryFrom<InitRequest> for (RequestV1, usize) {
 
 pub(crate) struct InitRequest {
     pub index: u64,
+
+    pub config: Pubkey,
     pub creator: Pubkey,
 
     pub reward: u64,
@@ -219,8 +233,9 @@ mod tests {
     #[test]
     fn request_size() {
         let init = InitRequest {
-            creator: Pubkey::new_unique(),
             index: 0,
+            config: Pubkey::new_unique(),
+            creator: Pubkey::new_unique(),
             reward: 0,
             reward_mint: Pubkey::new_unique(),
             bond: 0,

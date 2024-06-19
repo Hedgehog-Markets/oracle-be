@@ -7,7 +7,7 @@ use solana_program::sysvar::Sysvar;
 use crate::error::OracleError;
 use crate::instruction::accounts::CloseVotingV1Accounts;
 use crate::pda;
-use crate::state::{Account, AccountSized, OracleV1, RequestState, RequestV1, VotingV1};
+use crate::state::{Account, AccountSized, ConfigV1, RequestState, RequestV1, VotingV1};
 
 pub fn close_voting_v1<'a>(
     _program_id: &'a Pubkey,
@@ -15,24 +15,22 @@ pub fn close_voting_v1<'a>(
 ) -> ProgramResult {
     let ctx = CloseVotingV1Accounts::context(accounts)?;
 
-    // Guard PDAs.
-    pda::oracle::assert_pda(ctx.accounts.oracle.key)?;
-
     let voting_window: u32;
 
-    // Step 1: Get oracle voting window.
+    // Step 1: Get config voting window.
     {
-        let oracle = OracleV1::from_account_info(ctx.accounts.oracle)?;
+        let config = ConfigV1::from_account_info(ctx.accounts.config)?;
 
-        voting_window = oracle.config.voting_window;
+        voting_window = config.voting_window;
     }
 
     let mut request = RequestV1::from_account_info_mut(ctx.accounts.request)?;
 
     // Step 2: Check voting has not yet resolved the request.
     {
-        // Guard request PDA.
+        // Guard request.
         request.assert_pda(ctx.accounts.request.key)?;
+        request.assert_config(ctx.accounts.config.key)?;
 
         // If the request state is not `Disputed`,
         // then the voting must have ended and resolved the request.
