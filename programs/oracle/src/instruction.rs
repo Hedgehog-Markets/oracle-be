@@ -19,16 +19,16 @@ pub enum OracleInstruction {
     #[account(1, signer, name = "authority", desc = "Oracle authority")]
     UpdateOracleV1(UpdateOracleV1Args),
 
-    // /// Creates config.
-    // #[account(0, writable, name = "config", desc = "Config")]
-    // #[account(1, signer, writable, name = "payer", desc = "Payer")]
-    // #[account(2, name = "system_program", desc = "System program")]
-    // CreateConfigV1(CreateConfigV1Args),
+    /// Creates config.
+    #[account(0, signer, writable, name = "config", desc = "Config")]
+    #[account(1, signer, writable, name = "payer", desc = "Payer")]
+    #[account(2, name = "system_program", desc = "System program")]
+    CreateConfigV1(CreateConfigV1Args),
 
-    // /// Updates config.
-    // #[account(0, writable, name = "config", desc = "Config")]
-    // #[account(1, signer, name = "authority", desc = "Config authority")]
-    // UpdateConfigV1(UpdateConfigV1Args),
+    /// Updates config.
+    #[account(0, writable, name = "config", desc = "Config")]
+    #[account(1, signer, name = "authority", desc = "Config authority")]
+    UpdateConfigV1(UpdateConfigV1Args),
 
     /// Creates a currency.
     #[account(0, name = "config", desc = "Config")]

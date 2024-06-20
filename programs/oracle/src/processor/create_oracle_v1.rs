@@ -8,8 +8,6 @@ use crate::instruction::accounts::CreateOracleV1Accounts;
 use crate::state::{InitAccount, InitContext, InitOracle, OracleV1};
 use crate::{pda, utils};
 
-// TODO: Validate config bps.
-
 #[derive(Clone, BorshDeserialize)]
 pub struct CreateOracleV1Args {
     pub authority: Pubkey,

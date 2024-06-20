@@ -28,7 +28,7 @@ pub struct ConfigV1 {
 impl ConfigV1 {
     pub fn assert_authority(&self, authority: &Pubkey) -> Result<(), OracleError> {
         if !common::cmp_pubkeys(&self.authority, authority) {
-            return Err(OracleError::OracleAuthorityMismatch);
+            return Err(OracleError::ConfigAuthorityMismatch);
         }
         Ok(())
     }

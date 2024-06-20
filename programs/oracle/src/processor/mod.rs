@@ -6,6 +6,7 @@ use solana_program::pubkey::Pubkey;
 
 mod close_voting_v1;
 mod create_assertion_v1;
+mod create_config_v1;
 mod create_currency_v1;
 mod create_oracle_v1;
 mod create_request_v1;
@@ -13,11 +14,13 @@ mod create_stake_v1;
 mod dispute_assertion_v1;
 mod resolve_assertion_v1;
 mod submit_vote_v1;
+mod update_config_v1;
 mod update_currency_v1;
 mod update_oracle_v1;
 
 pub(crate) use self::close_voting_v1::*;
 pub(crate) use self::create_assertion_v1::*;
+pub(crate) use self::create_config_v1::*;
 pub(crate) use self::create_currency_v1::*;
 pub(crate) use self::create_oracle_v1::*;
 pub(crate) use self::create_request_v1::*;
@@ -25,6 +28,7 @@ pub(crate) use self::create_stake_v1::*;
 pub(crate) use self::dispute_assertion_v1::*;
 pub(crate) use self::resolve_assertion_v1::*;
 pub(crate) use self::submit_vote_v1::*;
+pub(crate) use self::update_config_v1::*;
 pub(crate) use self::update_currency_v1::*;
 pub(crate) use self::update_oracle_v1::*;
 
@@ -42,6 +46,8 @@ pub fn process_instruction<'a>(
     match instruction {
         I::CreateOracleV1(args) => create_oracle_v1(program_id, accounts, args),
         I::UpdateOracleV1(args) => update_oracle_v1(program_id, accounts, args),
+        I::CreateConfigV1(args) => create_config_v1(program_id, accounts, args),
+        I::UpdateConfigV1(args) => update_config_v1(program_id, accounts, args),
         I::CreateCurrencyV1(args) => create_currency_v1(program_id, accounts, args),
         I::UpdateCurrencyV1(args) => update_currency_v1(program_id, accounts, args),
         I::CreateRequestV1(args) => create_request_v1(program_id, accounts, args),
