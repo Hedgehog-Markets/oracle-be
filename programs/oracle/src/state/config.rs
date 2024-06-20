@@ -21,6 +21,8 @@ pub struct ConfigV1 {
     pub dispute_window: u32,
     /// The duration of the voting window in seconds.
     pub voting_window: u32,
+    /// The duration of the arbitration window in seconds.
+    pub arbitration_window: u32,
 }
 
 impl ConfigV1 {
@@ -38,7 +40,13 @@ impl Account for ConfigV1 {
 
 impl From<InitConfig> for (ConfigV1, usize) {
     fn from(params: InitConfig) -> (ConfigV1, usize) {
-        let InitConfig { authority, bond_fee_bps, dispute_window, voting_window } = params;
+        let InitConfig {
+            authority,
+            bond_fee_bps,
+            dispute_window,
+            voting_window,
+            arbitration_window,
+        } = params;
 
         (
             ConfigV1 {
@@ -47,6 +55,7 @@ impl From<InitConfig> for (ConfigV1, usize) {
                 bond_fee_bps,
                 dispute_window,
                 voting_window,
+                arbitration_window,
             },
             ConfigV1::SIZE,
         )
@@ -60,4 +69,5 @@ pub(crate) struct InitConfig {
 
     pub dispute_window: u32,
     pub voting_window: u32,
+    pub arbitration_window: u32,
 }

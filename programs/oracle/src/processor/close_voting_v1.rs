@@ -16,12 +16,14 @@ pub fn close_voting_v1<'a>(
     let ctx = CloseVotingV1Accounts::context(accounts)?;
 
     let voting_window: u32;
+    let arbitration_window: u32;
 
-    // Step 1: Get config voting window.
+    // Step 1: Get config voting and arbitration windows.
     {
         let config = ConfigV1::from_account_info(ctx.accounts.config)?;
 
         voting_window = config.voting_window;
+        arbitration_window = config.arbitration_window;
     }
 
     let mut request = RequestV1::from_account_info_mut(ctx.accounts.request)?;
@@ -52,14 +54,8 @@ pub fn close_voting_v1<'a>(
     }
 
     // Step 4: If the request has an arbitrator, check the arbitration window has expired.
-    if request.has_arbitrator() {
-        // let end_timestamp =
-        //     checked_add!(voting.end_timestamp, i64::from(config.arbitration_window))?;
-
-        // Hardcoded 12 hour timeout.
-        const ARBITRATION_WINDOW: i64 = 12 * 60 * 60;
-
-        let end_timestamp = checked_add!(voting.end_timestamp, ARBITRATION_WINDOW)?;
+    if request.has_arbitrator() && arbitration_window > 0 {
+        let end_timestamp = checked_add!(voting.end_timestamp, i64::from(arbitration_window))?;
 
         if now < end_timestamp {
             return Err(OracleError::ArbitrationWindowNotExpired.into());
