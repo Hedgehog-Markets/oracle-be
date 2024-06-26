@@ -122,4 +122,8 @@ pub enum OracleInstruction {
     #[account(7, name = "token_program", desc = "SPL token program")]
     #[account(8, name = "system_program", desc = "System program")]
     CreateStakeV1(CreateStakeV1Args),
+
+    // #[account(0, name = "config", desc = "Config")]
+    // #[account(0, writable, name = "config", desc = "Config")]
+    // ClaimAssertionV1,
 }
