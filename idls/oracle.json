@@ -3,7 +3,7 @@
   "name": "oracle",
   "instructions": [
     {
-      "name": "CreateOracle",
+      "name": "CreateOracleV1",
       "accounts": [
         {
           "name": "oracle",
@@ -11,6 +11,14 @@
           "isSigner": false,
           "docs": [
             "Oracle account"
+          ]
+        },
+        {
+          "name": "governanceMint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Governance token mint"
           ]
         },
         {
@@ -32,9 +40,9 @@
       ],
       "args": [
         {
-          "name": "createOracleArgs",
+          "name": "createOracleV1Args",
           "type": {
-            "defined": "CreateOracleArgs"
+            "defined": "CreateOracleV1Args"
           }
         }
       ],
@@ -44,7 +52,7 @@
       }
     },
     {
-      "name": "CreateRequest",
+      "name": "UpdateOracleV1",
       "accounts": [
         {
           "name": "oracle",
@@ -52,6 +60,235 @@
           "isSigner": false,
           "docs": [
             "Oracle account"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "Oracle authority"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "updateOracleV1Args",
+          "type": {
+            "defined": "UpdateOracleV1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 1
+      }
+    },
+    {
+      "name": "CreateConfigV1",
+      "accounts": [
+        {
+          "name": "config",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Config"
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Payer"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "System program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "createConfigV1Args",
+          "type": {
+            "defined": "CreateConfigV1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 2
+      }
+    },
+    {
+      "name": "UpdateConfigV1",
+      "accounts": [
+        {
+          "name": "config",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Config"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "Config authority"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "updateConfigV1Args",
+          "type": {
+            "defined": "UpdateConfigV1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 3
+      }
+    },
+    {
+      "name": "CreateCurrencyV1",
+      "accounts": [
+        {
+          "name": "config",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Config"
+          ]
+        },
+        {
+          "name": "currency",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Currency"
+          ]
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Mint"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Oracle authority"
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Payer"
+          ]
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "SPL token program"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "System program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "createCurrencyV1Args",
+          "type": {
+            "defined": "CreateCurrencyV1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 4
+      }
+    },
+    {
+      "name": "UpdateCurrencyV1",
+      "accounts": [
+        {
+          "name": "config",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Config"
+          ]
+        },
+        {
+          "name": "currency",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Currency"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Oracle authority"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "updateCurrencyV1Args",
+          "type": {
+            "defined": "UpdateCurrencyV1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 5
+      }
+    },
+    {
+      "name": "CreateRequestV1",
+      "accounts": [
+        {
+          "name": "oracle",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Oracle account"
+          ]
+        },
+        {
+          "name": "config",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Config"
           ]
         },
         {
@@ -137,26 +374,26 @@
       ],
       "args": [
         {
-          "name": "createRequestArgs",
+          "name": "createRequestV1Args",
           "type": {
-            "defined": "CreateRequestArgs"
+            "defined": "CreateRequestV1Args"
           }
         }
       ],
       "discriminant": {
         "type": "u8",
-        "value": 1
+        "value": 6
       }
     },
     {
-      "name": "CreateAssertion",
+      "name": "CreateAssertionV1",
       "accounts": [
         {
-          "name": "oracle",
+          "name": "config",
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Oracle account"
+            "Config"
           ]
         },
         {
@@ -234,26 +471,26 @@
       ],
       "args": [
         {
-          "name": "createAssertionArgs",
+          "name": "createAssertionV1Args",
           "type": {
-            "defined": "CreateAssertionArgs"
+            "defined": "CreateAssertionV1Args"
           }
         }
       ],
       "discriminant": {
         "type": "u8",
-        "value": 2
+        "value": 7
       }
     },
     {
-      "name": "ExpireAssertion",
+      "name": "ResolveAssertionV1",
       "accounts": [
         {
-          "name": "oracle",
+          "name": "config",
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Oracle account"
+            "Config"
           ]
         },
         {
@@ -273,28 +510,21 @@
           ]
         }
       ],
-      "args": [
-        {
-          "name": "expireAssertionArgs",
-          "type": {
-            "defined": "ExpireAssertionArgs"
-          }
-        }
-      ],
+      "args": [],
       "discriminant": {
         "type": "u8",
-        "value": 3
+        "value": 8
       }
     },
     {
-      "name": "DisputeAssertion",
+      "name": "DisputeAssertionV1",
       "accounts": [
         {
-          "name": "oracle",
+          "name": "config",
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Oracle account"
+            "Config"
           ]
         },
         {
@@ -378,28 +608,21 @@
           ]
         }
       ],
-      "args": [
-        {
-          "name": "disputeAssertionArgs",
-          "type": {
-            "defined": "DisputeAssertionArgs"
-          }
-        }
-      ],
+      "args": [],
       "discriminant": {
         "type": "u8",
-        "value": 4
+        "value": 9
       }
     },
     {
-      "name": "SubmitVote",
+      "name": "SubmitVoteV1",
       "accounts": [
         {
-          "name": "oracle",
+          "name": "config",
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Oracle account"
+            "Config"
           ]
         },
         {
@@ -461,26 +684,26 @@
       ],
       "args": [
         {
-          "name": "submitVoteArgs",
+          "name": "submitVoteV1Args",
           "type": {
-            "defined": "SubmitVoteArgs"
+            "defined": "SubmitVoteV1Args"
           }
         }
       ],
       "discriminant": {
         "type": "u8",
-        "value": 5
+        "value": 10
       }
     },
     {
-      "name": "FinalizeVoting",
+      "name": "CloseVotingV1",
       "accounts": [
         {
-          "name": "oracle",
+          "name": "config",
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Oracle account"
+            "Config"
           ]
         },
         {
@@ -500,21 +723,14 @@
           ]
         }
       ],
-      "args": [
-        {
-          "name": "finalizeVotingArgs",
-          "type": {
-            "defined": "FinalizeVotingArgs"
-          }
-        }
-      ],
+      "args": [],
       "discriminant": {
         "type": "u8",
-        "value": 6
+        "value": 11
       }
     },
     {
-      "name": "CreateCurrency",
+      "name": "CreateStakeV1",
       "accounts": [
         {
           "name": "oracle",
@@ -525,33 +741,49 @@
           ]
         },
         {
-          "name": "currency",
+          "name": "stake",
           "isMut": true,
-          "isSigner": false,
+          "isSigner": true,
           "docs": [
-            "Currency"
+            "Stake"
           ]
         },
         {
           "name": "mint",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false,
           "docs": [
-            "Mint"
+            "Stake"
           ]
         },
         {
-          "name": "authority",
-          "isMut": false,
+          "name": "stakeSource",
+          "isMut": true,
           "isSigner": false,
           "docs": [
-            "Oracle authority"
+            "Stake source token account"
+          ]
+        },
+        {
+          "name": "stakePool",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Stake pool token account"
+          ]
+        },
+        {
+          "name": "wallet",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Stake owner"
           ]
         },
         {
           "name": "payer",
-          "isMut": false,
-          "isSigner": false,
+          "isMut": true,
+          "isSigner": true,
           "docs": [
             "Payer"
           ]
@@ -575,21 +807,21 @@
       ],
       "args": [
         {
-          "name": "createCurrencyArgs",
+          "name": "createStakeV1Args",
           "type": {
-            "defined": "CreateCurrencyArgs"
+            "defined": "CreateStakeV1Args"
           }
         }
       ],
       "discriminant": {
         "type": "u8",
-        "value": 7
+        "value": 12
       }
     }
   ],
   "accounts": [
     {
-      "name": "Assertion",
+      "name": "AssertionV1",
       "type": {
         "kind": "struct",
         "fields": [
@@ -626,16 +858,12 @@
           {
             "name": "assertedValue",
             "type": "u64"
-          },
-          {
-            "name": "disputedValue",
-            "type": "u64"
           }
         ]
       }
     },
     {
-      "name": "Currency",
+      "name": "ConfigV1",
       "type": {
         "kind": "struct",
         "fields": [
@@ -646,32 +874,64 @@
             }
           },
           {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "bondFeeBps",
+            "type": "u16"
+          },
+          {
+            "name": "disputeWindow",
+            "type": "u32"
+          },
+          {
+            "name": "votingWindow",
+            "type": "u32"
+          },
+          {
+            "name": "arbitrationWindow",
+            "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CurrencyV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "accountType",
+            "type": {
+              "defined": "AccountType"
+            }
+          },
+          {
+            "name": "config",
+            "type": "publicKey"
+          },
+          {
             "name": "mint",
             "type": "publicKey"
           },
           {
             "name": "rewardRange",
             "type": {
-              "tuple": [
-                "u64",
-                "u64"
-              ]
+              "defined": "Bounds"
             }
           },
           {
             "name": "bondRange",
             "type": {
-              "tuple": [
-                "u64",
-                "u64"
-              ]
+              "defined": "Bounds"
             }
           }
         ]
       }
     },
     {
-      "name": "Oracle",
+      "name": "OracleV1",
       "type": {
         "kind": "struct",
         "fields": [
@@ -690,16 +950,14 @@
             "type": "publicKey"
           },
           {
-            "name": "config",
-            "type": {
-              "defined": "Config"
-            }
+            "name": "governanceMint",
+            "type": "publicKey"
           }
         ]
       }
     },
     {
-      "name": "Request",
+      "name": "RequestV1",
       "type": {
         "kind": "struct",
         "fields": [
@@ -712,6 +970,10 @@
           {
             "name": "index",
             "type": "u64"
+          },
+          {
+            "name": "config",
+            "type": "publicKey"
           },
           {
             "name": "creator",
@@ -756,6 +1018,10 @@
             "type": "u64"
           },
           {
+            "name": "arbitrator",
+            "type": "publicKey"
+          },
+          {
             "name": "data",
             "type": {
               "defined": "RequestData"
@@ -765,7 +1031,7 @@
       }
     },
     {
-      "name": "Stake",
+      "name": "StakeV1",
       "type": {
         "kind": "struct",
         "fields": [
@@ -797,7 +1063,7 @@
       }
     },
     {
-      "name": "Vote",
+      "name": "VoteV1",
       "type": {
         "kind": "struct",
         "fields": [
@@ -823,7 +1089,7 @@
       }
     },
     {
-      "name": "Voting",
+      "name": "VotingV1",
       "type": {
         "kind": "struct",
         "fields": [
@@ -872,10 +1138,30 @@
   ],
   "types": [
     {
-      "name": "Config",
+      "name": "CreateAssertionV1Args",
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "value",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateConfigV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "bondFeeBps",
+            "type": "u16"
+          },
           {
             "name": "disputeWindow",
             "type": "u32"
@@ -885,29 +1171,168 @@
             "type": "u32"
           },
           {
-            "name": "bondFeeBps",
-            "type": "u16"
+            "name": "arbitrationWindow",
+            "type": "u32"
           }
         ]
       }
     },
     {
-      "name": "CreateOracleArgs",
+      "name": "CreateCurrencyV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "rewardRange",
+            "type": {
+              "defined": "Bounds"
+            }
+          },
+          {
+            "name": "bondRange",
+            "type": {
+              "defined": "Bounds"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateOracleV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateRequestV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "reward",
+            "type": "u64"
+          },
+          {
+            "name": "bond",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": {
+              "defined": "UnixTimestamp"
+            }
+          },
+          {
+            "name": "arbitrator",
+            "type": "publicKey"
+          },
+          {
+            "name": "data",
+            "type": {
+              "defined": "RequestData"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateStakeV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SubmitVoteV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "value",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateCurrencyV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "newRewardRange",
+            "type": {
+              "defined": "Bounds"
+            }
+          },
+          {
+            "name": "newBondRange",
+            "type": {
+              "defined": "Bounds"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Bounds",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "start",
+            "type": "u64"
+          },
+          {
+            "name": "end",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateConfigV1Args",
       "type": {
         "kind": "enum",
         "variants": [
           {
-            "name": "V1",
+            "name": "Authority",
             "fields": [
               {
-                "name": "authority",
+                "name": "new_authority",
                 "type": "publicKey"
+              }
+            ]
+          },
+          {
+            "name": "Config",
+            "fields": [
+              {
+                "name": "new_bond_fee_bps",
+                "type": "u16"
               },
               {
-                "name": "config",
-                "type": {
-                  "defined": "Config"
-                }
+                "name": "new_dispute_window",
+                "type": "u32"
+              },
+              {
+                "name": "new_voting_window",
+                "type": "u32"
+              },
+              {
+                "name": "new_arbitration_window",
+                "type": "u32"
               }
             ]
           }
@@ -915,134 +1340,16 @@
       }
     },
     {
-      "name": "CreateRequestArgs",
+      "name": "UpdateOracleV1Args",
       "type": {
         "kind": "enum",
         "variants": [
           {
-            "name": "V1",
+            "name": "Authority",
             "fields": [
               {
-                "name": "reward",
-                "type": "u64"
-              },
-              {
-                "name": "bond",
-                "type": "u64"
-              },
-              {
-                "name": "timestamp",
-                "type": "i64"
-              },
-              {
-                "name": "data",
-                "type": {
-                  "defined": "RequestData"
-                }
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "name": "CreateAssertionArgs",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "V1",
-            "fields": [
-              {
-                "name": "value",
-                "type": "u64"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "name": "ExpireAssertionArgs",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "V1"
-          }
-        ]
-      }
-    },
-    {
-      "name": "DisputeAssertionArgs",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "V1",
-            "fields": [
-              {
-                "name": "value",
-                "type": "u64"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "name": "SubmitVoteArgs",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "V1",
-            "fields": [
-              {
-                "name": "value",
-                "type": "u64"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "name": "FinalizeVotingArgs",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "V1"
-          }
-        ]
-      }
-    },
-    {
-      "name": "CreateCurrencyArgs",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "V1",
-            "fields": [
-              {
-                "name": "reward_range",
-                "type": {
-                  "tuple": [
-                    "u64",
-                    "u64"
-                  ]
-                }
-              },
-              {
-                "name": "bond_range",
-                "type": {
-                  "tuple": [
-                    "u64",
-                    "u64"
-                  ]
-                }
+                "name": "new_authority",
+                "type": "publicKey"
               }
             ]
           }
@@ -1058,25 +1365,28 @@
             "name": "Uninitialized"
           },
           {
-            "name": "Oracle"
+            "name": "OracleV1"
           },
           {
-            "name": "Stake"
+            "name": "ConfigV1"
           },
           {
-            "name": "Request"
+            "name": "StakeV1"
           },
           {
-            "name": "Assertion"
+            "name": "RequestV1"
           },
           {
-            "name": "Currency"
+            "name": "AssertionV1"
           },
           {
-            "name": "Voting"
+            "name": "CurrencyV1"
           },
           {
-            "name": "Vote"
+            "name": "VotingV1"
+          },
+          {
+            "name": "VoteV1"
           }
         ]
       }
@@ -1122,98 +1432,123 @@
   "errors": [
     {
       "code": 0,
-      "name": "InsufficientBond",
-      "msg": "Insufficient bond"
+      "name": "DeserializationError",
+      "msg": "Failed to deserialize account"
     },
     {
       "code": 1,
-      "name": "NotAsserted",
-      "msg": "Request does not have an assertion"
+      "name": "SerializationError",
+      "msg": "Failed to serialize account"
     },
     {
       "code": 2,
-      "name": "NotDisputed",
-      "msg": "Request is not disputed"
-    },
-    {
-      "code": 3,
-      "name": "AlreadyAsserted",
-      "msg": "Request already has an assertion"
-    },
-    {
-      "code": 4,
-      "name": "AlreadyDisputed",
-      "msg": "Assertion has already been disputed"
-    },
-    {
-      "code": 5,
-      "name": "AlreadyResolved",
-      "msg": "Request has already been resolved"
-    },
-    {
-      "code": 6,
-      "name": "AssertionTooEarly",
-      "msg": "Request is not accepting assertion yet"
-    },
-    {
-      "code": 7,
-      "name": "DisputeWindowNotExpired",
-      "msg": "Dispute window has not expired"
-    },
-    {
-      "code": 8,
-      "name": "DisputeWindowExpired",
-      "msg": "Dispute window has expired"
-    },
-    {
-      "code": 9,
-      "name": "InvalidValue",
-      "msg": "Value is not valid for the request"
-    },
-    {
-      "code": 10,
-      "name": "InvalidDispute",
-      "msg": "Disputed value falls within range of acceptable deviation for asserted value"
-    },
-    {
-      "code": 11,
-      "name": "DisputerIsAsserter",
-      "msg": "Disputer cannot be the same as the asserter"
-    },
-    {
-      "code": 12,
-      "name": "BondMintMismatch",
-      "msg": "Bond mint address does not match"
-    },
-    {
-      "code": 13,
-      "name": "VotingWindowNotExpired",
-      "msg": "Voting window has not expired"
-    },
-    {
-      "code": 14,
-      "name": "VotingWindowExpired",
-      "msg": "Voting window has expired"
-    },
-    {
-      "code": 15,
-      "name": "RewardMintMismatch",
-      "msg": "Reward mint address does not match"
-    },
-    {
-      "code": 16,
       "name": "RewardBounds",
       "msg": "Reward must be within valid bounds"
     },
     {
-      "code": 17,
+      "code": 3,
       "name": "BondBounds",
       "msg": "Bond must be within valid bounds"
     },
     {
-      "code": 18,
+      "code": 4,
+      "name": "InvalidValue",
+      "msg": "Value is not valid for the request"
+    },
+    {
+      "code": 5,
+      "name": "DisputerIsAsserter",
+      "msg": "Disputer cannot be the same as the asserter"
+    },
+    {
+      "code": 6,
+      "name": "NotAsserted",
+      "msg": "Request does not have an assertion"
+    },
+    {
+      "code": 7,
+      "name": "NotDisputed",
+      "msg": "Request is not disputed"
+    },
+    {
+      "code": 8,
+      "name": "AlreadyAsserted",
+      "msg": "Request already has an assertion"
+    },
+    {
+      "code": 9,
+      "name": "AlreadyDisputed",
+      "msg": "Assertion has already been disputed"
+    },
+    {
+      "code": 10,
+      "name": "AlreadyResolved",
+      "msg": "Request has already been resolved"
+    },
+    {
+      "code": 11,
+      "name": "AssertionTooEarly",
+      "msg": "Request is not accepting assertion yet"
+    },
+    {
+      "code": 12,
+      "name": "DisputeWindowNotExpired",
+      "msg": "Dispute window has not expired"
+    },
+    {
+      "code": 13,
+      "name": "DisputeWindowExpired",
+      "msg": "Dispute window has expired"
+    },
+    {
+      "code": 14,
+      "name": "VotingWindowNotExpired",
+      "msg": "Voting window has not expired"
+    },
+    {
+      "code": 15,
+      "name": "VotingWindowExpired",
+      "msg": "Voting window has expired"
+    },
+    {
+      "code": 16,
+      "name": "ArbitrationWindowNotExpired",
+      "msg": "Arbitration window has not expired"
+    },
+    {
+      "code": 17,
       "name": "OracleAuthorityMismatch",
       "msg": "Oracle authority address does not match"
+    },
+    {
+      "code": 18,
+      "name": "ConfigAuthorityMismatch",
+      "msg": "Config authority address does not match"
+    },
+    {
+      "code": 19,
+      "name": "ConfigMismatch",
+      "msg": "Config address does not match"
+    },
+    {
+      "code": 20,
+      "name": "CurrencyMintMismatch",
+      "msg": "Currency mint address does not match"
+    },
+    {
+      "code": 21,
+      "name": "BondMintMismatch",
+      "msg": "Bond mint address does not match"
+    },
+    {
+      "code": 22,
+      "name": "StakeMintMismatch",
+      "msg": "Stake mint address does not match"
+    },
+    {
+      "code": 23,
+      "name": "StakeVoterMismatch",
+      "msg": "Stake delegate does not match voter"
     }
   ],
   "metadata": {
