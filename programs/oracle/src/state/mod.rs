@@ -287,7 +287,7 @@ impl<T: Account> AccountInitializer<T> {
             signer_seeds,
         )?;
 
-        serialize_account(&mut *account_info.try_borrow_mut_data()?, &self.account)?;
+        serialize_account(account_info.try_borrow_mut_data()?.deref_mut(), &self.account)?;
 
         Ok(self.account)
     }

@@ -4,11 +4,12 @@ use solana_program::account_info::AccountInfo;
 use solana_program::entrypoint::ProgramResult;
 use solana_program::program::{get_return_data, invoke, invoke_signed};
 use solana_program::program_error::ProgramError;
+use solana_program::pubkey;
 use solana_program::pubkey::Pubkey;
 use spl_token_2022::extension::PodStateWithExtensions;
 use spl_token_2022::pod::{PodAccount, PodMint};
 
-pub const TOKEN_ID: Pubkey = solana_program::pubkey!("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+pub const TOKEN_ID: Pubkey = pubkey!("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 pub const TOKEN_2022_ID: Pubkey = spl_token_2022::ID;
 
 pub struct CreateTokenAccount<'a, 'info> {
@@ -114,7 +115,7 @@ pub fn close_account(accounts: CloseAccount, signers_seeds: &[&[&[u8]]]) -> Prog
 }
 
 /// Determines the required initial data length for a new token account.
-pub fn get_account_len<'a>(
+fn get_account_len<'a>(
     mint: &AccountInfo<'a>,
     token_program: &AccountInfo<'a>,
 ) -> Result<usize, ProgramError> {

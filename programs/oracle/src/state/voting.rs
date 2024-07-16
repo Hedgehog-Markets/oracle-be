@@ -52,7 +52,7 @@ impl AccountSized for VotingV1 {
     const IS_FIXED_SIZE: bool = false;
 
     fn serialized_size(&self) -> Option<usize> {
-        self.votes.len().checked_mul(u64::SIZE)?.checked_add(Self::BASE_SIZE)
+        self.votes.len().checked_mul(u64::SIZE + u64::SIZE)?.checked_add(Self::BASE_SIZE)
     }
 }
 
@@ -84,4 +84,28 @@ pub(crate) struct InitVoting {
     pub start_timestamp: UnixTimestamp,
 
     pub voting_window: u32,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn account_size() {
+        let init =
+            InitVoting { request: Pubkey::new_unique(), start_timestamp: 0, voting_window: 0 };
+
+        let (mut account, expected) = <(VotingV1, usize)>::try_from(init).unwrap();
+        let actual = common_test::serialized_len(&account).unwrap();
+
+        assert_eq!(expected, actual);
+
+        account.votes.insert(0, 10);
+        account.votes.insert(1, 5);
+
+        let expected = account.serialized_size().unwrap();
+        let actual = common_test::serialized_len(&account).unwrap();
+
+        assert_eq!(expected, actual);
+    }
 }

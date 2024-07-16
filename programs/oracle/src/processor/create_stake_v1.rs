@@ -43,15 +43,18 @@ pub fn create_stake_v1<'a>(
     }
 
     // Step 2: Create stake account.
-    StakeV1::init(InitStake { owner: *ctx.accounts.wallet.key, amount: args.amount }).save(
-        InitContext {
-            account: ctx.accounts.stake,
-            payer: ctx.accounts.payer,
-            system_program: ctx.accounts.system_program,
-            program_id,
-            signers_seeds: &[],
-        },
-    )?;
+    StakeV1::init(InitStake {
+        mint: *ctx.accounts.mint.key,
+        owner: *ctx.accounts.wallet.key,
+        amount: args.amount,
+    })
+    .save(InitContext {
+        account: ctx.accounts.stake,
+        payer: ctx.accounts.payer,
+        system_program: ctx.accounts.system_program,
+        program_id,
+        signers_seeds: &[],
+    })?;
 
     // Step 3: Create stake pool account if necessary.
     {

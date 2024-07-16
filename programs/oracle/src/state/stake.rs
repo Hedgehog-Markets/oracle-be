@@ -17,9 +17,11 @@ use super::{Account, AccountType};
 pub struct StakeV1 {
     account_type: AccountType,
 
-    /// Owner of the stake.
+    /// The mint address.
+    pub mint: Pubkey,
+    /// The owner address.
     pub owner: Pubkey,
-    /// Address the stake is delegated to.
+    /// The address the stake is delegated to.
     ///
     /// The delegate can vote and restake rewards, but cannot withdraw stake.
     pub delegate: Pubkey,
@@ -46,11 +48,12 @@ impl Account for StakeV1 {
 
 impl From<InitStake> for (StakeV1, usize) {
     fn from(params: InitStake) -> (StakeV1, usize) {
-        let InitStake { owner, amount } = params;
+        let InitStake { mint, owner, amount } = params;
 
         (
             StakeV1 {
                 account_type: StakeV1::TYPE,
+                mint,
                 owner,
                 delegate: owner,
                 amount,
@@ -62,6 +65,7 @@ impl From<InitStake> for (StakeV1, usize) {
 }
 
 pub(crate) struct InitStake {
+    pub mint: Pubkey,
     pub owner: Pubkey,
     pub amount: u64,
 }

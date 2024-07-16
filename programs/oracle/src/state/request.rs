@@ -221,7 +221,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn request_data_size() {
+    fn data_size() {
         let data = RequestData::YesNo { question: "example question?".to_owned() };
 
         let expected = data.serialized_size().unwrap();
@@ -231,7 +231,7 @@ mod tests {
     }
 
     #[test]
-    fn request_size() {
+    fn account_size() {
         let init = InitRequest {
             index: 0,
             config: Pubkey::new_unique(),
