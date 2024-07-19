@@ -128,7 +128,7 @@ pub enum OracleInstruction {
     #[account(1, writable, name = "assertion", desc = "Assertion")]
     #[account(2, name = "bond_mint", desc = "Bond mint")]
     #[account(3, writable, name = "bond_destination", desc = "Reclaimed bond destination token account")]
-    #[account(4, writable, name = "bond_escrow", desc = "Bond escrow token account")]
+    #[account(4, writable, name = "bond_escrow", desc = "Asserter bond escrow token account")]
     #[account(5, name = "reward_mint", desc = "Bond mint")]
     #[account(6, writable, name = "reward_destination", desc = "Reclaimed bond destination token account")]
     #[account(7, writable, name = "reward_escrow", desc = "Bond escrow token account")]
@@ -136,4 +136,17 @@ pub enum OracleInstruction {
     #[account(9, name = "token_program", desc = "SPL token program")]
     #[account(10, name = "system_program", desc = "System program")]
     ClaimAssertionV1,
+
+    #[account(0, name = "request", desc = "Request")]
+    #[account(1, writable, name = "assertion", desc = "Assertion")]
+    #[account(2, name = "bond_mint", desc = "Bond mint")]
+    #[account(3, writable, name = "bond_destination", desc = "Reclaimed bond destination token account")]
+    #[account(4, writable, name = "bond_escrow", desc = "Disputer bond escrow token account")]
+    #[account(5, name = "reward_mint", desc = "Bond mint")]
+    #[account(6, writable, name = "reward_destination", desc = "Reclaimed bond destination token account")]
+    #[account(7, writable, name = "reward_escrow", desc = "Bond escrow token account")]
+    #[account(8, signer, writable, name = "disputer", desc = "Disputer")]
+    #[account(9, name = "token_program", desc = "SPL token program")]
+    #[account(10, name = "system_program", desc = "System program")]
+    ClaimDisputeV1,
 }
