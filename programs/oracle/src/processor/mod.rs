@@ -4,6 +4,7 @@ use solana_program::account_info::AccountInfo;
 use solana_program::entrypoint::ProgramResult;
 use solana_program::pubkey::Pubkey;
 
+mod claim_assertion_v1;
 mod close_voting_v1;
 mod create_assertion_v1;
 mod create_config_v1;
@@ -18,6 +19,7 @@ mod update_config_v1;
 mod update_currency_v1;
 mod update_oracle_v1;
 
+pub(crate) use self::claim_assertion_v1::*;
 pub(crate) use self::close_voting_v1::*;
 pub(crate) use self::create_assertion_v1::*;
 pub(crate) use self::create_config_v1::*;
@@ -57,5 +59,6 @@ pub fn process_instruction<'a>(
         I::SubmitVoteV1(args) => submit_vote_v1(program_id, accounts, args),
         I::CloseVotingV1 => close_voting_v1(program_id, accounts),
         I::CreateStakeV1(args) => create_stake_v1(program_id, accounts, args),
+        I::ClaimAssertionV1 => claim_assertion_v1(program_id, accounts),
     }
 }

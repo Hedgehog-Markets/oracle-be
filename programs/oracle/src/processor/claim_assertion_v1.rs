@@ -1,152 +1,134 @@
 use common::cpi;
 use solana_program::account_info::AccountInfo;
-use solana_program::clock::Clock;
 use solana_program::entrypoint::ProgramResult;
 use solana_program::pubkey::Pubkey;
-use solana_program::sysvar::Sysvar;
 
 use crate::error::OracleError;
-use crate::instruction::accounts::DisputeAssertionV1Accounts;
-use crate::state::{
-    Account, AccountSized, AssertionV1, ConfigV1, InitAccount, InitContext, InitVoting,
-    RequestState, RequestV1, VotingV1,
-};
+use crate::instruction::accounts::ClaimAssertionV1Accounts;
+use crate::state::{Account, AssertionV1, RequestState, RequestV1};
 use crate::{pda, utils};
 
 pub fn claim_assertion_v1<'a>(
-    program_id: &'a Pubkey,
+    _program_id: &'a Pubkey,
     accounts: &'a [AccountInfo<'a>],
 ) -> ProgramResult {
-    let ctx = DisputeAssertionV1Accounts::context(accounts)?;
+    let ctx = ClaimAssertionV1Accounts::context(accounts)?;
 
     // Guard signatures.
-    utils::assert_signer(ctx.accounts.disputer)?;
-    utils::assert_signer(ctx.accounts.payer)?;
+    utils::assert_signer(ctx.accounts.asserter)?;
 
     // Guard programs.
     utils::assert_token_program(ctx.accounts.token_program.key)?;
     utils::assert_system_program(ctx.accounts.system_program.key)?;
 
-    let voting_window: u32;
+    let request_index: u64;
+    let request_bump: u8;
 
-    // Step 1: Get config voting window.
     {
-        let config = ConfigV1::from_account_info(ctx.accounts.config)?;
+        let resolved_value: u64;
 
-        voting_window = config.voting_window;
-    }
-
-    let now = Clock::get()?.unix_timestamp;
-    let bond: u64;
-
-    // Step 2: Update request and assertion states.
-    {
-        let mut request = RequestV1::from_account_info_mut(ctx.accounts.request)?;
-
-        // Step 2.1: Check request.
+        // Step 1: Check request state.
         {
+            let request = RequestV1::from_account_info(ctx.accounts.request)?;
+
             // Guard request.
-            request.assert_pda(ctx.accounts.request.key)?;
-            request.assert_config(ctx.accounts.config.key)?;
+            request_bump = request.assert_pda(ctx.accounts.request.key)?;
+            request.assert_reward_mint(ctx.accounts.reward_mint.key)?;
             request.assert_bond_mint(ctx.accounts.bond_mint.key)?;
 
-            // The request state must be `Asserted` to dispute.
-            match request.state {
-                RequestState::Asserted => {}
-                RequestState::Requested => return Err(OracleError::NotAsserted.into()),
-                RequestState::Disputed => return Err(OracleError::AlreadyDisputed.into()),
-                RequestState::Resolved => return Err(OracleError::AlreadyResolved.into()),
+            // The request must be resolved to claim.
+            if request.state != RequestState::Resolved {
+                return Err(OracleError::NotResolved.into());
             }
+
+            request_index = request.index;
+            resolved_value = request.value;
         }
 
-        bond = request.bond;
-
-        // Step 2.2: Check and update assertion.
+        // Step 2: Check assertion.
         {
             // Guard assertion PDA.
             pda::assertion::assert_pda(ctx.accounts.assertion.key, ctx.accounts.request.key)?;
 
-            let mut assertion = AssertionV1::from_account_info_mut(ctx.accounts.assertion)?;
+            let assertion = AssertionV1::from_account_info(ctx.accounts.assertion)?;
 
-            // The disputer cannot have the same address as the asserter.
-            if common::cmp_pubkeys(&assertion.asserter, ctx.accounts.disputer.key) {
-                return Err(OracleError::DisputerIsAsserter.into());
+            // Guard assertion.
+            assertion.assert_asserter(ctx.accounts.asserter.key)?;
+
+            // Check the asserter is correct.
+            if assertion.asserted_value != resolved_value {
+                return Err(OracleError::IncorrectClaimer.into());
             }
-
-            // The dispute window of the assertion must not have expired.
-            assertion.validate_dispute_timestamp(now)?;
-
-            assertion.disputer = *ctx.accounts.disputer.key;
-            assertion.save()?;
-        }
-
-        // Step 2.3: Update request state.
-        {
-            request.state = RequestState::Disputed;
-            request.save()?;
         }
     }
 
-    // Step 3: Transfer bond to escrow.
+    let signer_seeds = pda::request::seeds_with_bump(&request_index, &request_bump);
+
+    // Step 3: Recover asserter bond.
     {
-        let mint_decimals = cpi::spl::mint_decimals(ctx.accounts.bond_mint)?;
+        pda::assert_bond::assert_pda(ctx.accounts.bond_escrow.key, ctx.accounts.request.key)?;
 
-        // Step 3.1: Initialize `bond_escrow` account.
-        {
-            let bump = pda::dispute_bond::assert_pda(
-                ctx.accounts.bond_escrow.key,
-                ctx.accounts.request.key,
-            )?;
-            let signer_seeds = pda::dispute_bond::seeds_with_bump(ctx.accounts.request.key, &bump);
+        let bond = cpi::spl::account_amount(ctx.accounts.bond_escrow)?;
+        let decimals = cpi::spl::mint_decimals(ctx.accounts.bond_mint)?;
 
-            cpi::spl::create_token_account(
-                ctx.accounts.request.key,
-                cpi::spl::CreateTokenAccount {
-                    account: ctx.accounts.bond_escrow,
-                    mint: ctx.accounts.bond_mint,
-                    payer: ctx.accounts.payer,
-                    token_program: ctx.accounts.token_program,
-                    system_program: ctx.accounts.system_program,
-                },
-                &[&signer_seeds],
-            )?;
-        }
-
-        // Step 3.2: Transfer bond from `bond_source` to `bond_escrow`.
+        // Step 3.1: Transfer bond from escrow to asserter.
         cpi::spl::transfer_checked(
             bond,
-            mint_decimals,
+            decimals,
             cpi::spl::TransferChecked {
-                source: ctx.accounts.bond_source,
-                destination: ctx.accounts.bond_escrow,
+                source: ctx.accounts.bond_escrow,
+                destination: ctx.accounts.bond_destination,
                 mint: ctx.accounts.bond_mint,
-                authority: ctx.accounts.disputer,
+                authority: ctx.accounts.request,
                 token_program: ctx.accounts.token_program,
             },
-            &[],
+            &[&signer_seeds],
+        )?;
+
+        // Step 3.2: Close bond escrow account.
+        cpi::spl::close_account(
+            cpi::spl::CloseAccount {
+                account: ctx.accounts.bond_escrow,
+                destination: ctx.accounts.asserter,
+                authority: ctx.accounts.request,
+                token_program: ctx.accounts.token_program,
+            },
+            &[&signer_seeds],
         )?;
     }
 
-    // Step 4: Initialize `voting` account.
+    // Step 4: Claim reward.
     {
-        let bump = pda::voting::assert_pda(ctx.accounts.voting.key, ctx.accounts.request.key)?;
-        let signer_seeds = pda::voting::seeds_with_bump(ctx.accounts.request.key, &bump);
+        pda::reward::assert_pda(ctx.accounts.reward_escrow.key, ctx.accounts.request.key)?;
 
-        VotingV1::try_init(InitVoting {
-            request: *ctx.accounts.request.key,
-            start_timestamp: now,
-            voting_window,
-        })?
-        .save(InitContext {
-            account: ctx.accounts.voting,
-            payer: ctx.accounts.payer,
-            system_program: ctx.accounts.system_program,
-            program_id,
-            signers_seeds: &[&signer_seeds],
-        })?;
+        let reward = cpi::spl::account_amount(ctx.accounts.reward_escrow)?;
+        let decimals = cpi::spl::mint_decimals(ctx.accounts.reward_mint)?;
+
+        // Step 4.1: Transfer reward from escrow to asserter.
+        cpi::spl::transfer_checked(
+            reward,
+            decimals,
+            cpi::spl::TransferChecked {
+                source: ctx.accounts.reward_escrow,
+                destination: ctx.accounts.reward_destination,
+                mint: ctx.accounts.reward_mint,
+                authority: ctx.accounts.request,
+                token_program: ctx.accounts.token_program,
+            },
+            &[&signer_seeds],
+        )?;
+
+        // Step 4.2: Close reward escrow account.
+        cpi::spl::close_account(
+            cpi::spl::CloseAccount {
+                account: ctx.accounts.reward_escrow,
+                destination: ctx.accounts.asserter,
+                authority: ctx.accounts.request,
+                token_program: ctx.accounts.token_program,
+            },
+            &[&signer_seeds],
+        )?;
     }
-
-    // TODO: Emit an event?
 
     Ok(())
 }
