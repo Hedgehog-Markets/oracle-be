@@ -94,6 +94,9 @@ pub enum OracleError {
 
     #[error("Incorrect claimer")]
     IncorrectClaimer,
+
+    #[error("Value voted for is not the resolved value")]
+    IncorrectVote,
 }
 
 impl PrintProgramError for OracleError {

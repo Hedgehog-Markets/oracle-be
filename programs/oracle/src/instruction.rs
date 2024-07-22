@@ -149,4 +149,17 @@ pub enum OracleInstruction {
     #[account(9, name = "token_program", desc = "SPL token program")]
     #[account(10, name = "system_program", desc = "System program")]
     ClaimDisputeV1,
+
+    #[account(0, name = "request", desc = "Request")]
+    #[account(1, name = "assertion", desc = "Assertion")]
+    #[account(2, name = "voting", desc = "Voting")]
+    #[account(3, writable, name = "vote", desc = "Vote")]
+    #[account(4, name = "stake", desc = "Stake")]
+    #[account(5, name = "bond_mint", desc = "Bond mint")]
+    #[account(6, writable, name = "bond_destination", desc = "Bond destination token account")]
+    #[account(7, writable, name = "bond_escrow", desc = "Bond escrow token account of incorrect asserter/disputer")]
+    #[account(8, signer, writable, name = "voter", desc = "Voter")]
+    #[account(9, name = "token_program", desc = "SPL token program")]
+    #[account(10, name = "system_program", desc = "System program")]
+    ClaimVoteV1,
 }
