@@ -3,22 +3,23 @@ members = ["crates/*", "programs/*", "clients/rust"]
 resolver = "2"
 
 [workspace.dependencies]
-solana-program = "2.0.7"
+solana-program = "2.0"
 
-spl-token-2022 = { version = "5.0.1", features = ["no-entrypoint"] }
+spl-token-2022 = { version = "5.0", default-features = false, features = ["no-entrypoint"] }
 
-bytemuck = { version = "1.17.1", features = ["extern_crate_std"] }
+borsh = { version = "1.5.1", features = ["derive"] }
+bytemuck = { version = "1.18.0", features = ["extern_crate_std"] }
 
-thiserror = "1.0.63"
+thiserror = "1.0.64"
 num-traits = "0.2.19"
 num-derive = "0.4.2"
 
 cpi = { path = "crates/cpi" }
 
-borsh-size = { git = "https://github.com/Hedgehog-Markets/solana-utils", rev = "e457cbe" }
-include-idl = { git = "https://github.com/Hedgehog-Markets/solana-utils", rev = "e457cbe" }
-security-txt = { git = "https://github.com/Hedgehog-Markets/solana-utils", rev = "e457cbe" }
-solana-utils = { git = "https://github.com/Hedgehog-Markets/solana-utils", rev = "e457cbe" }
+borsh-size = { git = "https://github.com/Hedgehog-Markets/solana-utils", rev = "a8a4b8c" }
+include-idl = { git = "https://github.com/Hedgehog-Markets/solana-utils", rev = "a8a4b8c" }
+security-txt = { git = "https://github.com/Hedgehog-Markets/solana-utils", rev = "a8a4b8c" }
+solana-utils = { git = "https://github.com/Hedgehog-Markets/solana-utils", rev = "a8a4b8c" }
 
 [profile.release]
 opt-level = 3
