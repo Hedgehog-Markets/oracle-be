@@ -35,10 +35,18 @@ pub fn claim_assertion_v1<'a>(
             request.assert_reward_mint(ctx.accounts.reward_mint.key)?;
             request.assert_bond_mint(ctx.accounts.bond_mint.key)?;
 
-            // The request must be resolved to claim.
+            // The asserter can only claim if the request is resolved to the value they asserted.
+            // Thus the request should be resolved, and the assertion round should be current round.
             if request.state != RequestState::Resolved {
                 return Err(OracleError::NotResolved.into());
             }
+
+            // Guard assertion PDA.
+            pda::assertion::assert_pda(
+                ctx.accounts.assertion.key,
+                ctx.accounts.request.key,
+                &request.round,
+            )?;
 
             request_index = request.index;
             resolved_value = request.value;
@@ -46,9 +54,6 @@ pub fn claim_assertion_v1<'a>(
 
         // Step 2: Check assertion.
         {
-            // Guard assertion PDA.
-            pda::assertion::assert_pda(ctx.accounts.assertion.key, ctx.accounts.request.key)?;
-
             let assertion = AssertionV1::from_account_info(ctx.accounts.assertion)?;
 
             // Guard assertion.
@@ -65,7 +70,7 @@ pub fn claim_assertion_v1<'a>(
 
     // Step 3: Recover asserter bond.
     {
-        pda::assert_bond::assert_pda(ctx.accounts.bond_escrow.key, ctx.accounts.request.key)?;
+        pda::assert_bond::assert_pda(ctx.accounts.bond_escrow.key, ctx.accounts.assertion.key)?;
 
         let bond = cpi::spl::account_amount(ctx.accounts.bond_escrow)?;
         let decimals = cpi::spl::mint_decimals(ctx.accounts.bond_mint)?;

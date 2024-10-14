@@ -5,7 +5,9 @@ use solana_utils::log;
 
 use crate::error::OracleError;
 use crate::instruction::accounts::ClaimVoteV1Accounts;
-use crate::state::{Account, AssertionV1, RequestState, RequestV1, StakeV1, VoteV1, VotingV1};
+use crate::state::{
+    Account, AssertionV1, RequestState, RequestV1, StakeV1, VoteV1, VotingV1, VALUE_UNAVAILABLE,
+};
 use crate::{pda, utils};
 
 pub fn claim_vote_v1<'a>(
@@ -29,13 +31,22 @@ pub fn claim_vote_v1<'a>(
         stake.assert_voter(ctx.accounts.voter.key)?;
     }
 
+    let round: u8;
+
+    // Step 2: Check assertion.
+    {
+        let assertion = AssertionV1::from_account_info(ctx.accounts.assertion)?;
+
+        round = assertion.round;
+    }
+
     let request_index: u64;
     let request_bump: u8;
 
     let resolved_value: u64;
     let bond: u64;
 
-    // Step 2: Check request state.
+    // Step 3: Check request state.
     {
         let request = RequestV1::from_account_info(ctx.accounts.request)?;
 
@@ -43,30 +54,39 @@ pub fn claim_vote_v1<'a>(
         request_bump = request.assert_pda(ctx.accounts.request.key)?;
         request.assert_bond_mint(ctx.accounts.bond_mint.key)?;
 
-        // The request must be resolved to claim.
-        if request.state != RequestState::Resolved {
-            return Err(OracleError::NotResolved.into());
+        if request.round > round {
+            resolved_value = VALUE_UNAVAILABLE;
+        } else {
+            // The request must be resolved to claim.
+            if request.state != RequestState::Resolved {
+                return Err(OracleError::NotResolved.into());
+            }
+            resolved_value = request.value;
         }
 
         request_index = request.index;
-        resolved_value = request.value;
         bond = request.bond;
     }
 
     // Guard PDAs.
-    pda::assertion::assert_pda(ctx.accounts.assertion.key, ctx.accounts.request.key)?;
-    pda::voting::assert_pda(ctx.accounts.voting.key, ctx.accounts.request.key)?;
+    pda::assertion::assert_pda(ctx.accounts.assertion.key, ctx.accounts.request.key, &round)?;
+    pda::voting::assert_pda(ctx.accounts.voting.key, ctx.accounts.assertion.key)?;
     pda::vote::assert_pda(ctx.accounts.vote.key, ctx.accounts.voting.key, ctx.accounts.stake.key)?;
 
     let votes: u64;
 
-    // Step 3: Get voter votes for resolved value.
+    // Step 4: Get voter votes for resolved value.
     {
         let vote = VoteV1::from_account_info(ctx.accounts.vote)?;
 
-        // The vote must be for the resolved value.
+        // The vote must be for the resolved value to claim rewards.
+        // Otherwise just close the account to reclaim the rent.
         if vote.value != resolved_value {
-            return Err(OracleError::IncorrectVote.into());
+            log!("Incorrect vote");
+
+            solana_utils::close_account(ctx.accounts.vote, ctx.accounts.voter)?;
+
+            return Ok(());
         }
 
         votes = vote.votes;
@@ -74,7 +94,7 @@ pub fn claim_vote_v1<'a>(
 
     let total_votes: u64;
 
-    // Step 4: Get total votes for resolved value.
+    // Step 5: Get total votes for resolved value.
     {
         let voting = VotingV1::from_account_info(ctx.accounts.request)?;
 
@@ -91,7 +111,7 @@ pub fn claim_vote_v1<'a>(
     log!("Votes: {votes} / {total_votes}");
     log!("Reward: {voter_reward}");
 
-    // Step 5: Check bond escrow for incorrect asserter/disputer.
+    // Step 6: Check bond escrow for incorrect asserter/disputer.
     {
         let assertion = AssertionV1::from_account_info(ctx.accounts.assertion)?;
 
@@ -100,16 +120,19 @@ pub fn claim_vote_v1<'a>(
             log!("Assertion is correct");
 
             // The resolved value matches the asserted value, so the disputer loses their bond.
-            pda::dispute_bond::assert_pda(ctx.accounts.bond_escrow.key, ctx.accounts.request.key)?;
+            pda::dispute_bond::assert_pda(
+                ctx.accounts.bond_escrow.key,
+                ctx.accounts.assertion.key,
+            )?;
         } else {
             log!("Assertion is incorrect");
 
             // The resolved value doesn't match the asserted value, so the asserter loses their bond.
-            pda::assert_bond::assert_pda(ctx.accounts.bond_escrow.key, ctx.accounts.request.key)?;
+            pda::assert_bond::assert_pda(ctx.accounts.bond_escrow.key, ctx.accounts.assertion.key)?;
         }
     }
 
-    // Step 6: Claim voter reward from incorrect bond.
+    // Step 7: Claim voter reward from incorrect bond.
     {
         let signer_seeds = pda::request::seeds_with_bump(&request_index, &request_bump);
 
@@ -129,7 +152,7 @@ pub fn claim_vote_v1<'a>(
         )?;
     }
 
-    // Step 7: Close vote account.
+    // Step 8: Close vote account.
     solana_utils::close_account(ctx.accounts.vote, ctx.accounts.voter)?;
 
     Ok(())

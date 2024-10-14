@@ -69,10 +69,10 @@ pdas! {
     "Request": request(index: u64);
     "Reward": reward(request: Pubkey);
 
-    "Assertion": assertion(request: Pubkey);
-    "Assert bond": assert_bond(request: Pubkey);
-    "Dispute bond": dispute_bond(request: Pubkey);
+    "Assertion": assertion(request: Pubkey, round: u8);
+    "Assert bond": assert_bond(assertion: Pubkey);
+    "Dispute bond": dispute_bond(assertion: Pubkey);
 
-    "Voting": voting(request: Pubkey);
+    "Voting": voting(assertion: Pubkey);
     "Vote": vote(voting: Pubkey, stake: Pubkey);
 }

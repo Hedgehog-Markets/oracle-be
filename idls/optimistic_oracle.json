@@ -723,6 +723,14 @@
           ]
         },
         {
+          "name": "assertion",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Assertion"
+          ]
+        },
+        {
           "name": "voting",
           "isMut": true,
           "isSigner": false,
@@ -1138,6 +1146,10 @@
             "type": "publicKey"
           },
           {
+            "name": "round",
+            "type": "u8"
+          },
+          {
             "name": "assertionTimestamp",
             "type": "i64"
           },
@@ -1308,6 +1320,10 @@
             }
           },
           {
+            "name": "round",
+            "type": "u8"
+          },
+          {
             "name": "value",
             "type": "u64"
           },
@@ -1316,10 +1332,14 @@
             "type": "publicKey"
           },
           {
-            "name": "data",
+            "name": "kind",
             "type": {
-              "defined": "RequestData"
+              "defined": "RequestKind"
             }
+          },
+          {
+            "name": "uri",
+            "type": "string"
           }
         ]
       }
@@ -1378,11 +1398,11 @@
             "type": "publicKey"
           },
           {
-            "name": "value",
+            "name": "votes",
             "type": "u64"
           },
           {
-            "name": "votes",
+            "name": "value",
             "type": "u64"
           }
         ]
@@ -1400,7 +1420,7 @@
             }
           },
           {
-            "name": "request",
+            "name": "assertion",
             "type": "publicKey"
           },
           {
@@ -1531,10 +1551,14 @@
             "type": "publicKey"
           },
           {
-            "name": "data",
+            "name": "kind",
             "type": {
-              "defined": "RequestData"
+              "defined": "RequestKind"
             }
+          },
+          {
+            "name": "uri",
+            "type": "string"
           }
         ]
       }
@@ -1710,18 +1734,12 @@
       }
     },
     {
-      "name": "RequestData",
+      "name": "RequestKind",
       "type": {
         "kind": "enum",
         "variants": [
           {
-            "name": "YesNo",
-            "fields": [
-              {
-                "name": "question",
-                "type": "string"
-              }
-            ]
+            "name": "YesNo"
           }
         ]
       }

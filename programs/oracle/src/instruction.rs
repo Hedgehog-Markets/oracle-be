@@ -109,7 +109,8 @@ pub enum OracleInstruction {
     /// Closes voting and resolves the request.
     #[account(0, name = "config", desc = "Config")]
     #[account(1, writable, name = "request", desc = "Request")]
-    #[account(2, writable, name = "voting", desc = "Voting")]
+    #[account(2, name = "assertion", desc = "Assertion")]
+    #[account(3, writable, name = "voting", desc = "Voting")]
     CloseVotingV1,
 
     /// Creates a stake account.

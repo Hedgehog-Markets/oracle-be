@@ -7,7 +7,7 @@ use crate::error::OracleError;
 use crate::instruction::accounts::CreateRequestV1Accounts;
 use crate::state::{
     Account, AccountSized, ConfigV1, CurrencyV1, InitAccount, InitContext, InitRequest, OracleV1,
-    RequestData, RequestV1,
+    RequestKind, RequestV1,
 };
 use crate::{pda, utils};
 
@@ -21,8 +21,10 @@ pub struct CreateRequestV1Args {
     pub timestamp: i64,
     /// Arbitrator address.
     pub arbitrator: Pubkey,
-    /// Request data.
-    pub data: RequestData,
+    /// Request kind.
+    pub kind: RequestKind,
+    /// Off-chain data.
+    pub uri: String,
 }
 
 pub fn create_request_v1<'a>(
@@ -106,7 +108,8 @@ pub fn create_request_v1<'a>(
             bond_mint,
             timestamp: args.timestamp,
             arbitrator: args.arbitrator,
-            data: args.data,
+            kind: args.kind,
+            uri: args.uri,
         })?
         .save(InitContext {
             account: ctx.accounts.request,

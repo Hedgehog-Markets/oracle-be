@@ -16,6 +16,8 @@ pub struct AssertionV1 {
     ///
     /// [`Request`]: crate::state::Request
     pub request: Pubkey,
+    /// The round of the request the assertion is for.
+    pub round: u8,
 
     /// Unix timestamp of the assertion.
     pub assertion_timestamp: i64,
@@ -81,6 +83,7 @@ impl TryFrom<InitAssertion> for (AssertionV1, usize) {
     fn try_from(params: InitAssertion) -> Result<(AssertionV1, usize), Self::Error> {
         let InitAssertion {
             request,
+            round,
             assertion_timestamp,
             asserter,
             asserted_value,
@@ -93,6 +96,7 @@ impl TryFrom<InitAssertion> for (AssertionV1, usize) {
             AssertionV1 {
                 account_type: AssertionV1::TYPE,
                 request,
+                round,
                 assertion_timestamp,
                 expiration_timestamp,
                 asserter,
@@ -106,6 +110,7 @@ impl TryFrom<InitAssertion> for (AssertionV1, usize) {
 
 pub(crate) struct InitAssertion {
     pub request: Pubkey,
+    pub round: u8,
 
     pub assertion_timestamp: i64,
     pub asserter: Pubkey,

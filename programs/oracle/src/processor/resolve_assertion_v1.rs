@@ -29,7 +29,11 @@ pub fn resolve_assertion_v1<'a>(
     }
 
     // Guard assertion PDA.
-    pda::assertion::assert_pda(ctx.accounts.assertion.key, ctx.accounts.request.key)?;
+    pda::assertion::assert_pda(
+        ctx.accounts.assertion.key,
+        ctx.accounts.request.key,
+        &request.round,
+    )?;
 
     let assertion = AssertionV1::from_account_info(ctx.accounts.assertion)?;
 

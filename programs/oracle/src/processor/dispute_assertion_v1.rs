@@ -72,7 +72,11 @@ pub fn dispute_assertion_v1<'a>(
         // Step 3.1: Check and update assertion.
         {
             // Guard assertion PDA.
-            pda::assertion::assert_pda(ctx.accounts.assertion.key, ctx.accounts.request.key)?;
+            pda::assertion::assert_pda(
+                ctx.accounts.assertion.key,
+                ctx.accounts.request.key,
+                &request.round,
+            )?;
 
             let mut assertion = AssertionV1::from_account_info_mut(ctx.accounts.assertion)?;
 
@@ -103,9 +107,10 @@ pub fn dispute_assertion_v1<'a>(
         {
             let bump = pda::dispute_bond::assert_pda(
                 ctx.accounts.bond_escrow.key,
-                ctx.accounts.request.key,
+                ctx.accounts.assertion.key,
             )?;
-            let signer_seeds = pda::dispute_bond::seeds_with_bump(ctx.accounts.request.key, &bump);
+            let signer_seeds =
+                pda::dispute_bond::seeds_with_bump(ctx.accounts.assertion.key, &bump);
 
             cpi::spl::create_token_account(
                 ctx.accounts.request.key,
@@ -137,11 +142,11 @@ pub fn dispute_assertion_v1<'a>(
 
     // Step 5: Initialize `voting` account.
     {
-        let bump = pda::voting::assert_pda(ctx.accounts.voting.key, ctx.accounts.request.key)?;
-        let signer_seeds = pda::voting::seeds_with_bump(ctx.accounts.request.key, &bump);
+        let bump = pda::voting::assert_pda(ctx.accounts.voting.key, ctx.accounts.assertion.key)?;
+        let signer_seeds = pda::voting::seeds_with_bump(ctx.accounts.assertion.key, &bump);
 
         VotingV1::try_init(InitVoting {
-            request: *ctx.accounts.request.key,
+            assertion: *ctx.accounts.request.key,
             governance_mint,
             start_timestamp: now,
             voting_window,

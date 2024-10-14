@@ -44,6 +44,8 @@ pub fn create_assertion_v1<'a>(
     }
 
     let bond: u64;
+    let round: u8;
+
     let now = Clock::get()?.unix_timestamp;
 
     // Step 2: Update request state.
@@ -63,9 +65,10 @@ pub fn create_assertion_v1<'a>(
         // The assertion timestamp on the request must have been reached.
         request.validate_assertion_timestamp(now)?;
         // The asserted value must be valid for the request data type.
-        request.data.validate_value(args.value)?;
+        request.kind.validate_value(args.value)?;
 
         bond = request.bond;
+        round = request.round;
 
         request.state = RequestState::Asserted;
         request.save()?;
@@ -73,12 +76,16 @@ pub fn create_assertion_v1<'a>(
 
     // Step 3: Initialize `assertion` account.
     {
-        let bump =
-            pda::assertion::assert_pda(ctx.accounts.assertion.key, ctx.accounts.request.key)?;
-        let signer_seeds = pda::assertion::seeds_with_bump(ctx.accounts.request.key, &bump);
+        let bump = pda::assertion::assert_pda(
+            ctx.accounts.assertion.key,
+            ctx.accounts.request.key,
+            &round,
+        )?;
+        let signer_seeds = pda::assertion::seeds_with_bump(ctx.accounts.request.key, &round, &bump);
 
         AssertionV1::try_init(InitAssertion {
             request: *ctx.accounts.request.key,
+            round,
             assertion_timestamp: now,
             asserter: *ctx.accounts.asserter.key,
             asserted_value: args.value,
@@ -101,10 +108,10 @@ pub fn create_assertion_v1<'a>(
         {
             let bond_bump = pda::assert_bond::assert_pda(
                 ctx.accounts.bond_escrow.key,
-                ctx.accounts.request.key,
+                ctx.accounts.assertion.key,
             )?;
             let signer_seeds =
-                pda::assert_bond::seeds_with_bump(ctx.accounts.request.key, &bond_bump);
+                pda::assert_bond::seeds_with_bump(ctx.accounts.assertion.key, &bond_bump);
 
             cpi::spl::create_token_account(
                 ctx.accounts.request.key,

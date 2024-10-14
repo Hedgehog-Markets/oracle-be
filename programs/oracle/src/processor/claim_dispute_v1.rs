@@ -24,9 +24,21 @@ pub fn claim_dispute_v1<'a>(
     let request_bump: u8;
 
     {
-        let resolved_value: u64;
+        let round: u8;
+        let asserted_value: u64;
 
-        // Step 1: Check request state.
+        // Step 1: Check assertion.
+        {
+            let assertion = AssertionV1::from_account_info(ctx.accounts.assertion)?;
+
+            // Guard assertion.
+            assertion.assert_disputer(ctx.accounts.disputer.key)?;
+
+            round = assertion.round;
+            asserted_value = assertion.asserted_value;
+        }
+
+        // Step 2: Check request state.
         {
             let request = RequestV1::from_account_info(ctx.accounts.request)?;
 
@@ -35,29 +47,24 @@ pub fn claim_dispute_v1<'a>(
             request.assert_reward_mint(ctx.accounts.reward_mint.key)?;
             request.assert_bond_mint(ctx.accounts.bond_mint.key)?;
 
-            // The request must be resolved to claim.
-            if request.state != RequestState::Resolved {
+            // Guard assertion PDA.
+            pda::assertion::assert_pda(
+                ctx.accounts.assertion.key,
+                ctx.accounts.request.key,
+                &round,
+            )?;
+
+            // The round must be over to claim.
+            if request.round == round && request.state != RequestState::Resolved {
                 return Err(OracleError::NotResolved.into());
             }
 
-            request_index = request.index;
-            resolved_value = request.value;
-        }
-
-        // Step 2: Check assertion.
-        {
-            // Guard assertion PDA.
-            pda::assertion::assert_pda(ctx.accounts.assertion.key, ctx.accounts.request.key)?;
-
-            let assertion = AssertionV1::from_account_info(ctx.accounts.assertion)?;
-
-            // Guard assertion.
-            assertion.assert_disputer(ctx.accounts.disputer.key)?;
-
             // The disputer can only claim if the asserted value is incorrect.
-            if assertion.asserted_value == resolved_value {
+            if request.value == asserted_value {
                 return Err(OracleError::IncorrectClaimer.into());
             }
+
+            request_index = request.index;
         }
     }
 
@@ -65,7 +72,7 @@ pub fn claim_dispute_v1<'a>(
 
     // Step 3: Recover disputer bond.
     {
-        pda::dispute_bond::assert_pda(ctx.accounts.bond_escrow.key, ctx.accounts.request.key)?;
+        pda::dispute_bond::assert_pda(ctx.accounts.bond_escrow.key, ctx.accounts.assertion.key)?;
 
         let bond = cpi::spl::account_amount(ctx.accounts.bond_escrow)?;
         let decimals = cpi::spl::mint_decimals(ctx.accounts.bond_mint)?;

@@ -12,10 +12,10 @@ use super::{Account, AccountType};
 pub struct VotingV1 {
     account_type: AccountType,
 
-    /// The [`Request`]` this assertion is for.
+    /// The address of the [`Assertion`] the voting is for.
     ///
-    /// [`Request`]: crate::state::Request
-    pub request: Pubkey,
+    /// [`Assertion`]: crate::state::Assertion
+    pub assertion: Pubkey,
 
     /// The address of the mint of the governance token required to vote.
     pub governance_mint: Pubkey,
@@ -42,13 +42,13 @@ impl TryFrom<InitVoting> for (VotingV1, usize) {
     type Error = ProgramError;
 
     fn try_from(params: InitVoting) -> Result<(VotingV1, usize), Self::Error> {
-        let InitVoting { request, governance_mint, start_timestamp, voting_window } = params;
+        let InitVoting { assertion, governance_mint, start_timestamp, voting_window } = params;
 
         let end_timestamp = checked_add!(start_timestamp, i64::from(voting_window))?;
 
         let account = VotingV1 {
             account_type: VotingV1::TYPE,
-            request,
+            assertion,
             governance_mint,
             start_timestamp,
             end_timestamp,
@@ -63,7 +63,7 @@ impl TryFrom<InitVoting> for (VotingV1, usize) {
 }
 
 pub(crate) struct InitVoting {
-    pub request: Pubkey,
+    pub assertion: Pubkey,
     pub governance_mint: Pubkey,
 
     pub start_timestamp: i64,
@@ -77,7 +77,7 @@ mod tests {
     #[test]
     fn account_size() {
         let init = InitVoting {
-            request: Pubkey::new_unique(),
+            assertion: Pubkey::new_unique(),
             governance_mint: Pubkey::new_unique(),
             start_timestamp: 0,
             voting_window: 0,

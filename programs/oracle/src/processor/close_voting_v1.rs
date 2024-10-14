@@ -8,7 +8,9 @@ use solana_utils::log;
 use crate::error::OracleError;
 use crate::instruction::accounts::CloseVotingV1Accounts;
 use crate::pda;
-use crate::state::{Account, AccountSized, ConfigV1, RequestState, RequestV1, VotingV1};
+use crate::state::{
+    Account, AccountSized, ConfigV1, RequestState, RequestV1, VotingV1, VALUE_UNAVAILABLE,
+};
 
 pub fn close_voting_v1<'a>(
     _program_id: &'a Pubkey,
@@ -29,6 +31,8 @@ pub fn close_voting_v1<'a>(
 
     let mut request = RequestV1::from_account_info_mut(ctx.accounts.request)?;
 
+    let round: u8;
+
     // Step 2: Check voting has not yet resolved the request.
     {
         // Guard request.
@@ -40,10 +44,13 @@ pub fn close_voting_v1<'a>(
         if request.state != RequestState::Disputed {
             return Err(OracleError::NotDisputed.into());
         }
+
+        round = request.round;
     }
 
-    // Guard voting PDA.
-    pda::voting::assert_pda(ctx.accounts.voting.key, ctx.accounts.request.key)?;
+    // Guard PDAs.
+    pda::assertion::assert_pda(ctx.accounts.assertion.key, ctx.accounts.request.key, &round)?;
+    pda::voting::assert_pda(ctx.accounts.voting.key, ctx.accounts.assertion.key)?;
 
     let now = Clock::get()?.unix_timestamp;
 
@@ -82,10 +89,16 @@ pub fn close_voting_v1<'a>(
 
     // Step 6: Resolve the request with the modal voted value.
     {
-        // Update request with resolved value.
-        request.resolve_timestamp = now;
-        request.state = RequestState::Resolved;
-        request.value = voting.mode_value;
+        if voting.mode_value == VALUE_UNAVAILABLE {
+            // Data is not available yet, start a new round.
+            request.state = RequestState::Requested;
+            request.round = checked_add!(request.round, 1)?;
+        } else {
+            // Update request with resolved value.
+            request.resolve_timestamp = now;
+            request.state = RequestState::Resolved;
+            request.value = voting.mode_value;
+        }
 
         request.save()?;
     }

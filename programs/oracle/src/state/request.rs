@@ -38,6 +38,8 @@ pub struct RequestV1 {
 
     /// Request state.
     pub state: RequestState,
+    /// The round of the request.
+    pub round: u8,
     /// Value of the resolved request.
     pub value: u64,
 
@@ -51,10 +53,10 @@ pub struct RequestV1 {
     /// then the request is considered to have no arbitrator.
     pub arbitrator: Pubkey,
 
-    // Request data may have varying layouts when serialized. It is at the end
-    // of the account to avoid interfering with GPA lookups.
-    /// Request data.
-    pub data: RequestData,
+    /// The type of data the request is for.
+    pub kind: RequestKind,
+    /// Off-chain data for the request.
+    pub uri: String,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, BorshDeserialize, BorshSerialize, BorshSchema, BorshSize)]
@@ -70,15 +72,15 @@ pub enum RequestState {
     Resolved,
 }
 
+pub const VALUE_UNAVAILABLE: u64 = 0;
+
 #[derive(Clone, BorshDeserialize, BorshSerialize, BorshSchema, BorshSize)]
-pub enum RequestData {
+pub enum RequestKind {
     /// Yes/No request:
-    /// - 0 = No
     /// - 1 = Yes
-    YesNo {
-        /// Question.
-        question: String,
-    },
+    /// - 2 = No
+    /// - 3 = Invalid
+    YesNo,
 }
 
 impl RequestV1 {
@@ -125,11 +127,16 @@ impl Account for RequestV1 {
     const TYPE: AccountType = AccountType::RequestV1;
 }
 
-impl RequestData {
+impl RequestKind {
     pub fn validate_value(&self, value: u64) -> Result<(), OracleError> {
+        if value == VALUE_UNAVAILABLE {
+            return Ok(());
+        }
+
         let valid = match self {
-            Self::YesNo { .. } => matches!(value, 0 | 1),
+            Self::YesNo => matches!(value, 1..=3),
         };
+
         if valid { Ok(()) } else { Err(OracleError::InvalidValue) }
     }
 }
@@ -148,7 +155,8 @@ impl TryFrom<InitRequest> for (RequestV1, usize) {
             bond_mint,
             timestamp,
             arbitrator,
-            data,
+            kind,
+            uri,
         } = params;
 
         let account = RequestV1 {
@@ -163,9 +171,11 @@ impl TryFrom<InitRequest> for (RequestV1, usize) {
             assertion_timestamp: timestamp,
             resolve_timestamp: 0,
             state: RequestState::Requested,
+            round: 0,
             value: 0,
             arbitrator,
-            data,
+            kind,
+            uri,
         };
         let space = account.borsh_size();
 
@@ -188,23 +198,14 @@ pub(crate) struct InitRequest {
     pub timestamp: i64,
     pub arbitrator: Pubkey,
 
-    pub data: RequestData,
+    pub kind: RequestKind,
+    pub uri: String,
 }
 
 #[cfg(test)]
 mod tests {
 
     use super::*;
-
-    #[test]
-    fn data_size() {
-        let data = RequestData::YesNo { question: "example question?".to_owned() };
-
-        let expected = data.borsh_size();
-        let actual = borsh::object_length(&data).unwrap();
-
-        assert_eq!(expected, actual);
-    }
 
     #[test]
     fn account_size() {
@@ -218,7 +219,8 @@ mod tests {
             bond_mint: Pubkey::new_unique(),
             timestamp: 0,
             arbitrator: Pubkey::new_unique(),
-            data: RequestData::YesNo { question: "another example question?".to_owned() },
+            kind: RequestKind::YesNo,
+            uri: "https://example.com".to_owned(),
         };
 
         let (request, expected) = <(RequestV1, usize)>::try_from(init).unwrap();
