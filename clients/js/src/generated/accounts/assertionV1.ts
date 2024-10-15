@@ -34,6 +34,7 @@ import {
   string,
   struct,
   u64,
+  u8,
 } from "@metaplex-foundation/umi/serializers";
 
 import { AccountType, getAccountTypeSerializer } from "../types";
@@ -43,6 +44,7 @@ export type AssertionV1 = Account<AssertionV1AccountData>;
 export type AssertionV1AccountData = {
   accountType: AccountType;
   request: PublicKey;
+  round: number;
   assertionTimestamp: DateTime;
   expirationTimestamp: DateTime;
   asserter: PublicKey;
@@ -52,6 +54,7 @@ export type AssertionV1AccountData = {
 
 export type AssertionV1AccountDataArgs = {
   request: PublicKey;
+  round: number;
   assertionTimestamp: DateTimeInput;
   expirationTimestamp: DateTimeInput;
   asserter: PublicKey;
@@ -68,6 +71,7 @@ export function getAssertionV1AccountDataSerializer(): Serializer<
       [
         ["accountType", getAccountTypeSerializer()],
         ["request", publicKeySerializer()],
+        ["round", u8()],
         ["assertionTimestamp", mapDateTimeSerializer(i64())],
         ["expirationTimestamp", mapDateTimeSerializer(i64())],
         ["asserter", publicKeySerializer()],
@@ -141,6 +145,7 @@ export function getAssertionV1GpaBuilder(context: Pick<Context, "rpc" | "program
     .registerFields<{
       accountType: AccountTypeArgs;
       request: PublicKey;
+      round: number;
       assertionTimestamp: DateTimeInput;
       expirationTimestamp: DateTimeInput;
       asserter: PublicKey;
@@ -149,18 +154,19 @@ export function getAssertionV1GpaBuilder(context: Pick<Context, "rpc" | "program
     }>({
       accountType: [0, getAccountTypeSerializer()],
       request: [1, publicKeySerializer()],
-      assertionTimestamp: [33, mapDateTimeSerializer(i64())],
-      expirationTimestamp: [41, mapDateTimeSerializer(i64())],
-      asserter: [49, publicKeySerializer()],
-      disputer: [81, publicKeySerializer()],
-      assertedValue: [113, u64()],
+      round: [33, u8()],
+      assertionTimestamp: [34, mapDateTimeSerializer(i64())],
+      expirationTimestamp: [42, mapDateTimeSerializer(i64())],
+      asserter: [50, publicKeySerializer()],
+      disputer: [82, publicKeySerializer()],
+      assertedValue: [114, u64()],
     })
     .deserializeUsing<AssertionV1>((account) => deserializeAssertionV1(account))
     .whereField("accountType", AccountType.AssertionV1);
 }
 
 export function getAssertionV1Size(): number {
-  return 121;
+  return 122;
 }
 
 export function findAssertionV1Pda(

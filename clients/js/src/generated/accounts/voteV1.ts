@@ -40,15 +40,15 @@ export type VoteV1AccountData = {
   accountType: AccountType;
   voting: PublicKey;
   stake: PublicKey;
-  value: bigint;
   votes: bigint;
+  value: bigint;
 };
 
 export type VoteV1AccountDataArgs = {
   voting: PublicKey;
   stake: PublicKey;
-  value: number | bigint;
   votes: number | bigint;
+  value: number | bigint;
 };
 
 export function getVoteV1AccountDataSerializer(): Serializer<
@@ -61,8 +61,8 @@ export function getVoteV1AccountDataSerializer(): Serializer<
         ["accountType", getAccountTypeSerializer()],
         ["voting", publicKeySerializer()],
         ["stake", publicKeySerializer()],
-        ["value", u64()],
         ["votes", u64()],
+        ["value", u64()],
       ],
       { description: "VoteV1AccountData" },
     ),
@@ -132,14 +132,14 @@ export function getVoteV1GpaBuilder(context: Pick<Context, "rpc" | "programs">) 
       accountType: AccountTypeArgs;
       voting: PublicKey;
       stake: PublicKey;
-      value: number | bigint;
       votes: number | bigint;
+      value: number | bigint;
     }>({
       accountType: [0, getAccountTypeSerializer()],
       voting: [1, publicKeySerializer()],
       stake: [33, publicKeySerializer()],
-      value: [65, u64()],
-      votes: [73, u64()],
+      votes: [65, u64()],
+      value: [73, u64()],
     })
     .deserializeUsing<VoteV1>((account) => deserializeVoteV1(account))
     .whereField("accountType", AccountType.VoteV1);

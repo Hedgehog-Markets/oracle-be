@@ -8,7 +8,7 @@
 
 export * from "./accountType";
 export * from "./bounds";
-export * from "./requestData";
+export * from "./requestKind";
 export * from "./requestState";
 export * from "./updateConfigV1Args";
 export * from "./updateOracleV1Args";

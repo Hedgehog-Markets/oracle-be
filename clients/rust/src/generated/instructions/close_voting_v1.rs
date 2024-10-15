@@ -13,6 +13,8 @@ pub struct CloseVotingV1 {
     pub config: solana_program::pubkey::Pubkey,
     /// Request
     pub request: solana_program::pubkey::Pubkey,
+    /// Assertion
+    pub assertion: solana_program::pubkey::Pubkey,
     /// Voting
     pub voting: solana_program::pubkey::Pubkey,
 }
@@ -26,9 +28,11 @@ impl CloseVotingV1 {
         &self,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
-        let mut accounts = Vec::with_capacity(3 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(4 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(self.config, false));
         accounts.push(solana_program::instruction::AccountMeta::new(self.request, false));
+        accounts
+            .push(solana_program::instruction::AccountMeta::new_readonly(self.assertion, false));
         accounts.push(solana_program::instruction::AccountMeta::new(self.voting, false));
         accounts.extend_from_slice(remaining_accounts);
         let data = CloseVotingV1InstructionData::new().try_to_vec().unwrap();
@@ -64,11 +68,13 @@ impl Default for CloseVotingV1InstructionData {
 ///
 ///   0. `[]` config
 ///   1. `[writable]` request
-///   2. `[writable]` voting
+///   2. `[]` assertion
+///   3. `[writable]` voting
 #[derive(Clone, Debug, Default)]
 pub struct CloseVotingV1Builder {
     config: Option<solana_program::pubkey::Pubkey>,
     request: Option<solana_program::pubkey::Pubkey>,
+    assertion: Option<solana_program::pubkey::Pubkey>,
     voting: Option<solana_program::pubkey::Pubkey>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
@@ -87,6 +93,12 @@ impl CloseVotingV1Builder {
     #[inline(always)]
     pub fn request(&mut self, request: solana_program::pubkey::Pubkey) -> &mut Self {
         self.request = Some(request);
+        self
+    }
+    /// Assertion
+    #[inline(always)]
+    pub fn assertion(&mut self, assertion: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.assertion = Some(assertion);
         self
     }
     /// Voting
@@ -118,6 +130,7 @@ impl CloseVotingV1Builder {
         let accounts = CloseVotingV1 {
             config: self.config.expect("config is not set"),
             request: self.request.expect("request is not set"),
+            assertion: self.assertion.expect("assertion is not set"),
             voting: self.voting.expect("voting is not set"),
         };
 
@@ -131,6 +144,8 @@ pub struct CloseVotingV1CpiAccounts<'a, 'b> {
     pub config: &'b solana_program::account_info::AccountInfo<'a>,
     /// Request
     pub request: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Assertion
+    pub assertion: &'b solana_program::account_info::AccountInfo<'a>,
     /// Voting
     pub voting: &'b solana_program::account_info::AccountInfo<'a>,
 }
@@ -143,6 +158,8 @@ pub struct CloseVotingV1Cpi<'a, 'b> {
     pub config: &'b solana_program::account_info::AccountInfo<'a>,
     /// Request
     pub request: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Assertion
+    pub assertion: &'b solana_program::account_info::AccountInfo<'a>,
     /// Voting
     pub voting: &'b solana_program::account_info::AccountInfo<'a>,
 }
@@ -156,6 +173,7 @@ impl<'a, 'b> CloseVotingV1Cpi<'a, 'b> {
             __program: program,
             config: accounts.config,
             request: accounts.request,
+            assertion: accounts.assertion,
             voting: accounts.voting,
         }
     }
@@ -184,10 +202,14 @@ impl<'a, 'b> CloseVotingV1Cpi<'a, 'b> {
         signers_seeds: &[&[&[u8]]],
         remaining_accounts: &[(&'b solana_program::account_info::AccountInfo<'a>, bool, bool)],
     ) -> solana_program::entrypoint::ProgramResult {
-        let mut accounts = Vec::with_capacity(3 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(4 + remaining_accounts.len());
         accounts
             .push(solana_program::instruction::AccountMeta::new_readonly(*self.config.key, false));
         accounts.push(solana_program::instruction::AccountMeta::new(*self.request.key, false));
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+            *self.assertion.key,
+            false,
+        ));
         accounts.push(solana_program::instruction::AccountMeta::new(*self.voting.key, false));
         remaining_accounts.iter().for_each(|remaining_account| {
             accounts.push(solana_program::instruction::AccountMeta {
@@ -203,10 +225,11 @@ impl<'a, 'b> CloseVotingV1Cpi<'a, 'b> {
             accounts,
             data,
         };
-        let mut account_infos = Vec::with_capacity(3 + 1 + remaining_accounts.len());
+        let mut account_infos = Vec::with_capacity(4 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
         account_infos.push(self.config.clone());
         account_infos.push(self.request.clone());
+        account_infos.push(self.assertion.clone());
         account_infos.push(self.voting.clone());
         remaining_accounts
             .iter()
@@ -226,7 +249,8 @@ impl<'a, 'b> CloseVotingV1Cpi<'a, 'b> {
 ///
 ///   0. `[]` config
 ///   1. `[writable]` request
-///   2. `[writable]` voting
+///   2. `[]` assertion
+///   3. `[writable]` voting
 #[derive(Clone, Debug)]
 pub struct CloseVotingV1CpiBuilder<'a, 'b> {
     instruction: Box<CloseVotingV1CpiBuilderInstruction<'a, 'b>>,
@@ -238,6 +262,7 @@ impl<'a, 'b> CloseVotingV1CpiBuilder<'a, 'b> {
             __program: program,
             config: None,
             request: None,
+            assertion: None,
             voting: None,
             __remaining_accounts: Vec::new(),
         });
@@ -259,6 +284,15 @@ impl<'a, 'b> CloseVotingV1CpiBuilder<'a, 'b> {
         request: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
         self.instruction.request = Some(request);
+        self
+    }
+    /// Assertion
+    #[inline(always)]
+    pub fn assertion(
+        &mut self,
+        assertion: &'b solana_program::account_info::AccountInfo<'a>,
+    ) -> &mut Self {
+        self.instruction.assertion = Some(assertion);
         self
     }
     /// Voting
@@ -310,6 +344,8 @@ impl<'a, 'b> CloseVotingV1CpiBuilder<'a, 'b> {
 
             request: self.instruction.request.expect("request is not set"),
 
+            assertion: self.instruction.assertion.expect("assertion is not set"),
+
             voting: self.instruction.voting.expect("voting is not set"),
         };
         instruction.invoke_signed_with_remaining_accounts(
@@ -324,6 +360,7 @@ struct CloseVotingV1CpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     config: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     request: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    assertion: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     voting: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(&'b solana_program::account_info::AccountInfo<'a>, bool, bool)>,

@@ -17,8 +17,8 @@ pub struct VoteV1 {
     pub voting: Pubkey,
     #[cfg_attr(feature = "serde", serde(with = "serde_with::As::<serde_with::DisplayFromStr>"))]
     pub stake: Pubkey,
-    pub value: u64,
     pub votes: u64,
+    pub value: u64,
 }
 
 impl VoteV1 {

@@ -13,7 +13,7 @@ import type { Serializer } from "@metaplex-foundation/umi/serializers";
 import { transactionBuilder } from "@metaplex-foundation/umi";
 import { mapSerializer, struct, u8 } from "@metaplex-foundation/umi/serializers";
 
-import { findVotingV1Pda } from "../accounts";
+import { findAssertionV1Pda, findVotingV1Pda } from "../accounts";
 import { expectPublicKey, getAccountMetasAndSigners } from "../shared";
 
 // Accounts.
@@ -22,6 +22,8 @@ export type CloseVotingV1InstructionAccounts = {
   config: PublicKey | Pda;
   /** Request */
   request: PublicKey | Pda;
+  /** Assertion */
+  assertion?: PublicKey | Pda;
   /** Voting */
   voting?: PublicKey | Pda;
 };
@@ -66,14 +68,24 @@ export function closeVotingV1(
       isWritable: true as boolean,
       value: input.request ?? null,
     },
-    voting: {
+    assertion: {
       index: 2,
+      isWritable: false as boolean,
+      value: input.assertion ?? null,
+    },
+    voting: {
+      index: 3,
       isWritable: true as boolean,
       value: input.voting ?? null,
     },
   } satisfies ResolvedAccountsWithIndices;
 
   // Default values.
+  if (!resolvedAccounts.assertion.value) {
+    resolvedAccounts.assertion.value = findAssertionV1Pda(context, {
+      request: expectPublicKey(resolvedAccounts.request.value),
+    });
+  }
   if (!resolvedAccounts.voting.value) {
     resolvedAccounts.voting.value = findVotingV1Pda(context, {
       request: expectPublicKey(resolvedAccounts.request.value),

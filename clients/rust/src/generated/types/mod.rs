@@ -7,14 +7,14 @@
 
 pub(crate) mod r#account_type;
 pub(crate) mod r#bounds;
-pub(crate) mod r#request_data;
+pub(crate) mod r#request_kind;
 pub(crate) mod r#request_state;
 pub(crate) mod r#update_config_v1_args;
 pub(crate) mod r#update_oracle_v1_args;
 
 pub use self::r#account_type::*;
 pub use self::r#bounds::*;
-pub use self::r#request_data::*;
+pub use self::r#request_kind::*;
 pub use self::r#request_state::*;
 pub use self::r#update_config_v1_args::*;
 pub use self::r#update_oracle_v1_args::*;

@@ -7,7 +7,7 @@
  */
 
 import type { ResolvedAccount, ResolvedAccountsWithIndices } from "../shared";
-import type { RequestData, RequestDataArgs } from "../types";
+import type { RequestKind, RequestKindArgs } from "../types";
 import type {
   Context,
   DateTime,
@@ -25,6 +25,7 @@ import {
   i64,
   mapSerializer,
   publicKey as publicKeySerializer,
+  string,
   struct,
   u64,
   u8,
@@ -33,7 +34,7 @@ import {
 import { findRewardPda } from "../../hooked";
 import { findCurrencyV1Pda, findOracleV1Pda } from "../accounts";
 import { expectPublicKey, expectSome, getAccountMetasAndSigners } from "../shared";
-import { getRequestDataSerializer } from "../types";
+import { getRequestKindSerializer } from "../types";
 
 // Accounts.
 export type CreateRequestV1InstructionAccounts = {
@@ -70,7 +71,8 @@ export type CreateRequestV1InstructionData = {
   bond: bigint;
   timestamp: DateTime;
   arbitrator: PublicKey;
-  data: RequestData;
+  kind: RequestKind;
+  uri: string;
 };
 
 export type CreateRequestV1InstructionDataArgs = {
@@ -78,7 +80,8 @@ export type CreateRequestV1InstructionDataArgs = {
   bond: number | bigint;
   timestamp: DateTimeInput;
   arbitrator: PublicKey;
-  data: RequestDataArgs;
+  kind: RequestKindArgs;
+  uri: string;
 };
 
 export function getCreateRequestV1InstructionDataSerializer(): Serializer<
@@ -93,7 +96,8 @@ export function getCreateRequestV1InstructionDataSerializer(): Serializer<
         ["bond", u64()],
         ["timestamp", mapDateTimeSerializer(i64())],
         ["arbitrator", publicKeySerializer()],
-        ["data", getRequestDataSerializer()],
+        ["kind", getRequestKindSerializer()],
+        ["uri", string()],
       ],
       { description: "CreateRequestV1InstructionData" },
     ),

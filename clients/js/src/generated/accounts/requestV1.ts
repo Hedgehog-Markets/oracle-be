@@ -8,8 +8,8 @@
 
 import type {
   AccountTypeArgs,
-  RequestData,
-  RequestDataArgs,
+  RequestKind,
+  RequestKindArgs,
   RequestState,
   RequestStateArgs,
 } from "../types";
@@ -40,12 +40,13 @@ import {
   string,
   struct,
   u64,
+  u8,
 } from "@metaplex-foundation/umi/serializers";
 
 import {
   AccountType,
   getAccountTypeSerializer,
-  getRequestDataSerializer,
+  getRequestKindSerializer,
   getRequestStateSerializer,
 } from "../types";
 
@@ -63,9 +64,11 @@ export type RequestV1AccountData = {
   assertionTimestamp: DateTime;
   resolveTimestamp: DateTime;
   state: RequestState;
+  round: number;
   value: bigint;
   arbitrator: PublicKey;
-  data: RequestData;
+  kind: RequestKind;
+  uri: string;
 };
 
 export type RequestV1AccountDataArgs = {
@@ -79,9 +82,11 @@ export type RequestV1AccountDataArgs = {
   assertionTimestamp: DateTimeInput;
   resolveTimestamp: DateTimeInput;
   state: RequestStateArgs;
+  round: number;
   value: number | bigint;
   arbitrator: PublicKey;
-  data: RequestDataArgs;
+  kind: RequestKindArgs;
+  uri: string;
 };
 
 export function getRequestV1AccountDataSerializer(): Serializer<
@@ -102,9 +107,11 @@ export function getRequestV1AccountDataSerializer(): Serializer<
         ["assertionTimestamp", mapDateTimeSerializer(i64())],
         ["resolveTimestamp", mapDateTimeSerializer(i64())],
         ["state", getRequestStateSerializer()],
+        ["round", u8()],
         ["value", u64()],
         ["arbitrator", publicKeySerializer()],
-        ["data", getRequestDataSerializer()],
+        ["kind", getRequestKindSerializer()],
+        ["uri", string()],
       ],
       { description: "RequestV1AccountData" },
     ),
@@ -182,9 +189,11 @@ export function getRequestV1GpaBuilder(context: Pick<Context, "rpc" | "programs"
       assertionTimestamp: DateTimeInput;
       resolveTimestamp: DateTimeInput;
       state: RequestStateArgs;
+      round: number;
       value: number | bigint;
       arbitrator: PublicKey;
-      data: RequestDataArgs;
+      kind: RequestKindArgs;
+      uri: string;
     }>({
       accountType: [0, getAccountTypeSerializer()],
       index: [1, u64()],
@@ -197,9 +206,11 @@ export function getRequestV1GpaBuilder(context: Pick<Context, "rpc" | "programs"
       assertionTimestamp: [153, mapDateTimeSerializer(i64())],
       resolveTimestamp: [161, mapDateTimeSerializer(i64())],
       state: [169, getRequestStateSerializer()],
-      value: [170, u64()],
-      arbitrator: [178, publicKeySerializer()],
-      data: [210, getRequestDataSerializer()],
+      round: [170, u8()],
+      value: [171, u64()],
+      arbitrator: [179, publicKeySerializer()],
+      kind: [211, getRequestKindSerializer()],
+      uri: [212, string()],
     })
     .deserializeUsing<RequestV1>((account) => deserializeRequestV1(account))
     .whereField("accountType", AccountType.RequestV1);

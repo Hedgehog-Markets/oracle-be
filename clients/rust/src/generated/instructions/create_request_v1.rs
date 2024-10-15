@@ -5,7 +5,7 @@
 //! <https://github.com/kinobi-so/kinobi>
 //!
 
-use crate::generated::types::RequestData;
+use crate::generated::types::RequestKind;
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::pubkey::Pubkey;
 
@@ -113,7 +113,8 @@ pub struct CreateRequestV1InstructionArgs {
     pub bond: u64,
     pub timestamp: i64,
     pub arbitrator: Pubkey,
-    pub data: RequestData,
+    pub kind: RequestKind,
+    pub uri: String,
 }
 
 /// Instruction builder for `CreateRequestV1`.
@@ -150,7 +151,8 @@ pub struct CreateRequestV1Builder {
     bond: Option<u64>,
     timestamp: Option<i64>,
     arbitrator: Option<Pubkey>,
-    data: Option<RequestData>,
+    kind: Option<RequestKind>,
+    uri: Option<String>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
@@ -256,8 +258,13 @@ impl CreateRequestV1Builder {
         self
     }
     #[inline(always)]
-    pub fn data(&mut self, data: RequestData) -> &mut Self {
-        self.data = Some(data);
+    pub fn kind(&mut self, kind: RequestKind) -> &mut Self {
+        self.kind = Some(kind);
+        self
+    }
+    #[inline(always)]
+    pub fn uri(&mut self, uri: String) -> &mut Self {
+        self.uri = Some(uri);
         self
     }
     /// Add an aditional account to the instruction.
@@ -303,7 +310,8 @@ impl CreateRequestV1Builder {
             bond: self.bond.clone().expect("bond is not set"),
             timestamp: self.timestamp.clone().expect("timestamp is not set"),
             arbitrator: self.arbitrator.clone().expect("arbitrator is not set"),
-            data: self.data.clone().expect("data is not set"),
+            kind: self.kind.clone().expect("kind is not set"),
+            uri: self.uri.clone().expect("uri is not set"),
         };
 
         accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
@@ -533,7 +541,8 @@ impl<'a, 'b> CreateRequestV1CpiBuilder<'a, 'b> {
             bond: None,
             timestamp: None,
             arbitrator: None,
-            data: None,
+            kind: None,
+            uri: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
@@ -664,8 +673,13 @@ impl<'a, 'b> CreateRequestV1CpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
-    pub fn data(&mut self, data: RequestData) -> &mut Self {
-        self.instruction.data = Some(data);
+    pub fn kind(&mut self, kind: RequestKind) -> &mut Self {
+        self.instruction.kind = Some(kind);
+        self
+    }
+    #[inline(always)]
+    pub fn uri(&mut self, uri: String) -> &mut Self {
+        self.instruction.uri = Some(uri);
         self
     }
     /// Add an additional account to the instruction.
@@ -706,7 +720,8 @@ impl<'a, 'b> CreateRequestV1CpiBuilder<'a, 'b> {
             bond: self.instruction.bond.clone().expect("bond is not set"),
             timestamp: self.instruction.timestamp.clone().expect("timestamp is not set"),
             arbitrator: self.instruction.arbitrator.clone().expect("arbitrator is not set"),
-            data: self.instruction.data.clone().expect("data is not set"),
+            kind: self.instruction.kind.clone().expect("kind is not set"),
+            uri: self.instruction.uri.clone().expect("uri is not set"),
         };
         let instruction = CreateRequestV1Cpi {
             __program: self.instruction.__program,
@@ -762,7 +777,8 @@ struct CreateRequestV1CpiBuilderInstruction<'a, 'b> {
     bond: Option<u64>,
     timestamp: Option<i64>,
     arbitrator: Option<Pubkey>,
-    data: Option<RequestData>,
+    kind: Option<RequestKind>,
+    uri: Option<String>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(&'b solana_program::account_info::AccountInfo<'a>, bool, bool)>,
 }

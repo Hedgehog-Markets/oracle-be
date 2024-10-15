@@ -43,7 +43,7 @@ export type VotingV1 = Account<VotingV1AccountData>;
 
 export type VotingV1AccountData = {
   accountType: AccountType;
-  request: PublicKey;
+  assertion: PublicKey;
   governanceMint: PublicKey;
   startTimestamp: DateTime;
   endTimestamp: DateTime;
@@ -53,7 +53,7 @@ export type VotingV1AccountData = {
 };
 
 export type VotingV1AccountDataArgs = {
-  request: PublicKey;
+  assertion: PublicKey;
   governanceMint: PublicKey;
   startTimestamp: DateTimeInput;
   endTimestamp: DateTimeInput;
@@ -70,7 +70,7 @@ export function getVotingV1AccountDataSerializer(): Serializer<
     struct<VotingV1AccountData>(
       [
         ["accountType", getAccountTypeSerializer()],
-        ["request", publicKeySerializer()],
+        ["assertion", publicKeySerializer()],
         ["governanceMint", publicKeySerializer()],
         ["startTimestamp", mapDateTimeSerializer(i64())],
         ["endTimestamp", mapDateTimeSerializer(i64())],
@@ -144,7 +144,7 @@ export function getVotingV1GpaBuilder(context: Pick<Context, "rpc" | "programs">
   return gpaBuilder(context, programId)
     .registerFields<{
       accountType: AccountTypeArgs;
-      request: PublicKey;
+      assertion: PublicKey;
       governanceMint: PublicKey;
       startTimestamp: DateTimeInput;
       endTimestamp: DateTimeInput;
@@ -153,7 +153,7 @@ export function getVotingV1GpaBuilder(context: Pick<Context, "rpc" | "programs">
       votes: Map<number | bigint, number | bigint>;
     }>({
       accountType: [0, getAccountTypeSerializer()],
-      request: [1, publicKeySerializer()],
+      assertion: [1, publicKeySerializer()],
       governanceMint: [33, publicKeySerializer()],
       startTimestamp: [65, mapDateTimeSerializer(i64())],
       endTimestamp: [73, mapDateTimeSerializer(i64())],

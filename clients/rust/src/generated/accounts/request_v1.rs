@@ -5,7 +5,7 @@
 //! <https://github.com/kinobi-so/kinobi>
 //!
 
-use crate::generated::types::{AccountType, RequestData, RequestState};
+use crate::generated::types::{AccountType, RequestKind, RequestState};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::pubkey::Pubkey;
 
@@ -27,10 +27,12 @@ pub struct RequestV1 {
     pub assertion_timestamp: i64,
     pub resolve_timestamp: i64,
     pub state: RequestState,
+    pub round: u8,
     pub value: u64,
     #[cfg_attr(feature = "serde", serde(with = "serde_with::As::<serde_with::DisplayFromStr>"))]
     pub arbitrator: Pubkey,
-    pub data: RequestData,
+    pub kind: RequestKind,
+    pub uri: String,
 }
 
 impl RequestV1 {

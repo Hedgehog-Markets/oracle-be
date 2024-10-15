@@ -15,7 +15,7 @@ use std::collections::HashMap;
 pub struct VotingV1 {
     pub account_type: AccountType,
     #[cfg_attr(feature = "serde", serde(with = "serde_with::As::<serde_with::DisplayFromStr>"))]
-    pub request: Pubkey,
+    pub assertion: Pubkey,
     #[cfg_attr(feature = "serde", serde(with = "serde_with::As::<serde_with::DisplayFromStr>"))]
     pub governance_mint: Pubkey,
     pub start_timestamp: i64,
