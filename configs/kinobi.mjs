@@ -1,33 +1,34 @@
 // @ts-check
 
-import fs from "fs/promises";
-import path from "path";
-import { fileURLToPath } from "url";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-import * as kIdl from "@kinobi-so/nodes-from-anchor";
-import * as kJs from "@kinobi-so/renderers-js-umi";
-import * as kRust from "@kinobi-so/renderers-rust";
+import { rootNodeFromAnchor } from "@codama/nodes-from-anchor";
+import * as kJs from "@codama/renderers-js-umi";
+import * as kRust from "@codama/renderers-rust";
+import * as k from "codama";
 import { bold } from "colorette";
 import { ESLint } from "eslint";
-import * as k from "kinobi";
 
-const __dirname = fileURLToPath(new URL(".", import.meta.url));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const rootDir = path.dirname(__dirname);
 const idlDir = path.join(rootDir, "idls");
 const clientDir = path.join(rootDir, "clients");
 
 const idlJson = await fs.readFile(path.join(idlDir, "optimistic_oracle.json"), "utf8");
+const idl = JSON.parse(idlJson);
 
 const start = Date.now();
 
 console.log("generating clients...");
 
-const idl = kIdl.rootNodeFromAnchor(JSON.parse(idlJson));
-const kinobi = k.createFromRoot(idl);
+const codama = k.createFromRoot(rootNodeFromAnchor(idl));
 
 // Update accounts.
-kinobi.update(
+codama.update(
   k.updateAccountsVisitor({
     oracleV1: {
       seeds: [k.constantPdaSeedNodeFromString("utf8", "oracle")],
@@ -84,7 +85,7 @@ kinobi.update(
 );
 
 // Set default values for instruction accounts.
-kinobi.update(
+codama.update(
   k.setInstructionAccountDefaultValuesVisitor([
     {
       account: "wallet",
@@ -136,7 +137,7 @@ const ataPdaValueNode = (mint = "mint", owner = "owner") =>
   ]);
 
 // Update instructions.
-kinobi.update(
+codama.update(
   k.updateInstructionsVisitor({
     claimAssertionV1: {
       accounts: {
@@ -144,7 +145,7 @@ kinobi.update(
           defaultValue: ataPdaValueNode("bondMint", "asserter"),
         },
         bondEscrow: {
-          defaultValue: k.pdaValueNode(k.pdaLinkNode("assertBond", "hooked"), [
+          defaultValue: k.pdaValueNode(k.pdaLinkNode("assertBond"), [
             k.pdaSeedValueNode("request", k.accountValueNode("request")),
           ]),
         },
@@ -152,7 +153,7 @@ kinobi.update(
           defaultValue: ataPdaValueNode("rewardMint", "asserter"),
         },
         rewardEscrow: {
-          defaultValue: k.pdaValueNode(k.pdaLinkNode("reward", "hooked"), [
+          defaultValue: k.pdaValueNode(k.pdaLinkNode("reward"), [
             k.pdaSeedValueNode("request", k.accountValueNode("request")),
           ]),
         },
@@ -167,7 +168,7 @@ kinobi.update(
           defaultValue: ataPdaValueNode("bondMint", "disputer"),
         },
         bondEscrow: {
-          defaultValue: k.pdaValueNode(k.pdaLinkNode("disputeBond", "hooked"), [
+          defaultValue: k.pdaValueNode(k.pdaLinkNode("disputeBond"), [
             k.pdaSeedValueNode("request", k.accountValueNode("request")),
           ]),
         },
@@ -175,7 +176,7 @@ kinobi.update(
           defaultValue: ataPdaValueNode("rewardMint", "disputer"),
         },
         rewardEscrow: {
-          defaultValue: k.pdaValueNode(k.pdaLinkNode("reward", "hooked"), [
+          defaultValue: k.pdaValueNode(k.pdaLinkNode("reward"), [
             k.pdaSeedValueNode("request", k.accountValueNode("request")),
           ]),
         },
@@ -201,7 +202,7 @@ kinobi.update(
           defaultValue: ataPdaValueNode("bondMint", "asserter"),
         },
         bondEscrow: {
-          defaultValue: k.pdaValueNode(k.pdaLinkNode("assertBond", "hooked"), [
+          defaultValue: k.pdaValueNode(k.pdaLinkNode("assertBond"), [
             k.pdaSeedValueNode("request", k.accountValueNode("request")),
           ]),
         },
@@ -228,7 +229,7 @@ kinobi.update(
           defaultValue: ataPdaValueNode("rewardMint", "creator"),
         },
         rewardEscrow: {
-          defaultValue: k.pdaValueNode(k.pdaLinkNode("reward", "hooked"), [
+          defaultValue: k.pdaValueNode(k.pdaLinkNode("reward"), [
             k.pdaSeedValueNode("request", k.accountValueNode("request")),
           ]),
         },
@@ -249,7 +250,7 @@ kinobi.update(
           defaultValue: ataPdaValueNode("mint", "wallet"),
         },
         stakePool: {
-          defaultValue: k.pdaValueNode(k.pdaLinkNode("stakePool", "hooked"), [
+          defaultValue: k.pdaValueNode(k.pdaLinkNode("stakePool"), [
             k.pdaSeedValueNode("mint", k.accountValueNode("mint")),
           ]),
         },
@@ -261,7 +262,7 @@ kinobi.update(
           defaultValue: ataPdaValueNode("bondMint", "disputer"),
         },
         bondEscrow: {
-          defaultValue: k.pdaValueNode(k.pdaLinkNode("disputeBond", "hooked"), [
+          defaultValue: k.pdaValueNode(k.pdaLinkNode("disputeBond"), [
             k.pdaSeedValueNode("request", k.accountValueNode("request")),
           ]),
         },
@@ -281,7 +282,7 @@ kinobi.update(
 );
 
 // Mark timestamps fields as data-time types.
-kinobi.update(
+codama.update(
   k.bottomUpTransformerVisitor([
     {
       select: (node) =>
@@ -307,7 +308,7 @@ const accountType = (name) => ({
 });
 
 // Set account discriminators.
-kinobi.update(
+codama.update(
   k.setAccountDiscriminatorFromFieldVisitor({
     OracleV1: accountType("OracleV1"),
     ConfigV1: accountType("ConfigV1"),
@@ -327,7 +328,7 @@ kinobi.update(
 
   console.log(`writing rust client to ${bold(path.relative(rootDir, rustDir))}...`);
 
-  kinobi.accept(
+  codama.accept(
     kRust.renderVisitor(rustDir, {
       crateFolder: crateDir,
       formatCode: true,
@@ -342,9 +343,19 @@ kinobi.update(
 
   console.log(`writing js client to ${bold(path.relative(rootDir, jsDir))}...`);
 
-  await kinobi.accept(
+  await codama.accept(
     kJs.renderVisitor(jsDir, {
       formatCode: true,
+      linkOverrides: {
+        pdas: {
+          associatedToken: "mplToolbox",
+
+          stakePool: "hooked",
+          reward: "hooked",
+          assertBond: "hooked",
+          disputeBond: "hooked",
+        },
+      },
     }),
   );
 
@@ -352,7 +363,7 @@ kinobi.update(
 
   const eslint = new ESLint({
     cache: true,
-    cacheLocation: path.join(rootDir, "node_modules", ".cache", "eslint-kinobi"),
+    cacheLocation: path.join(rootDir, "node_modules", ".cache", "eslint-codama"),
     cacheStrategy: "content",
     fix: true,
   });

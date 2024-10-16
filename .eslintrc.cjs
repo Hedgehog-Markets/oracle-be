@@ -37,6 +37,7 @@ module.exports = {
       ],
       parserOptions: {
         project: ["clients/js/tsconfig.json"],
+        warnOnUnsupportedTypeScriptVersion: false,
       },
       rules: {
         "@typescript-eslint/array-type": ["error", { default: "generic" }],
@@ -55,6 +56,10 @@ module.exports = {
           "error",
           { allowBitwiseExpressions: true },
         ],
+        "@typescript-eslint/prefer-string-starts-ends-with": [
+          "error",
+          { allowSingleElementEquality: "always" },
+        ],
 
         "@typescript-eslint/restrict-template-expressions": [
           "error",
@@ -69,6 +74,19 @@ module.exports = {
 
         // TS verifies these.
         "consistent-return": "off",
+      },
+    },
+    {
+      files: ["clients/js/src/generated/**/*"],
+      rules: {
+        "@typescript-eslint/explicit-module-boundary-types": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-empty-object-type": "off",
+        "@typescript-eslint/no-unnecessary-condition": "off",
+        "@typescript-eslint/no-unnecessary-type-parameters": "off",
+        "@typescript-eslint/no-unsafe-return": "off",
+
+        "import/no-cycle": "off",
       },
     },
     {

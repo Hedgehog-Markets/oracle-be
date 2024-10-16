@@ -10,7 +10,7 @@ serde = ["dep:serde", "serde_with"]
 [dependencies]
 solana-program = ">= 1.18, < 2.1"
 
-borsh = { version = "0.10.3", features = ["const-generics"] }
+borsh = { version = "0.10.4", features = ["const-generics"] }
 thiserror = "1.0"
 num-traits = "0.2.19"
 num-derive = "0.4.2"
