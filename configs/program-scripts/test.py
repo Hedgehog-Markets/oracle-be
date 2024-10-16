@@ -250,7 +250,7 @@ def main(args: List[str]):
 
     tools_version = get_tools_version_args()
 
-    cmd = [
+    cmd: List[str | Path] = [
         cargo,
         "test-sbf",
         "--sbf-out-dir",
