@@ -17,12 +17,12 @@ function getProgram(binary) {
 module.exports = {
   validator: {
     matchFeatures: "mainnet-beta",
-    commitment: "processed",
-    accountsCluster: "https://api.mainnet-beta.solana.com/",
+    commitment: "finalized",
+    accountsCluster: "https://api.mainnet-beta.solana.com",
     programs: [
       {
         label: "Optimistic Oracle",
-        programId: "DVM2j1a1AJ9hZuEXyMxA5vusKgMR2FcKJyCf3QE5R2ge",
+        programId: "DVM3hK9SDgXLmVoLng1KrTJCzTnhw31hAnqTYP7uGCot",
         deployPath: getProgram("oracle_program.so"),
       },
     ],
