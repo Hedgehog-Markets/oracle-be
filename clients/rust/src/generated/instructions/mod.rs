@@ -8,6 +8,7 @@
 pub(crate) mod r#claim_assertion_v1;
 pub(crate) mod r#claim_dispute_v1;
 pub(crate) mod r#claim_vote_v1;
+pub(crate) mod r#close_stake_v1;
 pub(crate) mod r#close_voting_v1;
 pub(crate) mod r#create_assertion_v1;
 pub(crate) mod r#create_config_v1;
@@ -25,6 +26,7 @@ pub(crate) mod r#update_oracle_v1;
 pub use self::r#claim_assertion_v1::*;
 pub use self::r#claim_dispute_v1::*;
 pub use self::r#claim_vote_v1::*;
+pub use self::r#close_stake_v1::*;
 pub use self::r#close_voting_v1::*;
 pub use self::r#create_assertion_v1::*;
 pub use self::r#create_config_v1::*;

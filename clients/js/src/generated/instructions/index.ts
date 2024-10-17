@@ -9,6 +9,7 @@
 export * from "./claimAssertionV1";
 export * from "./claimDisputeV1";
 export * from "./claimVoteV1";
+export * from "./closeStakeV1";
 export * from "./closeVotingV1";
 export * from "./createAssertionV1";
 export * from "./createConfigV1";

@@ -268,6 +268,18 @@ codama.update(
         },
       },
     },
+    closeStakeV1: {
+      accounts: {
+        stakePool: {
+          defaultValue: k.pdaValueNode(k.pdaLinkNode("stakePool"), [
+            k.pdaSeedValueNode("mint", k.accountValueNode("mint")),
+          ]),
+        },
+        stakeWithdraw: {
+          defaultValue: ataPdaValueNode("mint", "wallet"),
+        },
+      },
+    },
   }),
 );
 

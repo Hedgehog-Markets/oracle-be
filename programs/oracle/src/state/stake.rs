@@ -33,11 +33,25 @@ pub struct StakeV1 {
 }
 
 impl StakeV1 {
+    pub fn assert_owner(&self, owner: &Pubkey) -> Result<(), OracleError> {
+        if !solana_utils::pubkeys_eq(&self.owner, owner) {
+            return Err(OracleError::StakeOwnerMismatch);
+        }
+        Ok(())
+    }
+
     pub fn assert_voter(&self, voter: &Pubkey) -> Result<(), OracleError> {
         if !solana_utils::pubkeys_eq(&self.owner, voter)
             && !solana_utils::pubkeys_eq(&self.delegate, voter)
         {
             return Err(OracleError::StakeVoterMismatch);
+        }
+        Ok(())
+    }
+
+    pub fn assert_mint(&self, mint: &Pubkey) -> Result<(), OracleError> {
+        if !solana_utils::pubkeys_eq(&self.mint, mint) {
+            return Err(OracleError::StakeMintMismatch);
         }
         Ok(())
     }

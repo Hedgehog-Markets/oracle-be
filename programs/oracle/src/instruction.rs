@@ -116,7 +116,7 @@ pub enum OracleInstruction {
     /// Creates a stake account.
     #[account(0, name = "oracle", desc = "Oracle")]
     #[account(1, signer, writable, name = "stake", desc = "Stake")]
-    #[account(2, writable, name = "mint", desc = "Stake")]
+    #[account(2, writable, name = "mint", desc = "Governance token mint")]
     #[account(3, writable, name = "stake_source", desc = "Stake source token account")]
     #[account(4, writable, name = "stake_pool", desc = "Stake pool token account")]
     #[account(5, signer, writable, name = "wallet", desc = "Stake owner")]
@@ -125,6 +125,7 @@ pub enum OracleInstruction {
     #[account(8, name = "system_program", desc = "System program")]
     CreateStakeV1(CreateStakeV1Args),
 
+    /// Claims rewards for a correct assertion.
     #[account(0, name = "request", desc = "Request")]
     #[account(1, writable, name = "assertion", desc = "Assertion")]
     #[account(2, name = "bond_mint", desc = "Bond mint")]
@@ -138,6 +139,7 @@ pub enum OracleInstruction {
     #[account(10, name = "system_program", desc = "System program")]
     ClaimAssertionV1,
 
+    /// Claims rewards for a correct dispute.
     #[account(0, name = "request", desc = "Request")]
     #[account(1, writable, name = "assertion", desc = "Assertion")]
     #[account(2, name = "bond_mint", desc = "Bond mint")]
@@ -151,6 +153,7 @@ pub enum OracleInstruction {
     #[account(10, name = "system_program", desc = "System program")]
     ClaimDisputeV1,
 
+    /// Claims rewards for a correct vote.
     #[account(0, name = "request", desc = "Request")]
     #[account(1, name = "assertion", desc = "Assertion")]
     #[account(2, name = "voting", desc = "Voting")]
@@ -163,4 +166,15 @@ pub enum OracleInstruction {
     #[account(9, name = "token_program", desc = "SPL token program")]
     #[account(10, name = "system_program", desc = "System program")]
     ClaimVoteV1,
+
+    /// Closes a stake account.
+    #[account(0, name = "oracle", desc = "Oracle")]
+    #[account(1, writable, name = "stake", desc = "Stake")]
+    #[account(2, writable, name = "mint", desc = "Stake mint")]
+    #[account(3, writable, name = "stake_pool", desc = "Stake pool token account")]
+    #[account(4, writable, name = "stake_withdraw", desc = "Stake withdraw token account")]
+    #[account(5, signer, writable, name = "wallet", desc = "Stake owner")]
+    #[account(6, signer, writable, name = "payer", desc = "Payer")]
+    #[account(7, name = "token_program", desc = "SPL token program")]
+    CloseStakeV1,
 }

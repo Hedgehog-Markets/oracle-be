@@ -85,24 +85,30 @@ pub enum OptimisticOracleError {
     /// 24 - Bond mint address does not match
     #[error("Bond mint address does not match")]
     BondMintMismatch = 0x18,
-    /// 25 - Stake mint address does not match
+    /// 25 - Stake owner address does not match
+    #[error("Stake owner address does not match")]
+    StakeOwnerMismatch = 0x19,
+    /// 26 - Stake mint address does not match
     #[error("Stake mint address does not match")]
-    StakeMintMismatch = 0x19,
-    /// 26 - Stake delegate does not match voter
+    StakeMintMismatch = 0x1A,
+    /// 27 - Stake delegate does not match voter
     #[error("Stake delegate does not match voter")]
-    StakeVoterMismatch = 0x1A,
-    /// 27 - Asserter address does not match
+    StakeVoterMismatch = 0x1B,
+    /// 28 - Stake is locked
+    #[error("Stake is locked")]
+    StakeLocked = 0x1C,
+    /// 29 - Asserter address does not match
     #[error("Asserter address does not match")]
-    AsserterMismatch = 0x1B,
-    /// 28 - Disputer address does not match
+    AsserterMismatch = 0x1D,
+    /// 30 - Disputer address does not match
     #[error("Disputer address does not match")]
-    DisputerMismatch = 0x1C,
-    /// 29 - Incorrect claimer
+    DisputerMismatch = 0x1E,
+    /// 31 - Incorrect claimer
     #[error("Incorrect claimer")]
-    IncorrectClaimer = 0x1D,
-    /// 30 - Value voted for is not the resolved value
+    IncorrectClaimer = 0x1F,
+    /// 32 - Value voted for is not the resolved value
     #[error("Value voted for is not the resolved value")]
-    IncorrectVote = 0x1E,
+    IncorrectVote = 0x20,
 }
 
 impl solana_program::program_error::PrintProgramError for OptimisticOracleError {

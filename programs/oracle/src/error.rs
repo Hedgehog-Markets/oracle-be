@@ -81,11 +81,17 @@ pub enum OracleError {
     #[error("Bond mint address does not match")]
     BondMintMismatch,
 
+    #[error("Stake owner address does not match")]
+    StakeOwnerMismatch,
+
     #[error("Stake mint address does not match")]
     StakeMintMismatch,
 
     #[error("Stake delegate does not match voter")]
     StakeVoterMismatch,
+
+    #[error("Stake is locked")]
+    StakeLocked,
 
     #[error("Asserter address does not match")]
     AsserterMismatch,

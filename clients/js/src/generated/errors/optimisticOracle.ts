@@ -339,82 +339,108 @@ export class BondMintMismatchError extends ProgramError {
 codeToErrorMap.set(0x18, BondMintMismatchError);
 nameToErrorMap.set("BondMintMismatch", BondMintMismatchError);
 
+/** StakeOwnerMismatch: Stake owner address does not match */
+export class StakeOwnerMismatchError extends ProgramError {
+  override readonly name: string = "StakeOwnerMismatch";
+
+  readonly code: number = 0x19; // 25
+
+  constructor(program: Program, cause?: Error) {
+    super("Stake owner address does not match", program, cause);
+  }
+}
+codeToErrorMap.set(0x19, StakeOwnerMismatchError);
+nameToErrorMap.set("StakeOwnerMismatch", StakeOwnerMismatchError);
+
 /** StakeMintMismatch: Stake mint address does not match */
 export class StakeMintMismatchError extends ProgramError {
   override readonly name: string = "StakeMintMismatch";
 
-  readonly code: number = 0x19; // 25
+  readonly code: number = 0x1a; // 26
 
   constructor(program: Program, cause?: Error) {
     super("Stake mint address does not match", program, cause);
   }
 }
-codeToErrorMap.set(0x19, StakeMintMismatchError);
+codeToErrorMap.set(0x1a, StakeMintMismatchError);
 nameToErrorMap.set("StakeMintMismatch", StakeMintMismatchError);
 
 /** StakeVoterMismatch: Stake delegate does not match voter */
 export class StakeVoterMismatchError extends ProgramError {
   override readonly name: string = "StakeVoterMismatch";
 
-  readonly code: number = 0x1a; // 26
+  readonly code: number = 0x1b; // 27
 
   constructor(program: Program, cause?: Error) {
     super("Stake delegate does not match voter", program, cause);
   }
 }
-codeToErrorMap.set(0x1a, StakeVoterMismatchError);
+codeToErrorMap.set(0x1b, StakeVoterMismatchError);
 nameToErrorMap.set("StakeVoterMismatch", StakeVoterMismatchError);
+
+/** StakeLocked: Stake is locked */
+export class StakeLockedError extends ProgramError {
+  override readonly name: string = "StakeLocked";
+
+  readonly code: number = 0x1c; // 28
+
+  constructor(program: Program, cause?: Error) {
+    super("Stake is locked", program, cause);
+  }
+}
+codeToErrorMap.set(0x1c, StakeLockedError);
+nameToErrorMap.set("StakeLocked", StakeLockedError);
 
 /** AsserterMismatch: Asserter address does not match */
 export class AsserterMismatchError extends ProgramError {
   override readonly name: string = "AsserterMismatch";
 
-  readonly code: number = 0x1b; // 27
+  readonly code: number = 0x1d; // 29
 
   constructor(program: Program, cause?: Error) {
     super("Asserter address does not match", program, cause);
   }
 }
-codeToErrorMap.set(0x1b, AsserterMismatchError);
+codeToErrorMap.set(0x1d, AsserterMismatchError);
 nameToErrorMap.set("AsserterMismatch", AsserterMismatchError);
 
 /** DisputerMismatch: Disputer address does not match */
 export class DisputerMismatchError extends ProgramError {
   override readonly name: string = "DisputerMismatch";
 
-  readonly code: number = 0x1c; // 28
+  readonly code: number = 0x1e; // 30
 
   constructor(program: Program, cause?: Error) {
     super("Disputer address does not match", program, cause);
   }
 }
-codeToErrorMap.set(0x1c, DisputerMismatchError);
+codeToErrorMap.set(0x1e, DisputerMismatchError);
 nameToErrorMap.set("DisputerMismatch", DisputerMismatchError);
 
 /** IncorrectClaimer: Incorrect claimer */
 export class IncorrectClaimerError extends ProgramError {
   override readonly name: string = "IncorrectClaimer";
 
-  readonly code: number = 0x1d; // 29
+  readonly code: number = 0x1f; // 31
 
   constructor(program: Program, cause?: Error) {
     super("Incorrect claimer", program, cause);
   }
 }
-codeToErrorMap.set(0x1d, IncorrectClaimerError);
+codeToErrorMap.set(0x1f, IncorrectClaimerError);
 nameToErrorMap.set("IncorrectClaimer", IncorrectClaimerError);
 
 /** IncorrectVote: Value voted for is not the resolved value */
 export class IncorrectVoteError extends ProgramError {
   override readonly name: string = "IncorrectVote";
 
-  readonly code: number = 0x1e; // 30
+  readonly code: number = 0x20; // 32
 
   constructor(program: Program, cause?: Error) {
     super("Value voted for is not the resolved value", program, cause);
   }
 }
-codeToErrorMap.set(0x1e, IncorrectVoteError);
+codeToErrorMap.set(0x20, IncorrectVoteError);
 nameToErrorMap.set("IncorrectVote", IncorrectVoteError);
 
 /**

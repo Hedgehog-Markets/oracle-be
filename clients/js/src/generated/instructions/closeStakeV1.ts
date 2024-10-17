@@ -12,65 +12,53 @@ import type { Serializer } from "@metaplex-foundation/umi/serializers";
 
 import { findAssociatedTokenPda } from "@metaplex-foundation/mpl-toolbox";
 import { transactionBuilder } from "@metaplex-foundation/umi";
-import { mapSerializer, struct, u64, u8 } from "@metaplex-foundation/umi/serializers";
+import { mapSerializer, struct, u8 } from "@metaplex-foundation/umi/serializers";
 
 import { findStakePoolPda } from "../../hooked";
 import { findOracleV1Pda } from "../accounts";
 import { expectPublicKey, getAccountMetasAndSigners } from "../shared";
 
 // Accounts.
-export type CreateStakeV1InstructionAccounts = {
+export type CloseStakeV1InstructionAccounts = {
   /** Oracle */
   oracle?: PublicKey | Pda;
   /** Stake */
-  stake: Signer;
-  /** Governance token mint */
+  stake: PublicKey | Pda;
+  /** Stake mint */
   mint: PublicKey | Pda;
-  /** Stake source token account */
-  stakeSource?: PublicKey | Pda;
   /** Stake pool token account */
   stakePool?: PublicKey | Pda;
+  /** Stake withdraw token account */
+  stakeWithdraw?: PublicKey | Pda;
   /** Stake owner */
   wallet?: Signer;
   /** Payer */
   payer?: Signer;
   /** SPL token program */
   tokenProgram?: PublicKey | Pda;
-  /** System program */
-  systemProgram?: PublicKey | Pda;
 };
 
 // Data.
-export type CreateStakeV1InstructionData = {
-  discriminator: number;
-  amount: bigint;
-};
+export type CloseStakeV1InstructionData = { discriminator: number };
 
-export type CreateStakeV1InstructionDataArgs = { amount: number | bigint };
+export type CloseStakeV1InstructionDataArgs = {};
 
-export function getCreateStakeV1InstructionDataSerializer(): Serializer<
-  CreateStakeV1InstructionDataArgs,
-  CreateStakeV1InstructionData
+export function getCloseStakeV1InstructionDataSerializer(): Serializer<
+  CloseStakeV1InstructionDataArgs,
+  CloseStakeV1InstructionData
 > {
-  return mapSerializer<CreateStakeV1InstructionDataArgs, any, CreateStakeV1InstructionData>(
-    struct<CreateStakeV1InstructionData>(
-      [
-        ["discriminator", u8()],
-        ["amount", u64()],
-      ],
-      { description: "CreateStakeV1InstructionData" },
-    ),
-    (value) => ({ ...value, discriminator: 12 }),
+  return mapSerializer<CloseStakeV1InstructionDataArgs, any, CloseStakeV1InstructionData>(
+    struct<CloseStakeV1InstructionData>([["discriminator", u8()]], {
+      description: "CloseStakeV1InstructionData",
+    }),
+    (value) => ({ ...value, discriminator: 16 }),
   );
 }
 
-// Args.
-export type CreateStakeV1InstructionArgs = CreateStakeV1InstructionDataArgs;
-
 // Instruction.
-export function createStakeV1(
+export function closeStakeV1(
   context: Pick<Context, "eddsa" | "identity" | "payer" | "programs">,
-  input: CreateStakeV1InstructionAccounts & CreateStakeV1InstructionArgs,
+  input: CloseStakeV1InstructionAccounts,
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
@@ -91,15 +79,15 @@ export function createStakeV1(
       value: input.stake ?? null,
     },
     mint: { index: 2, isWritable: true as boolean, value: input.mint ?? null },
-    stakeSource: {
+    stakePool: {
       index: 3,
       isWritable: true as boolean,
-      value: input.stakeSource ?? null,
+      value: input.stakePool ?? null,
     },
-    stakePool: {
+    stakeWithdraw: {
       index: 4,
       isWritable: true as boolean,
-      value: input.stakePool ?? null,
+      value: input.stakeWithdraw ?? null,
     },
     wallet: {
       index: 5,
@@ -116,32 +104,24 @@ export function createStakeV1(
       isWritable: false as boolean,
       value: input.tokenProgram ?? null,
     },
-    systemProgram: {
-      index: 8,
-      isWritable: false as boolean,
-      value: input.systemProgram ?? null,
-    },
   } satisfies ResolvedAccountsWithIndices;
-
-  // Arguments.
-  const resolvedArgs: CreateStakeV1InstructionArgs = { ...input };
 
   // Default values.
   if (!resolvedAccounts.oracle.value) {
     resolvedAccounts.oracle.value = findOracleV1Pda(context);
   }
-  if (!resolvedAccounts.wallet.value) {
-    resolvedAccounts.wallet.value = context.identity;
-  }
-  if (!resolvedAccounts.stakeSource.value) {
-    resolvedAccounts.stakeSource.value = findAssociatedTokenPda(context, {
-      mint: expectPublicKey(resolvedAccounts.mint.value),
-      owner: expectPublicKey(resolvedAccounts.wallet.value),
-    });
-  }
   if (!resolvedAccounts.stakePool.value) {
     resolvedAccounts.stakePool.value = findStakePoolPda(context, {
       mint: expectPublicKey(resolvedAccounts.mint.value),
+    });
+  }
+  if (!resolvedAccounts.wallet.value) {
+    resolvedAccounts.wallet.value = context.identity;
+  }
+  if (!resolvedAccounts.stakeWithdraw.value) {
+    resolvedAccounts.stakeWithdraw.value = findAssociatedTokenPda(context, {
+      mint: expectPublicKey(resolvedAccounts.mint.value),
+      owner: expectPublicKey(resolvedAccounts.wallet.value),
     });
   }
   if (!resolvedAccounts.payer.value) {
@@ -154,13 +134,6 @@ export function createStakeV1(
     );
     resolvedAccounts.tokenProgram.isWritable = false;
   }
-  if (!resolvedAccounts.systemProgram.value) {
-    resolvedAccounts.systemProgram.value = context.programs.getPublicKey(
-      "splSystem",
-      "11111111111111111111111111111111",
-    );
-    resolvedAccounts.systemProgram.isWritable = false;
-  }
 
   // Accounts in order.
   const orderedAccounts: Array<ResolvedAccount> = Object.values(resolvedAccounts).sort(
@@ -171,7 +144,7 @@ export function createStakeV1(
   const [keys, signers] = getAccountMetasAndSigners(orderedAccounts, "programId", programId);
 
   // Data.
-  const data = getCreateStakeV1InstructionDataSerializer().serialize(resolvedArgs);
+  const data = getCloseStakeV1InstructionDataSerializer().serialize({});
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

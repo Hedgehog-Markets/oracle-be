@@ -769,7 +769,7 @@
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "Stake"
+            "Governance token mint"
           ]
         },
         {
@@ -1126,6 +1126,80 @@
       "discriminant": {
         "type": "u8",
         "value": 15
+      }
+    },
+    {
+      "name": "CloseStakeV1",
+      "accounts": [
+        {
+          "name": "oracle",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Oracle"
+          ]
+        },
+        {
+          "name": "stake",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Stake"
+          ]
+        },
+        {
+          "name": "mint",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Stake mint"
+          ]
+        },
+        {
+          "name": "stakePool",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Stake pool token account"
+          ]
+        },
+        {
+          "name": "stakeWithdraw",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Stake withdraw token account"
+          ]
+        },
+        {
+          "name": "wallet",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Stake owner"
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Payer"
+          ]
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "SPL token program"
+          ]
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 16
       }
     }
   ],
@@ -1873,31 +1947,41 @@
     },
     {
       "code": 25,
+      "name": "StakeOwnerMismatch",
+      "msg": "Stake owner address does not match"
+    },
+    {
+      "code": 26,
       "name": "StakeMintMismatch",
       "msg": "Stake mint address does not match"
     },
     {
-      "code": 26,
+      "code": 27,
       "name": "StakeVoterMismatch",
       "msg": "Stake delegate does not match voter"
     },
     {
-      "code": 27,
+      "code": 28,
+      "name": "StakeLocked",
+      "msg": "Stake is locked"
+    },
+    {
+      "code": 29,
       "name": "AsserterMismatch",
       "msg": "Asserter address does not match"
     },
     {
-      "code": 28,
+      "code": 30,
       "name": "DisputerMismatch",
       "msg": "Disputer address does not match"
     },
     {
-      "code": 29,
+      "code": 31,
       "name": "IncorrectClaimer",
       "msg": "Incorrect claimer"
     },
     {
-      "code": 30,
+      "code": 32,
       "name": "IncorrectVote",
       "msg": "Value voted for is not the resolved value"
     }
