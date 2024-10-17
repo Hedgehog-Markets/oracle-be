@@ -64,7 +64,7 @@ codama.update(
       size: null,
       seeds: [
         k.constantPdaSeedNodeFromString("utf8", "voting"),
-        k.variablePdaSeedNode("request", k.publicKeyTypeNode(), "The address of the request."),
+        k.variablePdaSeedNode("assertion", k.publicKeyTypeNode(), "The address of the assertion."),
       ],
     },
     voteV1: {
@@ -106,7 +106,7 @@ codama.update(
       account: "voting",
       ignoreIfOptional: true,
       defaultValue: k.pdaValueNode("votingV1", [
-        k.pdaSeedValueNode("request", k.accountValueNode("request")),
+        k.pdaSeedValueNode("assertion", k.accountValueNode("assertion")),
       ]),
     },
     {

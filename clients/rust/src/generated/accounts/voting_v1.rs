@@ -31,22 +31,22 @@ impl VotingV1 {
     /// Values are positional and appear in the following order:
     ///
     ///   0. `VotingV1::PREFIX`
-    ///   1. request (`Pubkey`)
+    ///   1. assertion (`Pubkey`)
     pub const PREFIX: &'static [u8] = "voting".as_bytes();
 
     pub fn create_pda(
-        request: Pubkey,
+        assertion: Pubkey,
         bump: u8,
     ) -> Result<solana_program::pubkey::Pubkey, solana_program::pubkey::PubkeyError> {
         solana_program::pubkey::Pubkey::create_program_address(
-            &["voting".as_bytes(), request.as_ref(), &[bump]],
+            &["voting".as_bytes(), assertion.as_ref(), &[bump]],
             &crate::OPTIMISTIC_ORACLE_ID,
         )
     }
 
-    pub fn find_pda(request: &Pubkey) -> (solana_program::pubkey::Pubkey, u8) {
+    pub fn find_pda(assertion: &Pubkey) -> (solana_program::pubkey::Pubkey, u8) {
         solana_program::pubkey::Pubkey::find_program_address(
-            &["voting".as_bytes(), request.as_ref()],
+            &["voting".as_bytes(), assertion.as_ref()],
             &crate::OPTIMISTIC_ORACLE_ID,
         )
     }
