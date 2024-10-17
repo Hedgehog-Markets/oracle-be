@@ -44,17 +44,14 @@ codama.update(
       size: null,
       seeds: [
         k.constantPdaSeedNodeFromString("utf8", "request"),
-        k.variablePdaSeedNode(
-          "index",
-          k.numberTypeNode("u64"),
-          "The next request index in the oracle.",
-        ),
+        k.variablePdaSeedNode("index", k.numberTypeNode("u64"), "The request index in the oracle."),
       ],
     },
     assertionV1: {
       seeds: [
         k.constantPdaSeedNodeFromString("utf8", "assertion"),
         k.variablePdaSeedNode("request", k.publicKeyTypeNode(), "The address of the request."),
+        k.variablePdaSeedNode("round", k.numberTypeNode("u8"), "The round for the assertion."),
       ],
     },
     stakeV1: {
@@ -103,13 +100,6 @@ codama.update(
       defaultValue: k.pdaValueNode("currencyV1", [
         k.pdaSeedValueNode("config", k.accountValueNode("config")),
         k.pdaSeedValueNode("mint", k.accountValueNode("mint")),
-      ]),
-    },
-    {
-      account: "assertion",
-      ignoreIfOptional: true,
-      defaultValue: k.pdaValueNode("assertionV1", [
-        k.pdaSeedValueNode("request", k.accountValueNode("request")),
       ]),
     },
     {

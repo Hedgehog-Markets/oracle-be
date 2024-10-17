@@ -13,8 +13,7 @@ import type { Serializer } from "@metaplex-foundation/umi/serializers";
 import { transactionBuilder } from "@metaplex-foundation/umi";
 import { mapSerializer, struct, u8 } from "@metaplex-foundation/umi/serializers";
 
-import { findAssertionV1Pda } from "../accounts";
-import { expectPublicKey, getAccountMetasAndSigners } from "../shared";
+import { getAccountMetasAndSigners } from "../shared";
 
 // Accounts.
 export type ResolveAssertionV1InstructionAccounts = {
@@ -23,7 +22,7 @@ export type ResolveAssertionV1InstructionAccounts = {
   /** Request */
   request: PublicKey | Pda;
   /** Assertion */
-  assertion?: PublicKey | Pda;
+  assertion: PublicKey | Pda;
 };
 
 // Data.
@@ -49,7 +48,7 @@ export function getResolveAssertionV1InstructionDataSerializer(): Serializer<
 
 // Instruction.
 export function resolveAssertionV1(
-  context: Pick<Context, "eddsa" | "programs">,
+  context: Pick<Context, "programs">,
   input: ResolveAssertionV1InstructionAccounts,
 ): TransactionBuilder {
   // Program ID.
@@ -76,13 +75,6 @@ export function resolveAssertionV1(
       value: input.assertion ?? null,
     },
   } satisfies ResolvedAccountsWithIndices;
-
-  // Default values.
-  if (!resolvedAccounts.assertion.value) {
-    resolvedAccounts.assertion.value = findAssertionV1Pda(context, {
-      request: expectPublicKey(resolvedAccounts.request.value),
-    });
-  }
 
   // Accounts in order.
   const orderedAccounts: Array<ResolvedAccount> = Object.values(resolvedAccounts).sort(

@@ -15,7 +15,6 @@ import { transactionBuilder } from "@metaplex-foundation/umi";
 import { mapSerializer, struct, u8 } from "@metaplex-foundation/umi/serializers";
 
 import { findDisputeBondPda, findRewardPda } from "../../hooked";
-import { findAssertionV1Pda } from "../accounts";
 import { expectPublicKey, getAccountMetasAndSigners } from "../shared";
 
 // Accounts.
@@ -23,7 +22,7 @@ export type ClaimDisputeV1InstructionAccounts = {
   /** Request */
   request: PublicKey | Pda;
   /** Assertion */
-  assertion?: PublicKey | Pda;
+  assertion: PublicKey | Pda;
   /** Bond mint */
   bondMint: PublicKey | Pda;
   /** Reclaimed bond destination token account */
@@ -132,11 +131,6 @@ export function claimDisputeV1(
   } satisfies ResolvedAccountsWithIndices;
 
   // Default values.
-  if (!resolvedAccounts.assertion.value) {
-    resolvedAccounts.assertion.value = findAssertionV1Pda(context, {
-      request: expectPublicKey(resolvedAccounts.request.value),
-    });
-  }
   if (!resolvedAccounts.disputer.value) {
     resolvedAccounts.disputer.value = context.identity;
   }

@@ -15,7 +15,7 @@ import { transactionBuilder } from "@metaplex-foundation/umi";
 import { mapSerializer, struct, u8 } from "@metaplex-foundation/umi/serializers";
 
 import { findDisputeBondPda } from "../../hooked";
-import { findAssertionV1Pda, findOracleV1Pda, findVotingV1Pda } from "../accounts";
+import { findOracleV1Pda, findVotingV1Pda } from "../accounts";
 import { expectPublicKey, getAccountMetasAndSigners } from "../shared";
 
 // Accounts.
@@ -27,7 +27,7 @@ export type DisputeAssertionV1InstructionAccounts = {
   /** Request */
   request: PublicKey | Pda;
   /** Assertion */
-  assertion?: PublicKey | Pda;
+  assertion: PublicKey | Pda;
   /** Voting */
   voting?: PublicKey | Pda;
   /** Bond mint */
@@ -145,11 +145,6 @@ export function disputeAssertionV1(
   // Default values.
   if (!resolvedAccounts.oracle.value) {
     resolvedAccounts.oracle.value = findOracleV1Pda(context);
-  }
-  if (!resolvedAccounts.assertion.value) {
-    resolvedAccounts.assertion.value = findAssertionV1Pda(context, {
-      request: expectPublicKey(resolvedAccounts.request.value),
-    });
   }
   if (!resolvedAccounts.voting.value) {
     resolvedAccounts.voting.value = findVotingV1Pda(context, {

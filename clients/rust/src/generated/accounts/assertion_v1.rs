@@ -34,21 +34,23 @@ impl AssertionV1 {
     ///
     ///   0. `AssertionV1::PREFIX`
     ///   1. request (`Pubkey`)
+    ///   2. round (`u8`)
     pub const PREFIX: &'static [u8] = "assertion".as_bytes();
 
     pub fn create_pda(
         request: Pubkey,
+        round: u8,
         bump: u8,
     ) -> Result<solana_program::pubkey::Pubkey, solana_program::pubkey::PubkeyError> {
         solana_program::pubkey::Pubkey::create_program_address(
-            &["assertion".as_bytes(), request.as_ref(), &[bump]],
+            &["assertion".as_bytes(), request.as_ref(), round.to_string().as_ref(), &[bump]],
             &crate::OPTIMISTIC_ORACLE_ID,
         )
     }
 
-    pub fn find_pda(request: &Pubkey) -> (solana_program::pubkey::Pubkey, u8) {
+    pub fn find_pda(request: &Pubkey, round: u8) -> (solana_program::pubkey::Pubkey, u8) {
         solana_program::pubkey::Pubkey::find_program_address(
-            &["assertion".as_bytes(), request.as_ref()],
+            &["assertion".as_bytes(), request.as_ref(), round.to_string().as_ref()],
             &crate::OPTIMISTIC_ORACLE_ID,
         )
     }

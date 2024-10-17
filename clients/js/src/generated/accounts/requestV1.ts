@@ -219,7 +219,7 @@ export function getRequestV1GpaBuilder(context: Pick<Context, "rpc" | "programs"
 export function findRequestV1Pda(
   context: Pick<Context, "eddsa" | "programs">,
   seeds: {
-    /** The next request index in the oracle. */
+    /** The request index in the oracle. */
     index: number | bigint;
   },
 ): Pda {

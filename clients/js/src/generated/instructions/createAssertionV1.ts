@@ -15,7 +15,6 @@ import { transactionBuilder } from "@metaplex-foundation/umi";
 import { mapSerializer, struct, u64, u8 } from "@metaplex-foundation/umi/serializers";
 
 import { findAssertBondPda } from "../../hooked";
-import { findAssertionV1Pda } from "../accounts";
 import { expectPublicKey, getAccountMetasAndSigners } from "../shared";
 
 // Accounts.
@@ -25,7 +24,7 @@ export type CreateAssertionV1InstructionAccounts = {
   /** Request */
   request: PublicKey | Pda;
   /** Assertion */
-  assertion?: PublicKey | Pda;
+  assertion: PublicKey | Pda;
   /** Bond mint */
   bondMint: PublicKey | Pda;
   /** Bond source token account */
@@ -138,11 +137,6 @@ export function createAssertionV1(
   const resolvedArgs: CreateAssertionV1InstructionArgs = { ...input };
 
   // Default values.
-  if (!resolvedAccounts.assertion.value) {
-    resolvedAccounts.assertion.value = findAssertionV1Pda(context, {
-      request: expectPublicKey(resolvedAccounts.request.value),
-    });
-  }
   if (!resolvedAccounts.asserter.value) {
     resolvedAccounts.asserter.value = context.identity;
   }

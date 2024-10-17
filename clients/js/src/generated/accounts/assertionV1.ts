@@ -174,6 +174,8 @@ export function findAssertionV1Pda(
   seeds: {
     /** The address of the request. */
     request: PublicKey;
+    /** The round for the assertion. */
+    round: number;
   },
 ): Pda {
   const programId = context.programs.getPublicKey(
@@ -183,6 +185,7 @@ export function findAssertionV1Pda(
   return context.eddsa.findPda(programId, [
     string({ size: "variable" }).serialize("assertion"),
     publicKeySerializer().serialize(seeds.request),
+    u8().serialize(seeds.round),
   ]);
 }
 
