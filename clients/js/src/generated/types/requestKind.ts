@@ -6,18 +6,43 @@
  * @see https://github.com/codama-idl/codama
  */
 
-import type { Serializer } from "@metaplex-foundation/umi/serializers";
+import type {
+  GetDataEnumKind,
+  GetDataEnumKindContent,
+  Serializer,
+} from "@metaplex-foundation/umi/serializers";
 
-import { scalarEnum } from "@metaplex-foundation/umi/serializers";
+import { dataEnum, struct, u8, unit } from "@metaplex-foundation/umi/serializers";
 
-export enum RequestKind {
-  YesNo,
-}
+export type RequestKind = { __kind: "YesNo" } | { __kind: "Options"; options: number };
 
 export type RequestKindArgs = RequestKind;
 
 export function getRequestKindSerializer(): Serializer<RequestKindArgs, RequestKind> {
-  return scalarEnum<RequestKind>(RequestKind, {
-    description: "RequestKind",
-  }) as Serializer<RequestKindArgs, RequestKind>;
+  return dataEnum<RequestKind>(
+    [
+      ["YesNo", unit()],
+      ["Options", struct<GetDataEnumKindContent<RequestKind, "Options">>([["options", u8()]])],
+    ],
+    { description: "RequestKind" },
+  );
+}
+
+// Data Enum Helpers.
+export function requestKind(kind: "YesNo"): GetDataEnumKind<RequestKindArgs, "YesNo">;
+export function requestKind(
+  kind: "Options",
+  data: GetDataEnumKindContent<RequestKindArgs, "Options">,
+): GetDataEnumKind<RequestKindArgs, "Options">;
+export function requestKind<K extends RequestKindArgs["__kind"]>(
+  kind: K,
+  data?: any,
+): Extract<RequestKindArgs, { __kind: K }> {
+  return Array.isArray(data) ? { __kind: kind, fields: data } : { __kind: kind, ...(data ?? {}) };
+}
+export function isRequestKind<K extends RequestKind["__kind"]>(
+  kind: K,
+  value: RequestKind,
+): value is RequestKind & { __kind: K } {
+  return value.__kind === kind;
 }

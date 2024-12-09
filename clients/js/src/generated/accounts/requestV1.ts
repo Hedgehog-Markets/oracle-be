@@ -210,7 +210,7 @@ export function getRequestV1GpaBuilder(context: Pick<Context, "rpc" | "programs"
       value: [171, u64()],
       arbitrator: [179, publicKeySerializer()],
       kind: [211, getRequestKindSerializer()],
-      uri: [212, string()],
+      uri: [null, string()],
     })
     .deserializeUsing<RequestV1>((account) => deserializeRequestV1(account))
     .whereField("accountType", AccountType.RequestV1);
