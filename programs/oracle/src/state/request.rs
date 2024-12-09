@@ -84,6 +84,8 @@ pub enum RequestKind {
     /// - 3 = Invalid
     YesNo,
     /// Request with a discrete number of choices.
+    /// - 1 = Invalid
+    /// - `2..(2 + options)` = Options
     Options { options: u8 },
 }
 
@@ -139,7 +141,7 @@ impl RequestKind {
 
         let valid = match self {
             Self::YesNo => matches!(value, 1..=3),
-            Self::Options { options } => (1..(1 + *options as u64)).contains(&value),
+            Self::Options { options } => (1..(2 + *options as u64)).contains(&value),
         };
 
         if valid { Ok(()) } else { Err(OracleError::InvalidValue) }
